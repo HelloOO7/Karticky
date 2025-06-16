@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:focusable="true"
+    android:focusableInTouchMode="true">
+
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/title_settings"
+        android:textSize="@dimen/text_title_l"
+        android:layout_margin="@dimen/activity_margin"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.materialswitch.MaterialSwitch
+        android:id="@+id/swUseNotifications"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/sw_use_notifications_label"
+        android:layout_margin="@dimen/activity_margin"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvTitle" />
+
+    <TextView
+        android:id="@+id/tvWlanCheckIntervalLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/tv_wlan_check_interval_label"
+        app:layout_constraintBottom_toBottomOf="@+id/etWlanCheckInterval"
+        app:layout_constraintStart_toStartOf="@+id/swUseNotifications"
+        app:layout_constraintTop_toTopOf="@+id/etWlanCheckInterval" />
+
+    <EditText
+        android:id="@+id/etWlanCheckInterval"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="3"
+        android:inputType="number"
+        android:textAlignment="viewEnd"
+        android:selectAllOnFocus="true"
+        app:layout_constraintStart_toEndOf="@+id/tvWlanCheckIntervalLabel"
+        app:layout_constraintTop_toBottomOf="@+id/swUseNotifications" />
+
+    <TextView
+        android:id="@+id/tvMinuteLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/minutes_unit_label"
+        app:layout_constraintBottom_toBottomOf="@+id/etWlanCheckInterval"
+        app:layout_constraintStart_toEndOf="@+id/etWlanCheckInterval"
+        app:layout_constraintTop_toTopOf="@+id/etWlanCheckInterval" />
+
+    <TextView
+        android:id="@+id/tvMinWifiSignalLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/tv_min_wlan_signal_label"
+        android:textColor="?attr/colorOnSurface"
+        android:layout_marginTop="@dimen/item_margin_s"
+        app:layout_constraintStart_toStartOf="@+id/swUseNotifications"
+        app:layout_constraintTop_toBottomOf="@+id/etWlanCheckInterval" />
+
+    <EditText
+        android:id="@+id/etMinWifiSignal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="4"
+        android:inputType="number"
+        android:selectAllOnFocus="true"
+        app:layout_constraintStart_toStartOf="@+id/tvMinWifiSignalLabel"
+        app:layout_constraintTop_toBottomOf="@+id/tvMinWifiSignalLabel" />
+
+    <TextView
+        android:id="@+id/tvDbmLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/dbm_unit_label"
+        app:layout_constraintBottom_toBottomOf="@+id/etMinWifiSignal"
+        app:layout_constraintStart_toEndOf="@+id/etMinWifiSignal"
+        app:layout_constraintTop_toTopOf="@+id/etMinWifiSignal" />
+
+    <Button
+        android:id="@+id/btnClose"
+        style="@style/Widget.Material3.Button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/item_margin_m"
+        android:layout_marginEnd="@dimen/activity_margin"
+        android:layout_marginBottom="@dimen/activity_margin"
+        android:text="@string/settings_save"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/etMinWifiSignal" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

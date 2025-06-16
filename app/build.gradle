@@ -1,0 +1,63 @@
+plugins {
+    alias(libs.plugins.android.application)
+}
+
+android {
+    namespace 'cz.nocard.android'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId "cz.nocard.android"
+        minSdk 24
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField "java.time.Instant", "BUILD_TIME", "java.time.Instant.parse(\"${Instant.now()}\")"
+        buildConfigField "String", "REMOTE_CONFIG_PAGE", "\"https://nocard.cz/\""
+    }
+
+    buildFeatures {
+        buildConfig true
+        viewBinding true
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+
+        coreLibraryDesugaringEnabled true
+    }
+}
+
+dependencies {
+
+    implementation libs.appcompat
+    implementation libs.material
+    implementation libs.activity
+    implementation libs.constraintlayout
+
+    implementation libs.zxing
+    implementation libs.jackson.core
+    implementation libs.jackson.databind
+    implementation libs.jsoup
+    implementation libs.dagger
+    implementation libs.work
+
+    annotationProcessor libs.dagger.compiler
+
+    coreLibraryDesugaring libs.desugaring
+
+    testImplementation libs.junit
+    androidTestImplementation libs.ext.junit
+    androidTestImplementation libs.espresso.core
+}

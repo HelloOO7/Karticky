@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:overScrollMode="never"
+    android:scrollbars="none"
+    tools:context=".MainActivity">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/clRoot"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:fitsSystemWindows="true"
+        android:animateLayoutChanges="true">
+
+        <TextView
+            android:id="@+id/tvProvider"
+            tools:visibility="visible"
+            android:visibility="gone"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/activity_margin"
+            android:layout_marginTop="@dimen/activity_margin"
+            android:textAlignment="center"
+            android:textSize="@dimen/text_title_l"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Provider" />
+
+        <ImageView
+            android:id="@+id/ivCard"
+            tools:visibility="visible"
+            android:visibility="gone"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/activity_margin"
+            android:adjustViewBounds="true"
+            android:background="@drawable/barcode_frame"
+            android:elevation="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvProvider"
+            app:srcCompat="@null" />
+
+        <ProgressBar
+            android:id="@+id/pbCardImageLoading"
+            android:visibility="gone"
+            tools:visibility="visible"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/item_margin_l"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvProvider" />
+
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/barrierImageLoading"
+            app:barrierDirection="bottom"
+            app:constraint_referenced_ids="ivCard,pbCardImageLoading"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/tvAvailableCardsLabel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/activity_margin"
+            android:layout_marginTop="@dimen/item_margin_l"
+            android:text="@string/tv_available_cards_label"
+            android:textSize="@dimen/text_title_m"
+            app:layout_constraintEnd_toStartOf="@+id/btnSettings"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/barrierImageLoading" />
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/swAutoDetect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/sw_autodetect_label"
+            app:layout_constraintEnd_toEndOf="@+id/tvAvailableCardsLabel"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/tvAvailableCardsLabel"
+            app:layout_constraintTop_toBottomOf="@+id/tvAvailableCardsLabel" />
+
+        <Button
+            android:id="@+id/btnSettings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/Widget.Material3.Button.IconButton"
+            android:layout_marginEnd="@dimen/activity_margin"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tvAvailableCardsLabel"
+            app:iconSize="36dp"
+            android:layout_marginTop="-8dp"
+            app:icon="@drawable/ic_settings_24px" />
+
+        <LinearLayout
+            android:id="@+id/llAvailableCards"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="@dimen/item_margin_m"
+            android:layout_marginHorizontal="@dimen/activity_margin"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/swAutoDetect" />
+
+        <TextView
+            android:id="@+id/tvRemoteConfigState"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/item_margin_m"
+            app:layout_constraintEnd_toEndOf="@+id/llAvailableCards"
+            app:layout_constraintStart_toStartOf="@+id/tvAvailableCardsLabel"
+            app:layout_constraintTop_toBottomOf="@id/llAvailableCards"
+            tools:text="Aktualizuju se" />
+
+        <TextView
+            android:id="@+id/tv_gdpr_link"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/gdpr_title"
+            android:layout_marginBottom="@dimen/activity_margin"
+            android:paddingVertical="@dimen/item_margin_s"
+            android:textColor="?attr/colorPrimary"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:layout_constraintStart_toStartOf="@+id/tvRemoteConfigState"
+            app:layout_constraintTop_toBottomOf="@+id/tvRemoteConfigState"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

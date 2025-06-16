@@ -1,0 +1,35 @@
+<resources>
+    <string name="app_name">NoCard</string>
+    <string name="tv_available_cards_label">Dostupné karty</string>
+    <string name="sw_autodetect_label">Detekovat automaticky</string>
+    <string name="location_permission_required_title">Přístup k poloze</string>
+    <string name="location_permission_required_message">Funkce automatické detekce používá informace o blízkých sítích Wi-Fi, k čemuž je potřeba povolit přístup k přesné poloze zařízení.</string>
+    <string name="notification_channel_name">Návrhy karet</string>
+    <string name="notification_title">Navržená věrnostní karta</string>
+    <string name="notification_text">Kliknutím zobrazíte kartu pro nedalekou prodejnu řetězce %1$s.</string>
+    <string name="notification_enable_title">Povolit notifikace?</string>
+    <string name="notification_enable_message">Chcete aplikaci povolit zobrazení (nezvonících) oznámení, když je některá z karet připravena k použití v blízké prodejně?</string>
+    <string name="background_location_permission_title">Přístup k poloze na pozadí</string>
+    <string name="background_location_permission_message">Jelikož váš operační systém považuje zjišťování blízkých sítí Wi-Fi za práci s polohou zařízení, je pro funkci doporučování karet potřeba povolit přístup k poloze na pozadí. To se bohužel musí udělat ručně, a to povolením možnosti \"%1$s\" v sekci "Poloha" v oprávněních aplikace.</string>
+    <string name="open_settings">Otevřít nastavení</string>
+    <string name="background_location_permission_option_default">Povolit vždy</string>
+    <string name="do_not_show_again">Znovu nezobrazovat</string>
+    <string name="enable">Zapnout</string>
+    <string name="code_generation_error">Chyba vykreslování kódu</string>
+    <string name="remote_config_updating">Probíhá aktualizace dat…</string>
+    <string name="remote_config_last_update">Poslední aktualizace dat: %1$s</string>
+    <string name="remote_config_error">Aktualizace dat se nezdařila (%1$s).</string>
+    <string name="remote_config_incompatible">Formát dat na serveru není kompatibilní.</string>
+    <string name="background_location_permission_message_again">Aplikace má povolený přístup k poloze pouze na popředí. Chcete-li, aby funkce oznámení o blízkých prodejnách pracovala, jak má, je třeba v nastavení polohy vybrat možnost \"%1$s\".</string>
+    <string name="minutes_unit_label">minut</string>
+    <string name="tv_wlan_check_interval_label">› Kontrolovat každých</string>
+    <string name="sw_use_notifications_label">Oznámení o doporučených kartách</string>
+    <string name="settings_save">Uložit</string>
+    <string name="title_settings">Nastavení</string>
+    <string name="dbm_unit_label">dBm</string>
+    <string name="tv_min_wlan_signal_label">Min. signál Wi-Fi pro detekci</string>
+    <string name="background_scan_unsupported_title">Nepodporované zařízení</string>
+    <string name="background_scan_unsupported_message">Skenování sítí Wi-Fi na pozadí je bohužel možné až od Androidu verze 10, kterou vaše zařízení nepodporuje.</string>
+    <string name="gdpr_title"><u>GDPR</u></string>
+    <string name="gdpr_message">Aplikace žádné vaše údaje nikam neodesílá a nepoužívá soubory cookies ani jiná špehovací udělátka.</string>
+</resources>

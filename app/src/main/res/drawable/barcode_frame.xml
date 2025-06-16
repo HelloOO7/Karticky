@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@android:color/white" />
+    <corners android:radius="@dimen/barcode_frame_corner_dim" />
+    <padding
+        android:bottom="@dimen/barcode_frame_corner_dim"
+        android:left="@dimen/barcode_frame_corner_dim"
+        android:right="@dimen/barcode_frame_corner_dim"
+        android:top="@dimen/barcode_frame_corner_dim" />
+</shape>
