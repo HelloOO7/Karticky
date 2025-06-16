@@ -487,6 +487,7 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
                             showCardForProvider(showingProvider);
                         }
                     } catch (IOException e) {
+                        Log.e(LOG_TAG, "Failed to update remote config", e);
                         displayRemoteConfigError(e);
                     }
                 } else if (result.status() == RemoteConfigFetcher.Status.NO_CHANGE) {

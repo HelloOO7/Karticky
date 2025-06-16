@@ -31,6 +31,7 @@ public class SettingsSheetFragment extends BottomSheetDialogFragment implements 
     WlanFencingManager wlanFencingManager;
 
     private SettingsSheetBinding binding;
+    private boolean freezeChanges = false;
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -82,9 +83,12 @@ public class SettingsSheetFragment extends BottomSheetDialogFragment implements 
                     interval = 1;
                 }
                 int oldInterval = prefs.getBackgroundCheckInterval();
-                prefs.putBackgroundCheckInterval(interval);
                 if (interval != oldInterval) {
-                    BackgroundWlanCheckWorker.scheduleWork(requireContext(), prefs, ExistingWorkPolicy.REPLACE);
+                    final int _interval = interval;
+                    performChange(() -> {
+                        prefs.putBackgroundCheckInterval(_interval);
+                        BackgroundWlanCheckWorker.scheduleWork(requireContext(), prefs, ExistingWorkPolicy.REPLACE);
+                    });
                 }
             } catch (NumberFormatException ignored) {
             }
@@ -93,7 +97,9 @@ public class SettingsSheetFragment extends BottomSheetDialogFragment implements 
         registerEditTextListener(binding.etMinWifiSignal, val -> {
             try {
                 int minSignal = Integer.parseInt(val);
-                prefs.putMinWlanDbm(minSignal);
+                performChange(() -> {
+                    prefs.putMinWlanDbm(minSignal);
+                });
             } catch (NumberFormatException ignored) {
             }
         });
@@ -124,6 +130,12 @@ public class SettingsSheetFragment extends BottomSheetDialogFragment implements 
         });
     }
 
+    private void performChange(Runnable change) {
+        freezeChanges = true;
+        change.run();
+        freezeChanges = false;
+    }
+
     private MainActivity getMainActivity() {
         return (MainActivity) requireActivity();
     }
@@ -136,6 +148,8 @@ public class SettingsSheetFragment extends BottomSheetDialogFragment implements 
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, @Nullable String key) {
-        updateSettingsUI();
+        if (!freezeChanges) {
+            updateSettingsUI();
+        }
     }
 }

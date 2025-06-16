@@ -2,6 +2,8 @@ package cz.nocard.android;
 
 import android.util.Log;
 
+import androidx.annotation.Keep;
+
 import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
@@ -129,6 +131,7 @@ public class RemoteConfigFetcher {
         };
     }
 
+    @Keep
     private static class CardData extends LinkedHashMap<String, List<String>> {
 
     }
