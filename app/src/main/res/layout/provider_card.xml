@@ -6,14 +6,55 @@
     xmlns:tools="http://schemas.android.com/tools"
     app:cardCornerRadius="12dp"
     app:cardElevation="4dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"
     android:layout_marginBottom="@dimen/item_margin_s">
 
-    <TextView
-        android:id="@+id/tvProviderName"
-        tools:text="Tesko"
-        android:paddingHorizontal="@dimen/item_margin_m"
-        android:paddingVertical="@dimen/item_margin_s"
-        android:textSize="@dimen/text_title_m"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/tvProviderName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/item_margin_m"
+            android:textSize="@dimen/text_title_m"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/btnToggleFavourite"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Tesko" />
+
+        <ImageView
+            android:id="@+id/ivBrandColor"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHeight_percent="0.15"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0"
+            app:layout_constraintWidth_percent="0.33"
+            app:srcCompat="@drawable/brand_color_chip"
+            tools:tint="@android:color/holo_green_dark" />
+
+        <com.google.android.material.checkbox.MaterialCheckBox
+            android:id="@+id/btnToggleFavourite"
+            app:rippleColor="@null"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:buttonCompat="@drawable/ic_favourite"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:paddingHorizontal="@dimen/item_margin_s"
+            android:checkable="true"
+            android:saveEnabled="false" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

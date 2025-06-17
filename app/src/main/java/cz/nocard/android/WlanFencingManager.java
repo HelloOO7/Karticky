@@ -63,14 +63,14 @@ public class WlanFencingManager {
     }
 
     private void invokeOnNearbyProviderCallbacks(String provider) {
-        Log.d(LOG_TAG, "Provider nearby: " + provider + ", callback count= " + callbacks.size());
+        Log.d(LOG_TAG, "Provider nearby: " + provider + ", callback count=" + callbacks.size());
         for (OnNearbyProviderCallback callback : callbacks) {
             callback.providerNearby(provider);
         }
     }
 
     private void invokeOnProviderLostCallback(String provider) {
-        Log.d(LOG_TAG, "Provider lost: " + provider + ", callback count= " + callbacks.size());
+        Log.d(LOG_TAG, "Provider lost: " + provider + ", callback count=" + callbacks.size());
         for (OnNearbyProviderCallback callback : callbacks) {
             callback.providerLost(provider);
         }

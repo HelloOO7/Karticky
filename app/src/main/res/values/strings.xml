@@ -32,4 +32,7 @@
     <string name="background_scan_unsupported_message">Skenování sítí Wi-Fi na pozadí je bohužel možné až od Androidu verze 10, kterou vaše zařízení nepodporuje.</string>
     <string name="gdpr_title"><u>GDPR</u></string>
     <string name="gdpr_message">Aplikace žádné vaše údaje nikam neodesílá a nepoužívá soubory cookies ani jiná špehovací udělátka.</string>
+    <string name="update_action">Zobrazit</string>
+    <string name="update_available">Je dostupná nová verze aplikace</string>
+    <string name="url_open_error">Nepodařilo se otevřít URL.</string>
 </resources>

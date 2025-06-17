@@ -3,6 +3,7 @@ package cz.nocard.android;
 import android.content.SharedPreferences;
 
 import java.time.Instant;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -16,6 +17,7 @@ public class NoCardPreferences {
     private static final String PK_LAST_REMOTE_UPDATE = "last_remote_update";
     private static final String PK_LAST_REMOTE_ETAG = "last_remote_etag";
     private static final String PK_MIN_WLAN_DBM = "min_wlan_dbm";
+    private static final String PK_FAVOURITE_PROVIDERS = "favourite_providers";
 
     private final SharedPreferences prefs;
 
@@ -95,5 +97,18 @@ public class NoCardPreferences {
 
     public void putMinWlanDbm(int dbm) {
         prefs.edit().putInt(PK_MIN_WLAN_DBM, dbm).apply();
+    }
+
+    public List<String> getFavouriteProviders() {
+        String list = prefs.getString(PK_FAVOURITE_PROVIDERS, "");
+        if (list.isEmpty()) {
+            return List.of();
+        }
+        return List.of(list.split(","));
+    }
+
+    public void putFavouriteProviders(List<String> providers) {
+        String list = String.join(",", providers);
+        prefs.edit().putString(PK_FAVOURITE_PROVIDERS, list).apply();
     }
 }

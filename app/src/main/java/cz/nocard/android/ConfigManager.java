@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
@@ -90,7 +91,7 @@ public class ConfigManager {
     }
 
     public List<String> getAllProviders() {
-        return List.copyOf(getCurrentConfig().cardData().keySet());
+        return new ArrayList<>(getCurrentConfig().cardData().keySet());
     }
 
     public NoCardConfig.ProviderInfo getProviderInfo(String key) {

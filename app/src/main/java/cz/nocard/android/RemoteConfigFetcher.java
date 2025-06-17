@@ -1,5 +1,6 @@
 package cz.nocard.android;
 
+import android.graphics.Color;
 import android.util.Log;
 
 import androidx.annotation.Keep;
@@ -20,8 +21,10 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -33,6 +36,10 @@ public class RemoteConfigFetcher {
     private static final Pattern CARD_DATA_REGEX = Pattern.compile(
             "const cardData = (\\{.*\\});",
             Pattern.DOTALL
+    );
+
+    private static final Pattern COLOR_CLASS_REGEX = Pattern.compile(
+            "\\.card\\.([^ :]+)([^#]+)(#[A-Fa-f0-9]+);"
     );
 
     private static final ObjectMapper JS_JSON_MAPPER = JsonMapper.builder()
@@ -63,11 +70,20 @@ public class RemoteConfigFetcher {
 
         LinkedHashMap<String, NoCardConfig.ProviderInfo> providerInfos = new LinkedHashMap<>();
 
+        Map<BrandColorKey, Integer> brandColors = extractBrandColors(page);
+
         Elements providers = page.select("div[data-key]");
         for (Element providerDiv : providers) {
             providerInfos.put(
                     providerDiv.attr("data-key"),
-                    new NoCardConfig.ProviderInfo(parseBarcodeFormat(providerDiv.attr("data-type")), new ArrayList<>())
+                    new NoCardConfig.ProviderInfo(
+                            providerDiv.text(),
+                            providerDiv.attr("data-name"),
+                            getBrandColor(brandColors, providerDiv, false),
+                            getBrandColor(brandColors, providerDiv, true),
+                            parseBarcodeFormat(providerDiv.attr("data-type")),
+                            new ArrayList<>()
+                    )
             );
         }
 
@@ -96,6 +112,50 @@ public class RemoteConfigFetcher {
         }
 
         return new Result(Status.SUCCESS, new NoCardConfig(current.wlanMappings(), providerInfos), etag);
+    }
+
+    private static Integer getBrandColor(Map<BrandColorKey, Integer> brandColors, Element providerElement, boolean isContrast) {
+        for (String clazz : providerElement.classNames()) {
+            BrandColorKey key = new BrandColorKey(clazz, isContrast);
+            Integer color = brandColors.get(key);
+            if (color != null) {
+                return color;
+            }
+        }
+        return null;
+    }
+
+    private static Map<BrandColorKey, Integer> extractBrandColors(Document document) {
+        Map<BrandColorKey, Integer> brandColors = new HashMap<>();
+        for (Element style : document.getElementsByTag("style")) {
+            String styleText = getScriptText(style);
+            Matcher matcher = COLOR_CLASS_REGEX.matcher(styleText);
+            while (matcher.find()) {
+                String className = matcher.group(1);
+                String spec = matcher.group(2);
+                String colorHex = matcher.group(3);
+
+                if (className != null && colorHex != null) {
+                    boolean isContrast = spec != null && spec.contains("h2");
+                    try {
+                        brandColors.put(new BrandColorKey(className, isContrast), Color.parseColor(expandCssColor(colorHex)));
+                    } catch (IllegalArgumentException ex) {
+                        Log.e(TAG, "Invalid Android color format: " + colorHex, ex);
+                    }
+                }
+            }
+        }
+        return brandColors;
+    }
+
+    private static String expandCssColor(String color) {
+        if (color.length() == 4) {
+            char c1 = color.charAt(1);
+            char c2 = color.charAt(2);
+            char c3 = color.charAt(3);
+            color = "#" + c1 + c1 + c2 + c2 + c3 + c3;
+        }
+        return color;
     }
 
     private static String findCardDataScript(Document page) {
@@ -143,6 +203,10 @@ public class RemoteConfigFetcher {
     }
 
     public static record Result(Status status, NoCardConfig config, String eTag) {
+
+    }
+
+    private static record BrandColorKey(String cssClass, boolean isContrast) {
 
     }
 }
