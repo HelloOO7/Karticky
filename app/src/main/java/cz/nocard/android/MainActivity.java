@@ -565,7 +565,7 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
     private void updateRemoteConfig() {
         ui.tvRemoteConfigState.setText(R.string.remote_config_updating);
         String etag = prefs.getLastRemoteEtag();
-        if (BuildConfig.BUILD_TIME.isAfter(prefs.getLastRemoteUpdate())) {
+        if (prefs.getLastRemoteUpdate() == null || BuildConfig.BUILD_TIME.isAfter(prefs.getLastRemoteUpdate())) {
             etag = null; //force update
         }
         final String _etag = etag;
