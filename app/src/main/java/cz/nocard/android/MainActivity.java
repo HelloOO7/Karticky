@@ -56,6 +56,7 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
     private static final String STATE_SHOWING_PROVIDER = "showing_provider";
     private static final String STATE_LOCAL_AUTO_DETECT_ENABLED = "local_auto_detect_enabled";
     private static final String STATE_PENDING_PERMISSIONS = "pending_permissions";
+    private static final String STATE_PROCESS_PERMISSIONS_UPON_RETURN = "process_permissions_upon_return";
 
     private static final String SETTINGS_SHEET_FRAGMENT_TAG = "settings_sheet";
 
@@ -82,6 +83,7 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
     private boolean localAutoDetectEnabled;
 
     private final Queue<String> pendingPermissionRequests = new LinkedList<>();
+    private boolean processPermissionsUponReturn = false;
 
     private Handler handler;
     private Runnable wlanScanUpdater;
@@ -101,7 +103,18 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
 
         locationPermissionRequester = PermissionRequestHelper.setupRequestLocationPermission(this, this, PermissionRequestHelper.FINE_LOCATION);
         notificationPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
-
+            if (!granted) {
+                prefs.putBGNotificationEnabled(false);
+                prefs.putNotificationNagDisabled(true);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    //if the user cancelled the notification prompt, it is pointless to ask for the background location permission
+                    //on older Android versions, the fine location permission demand will not be discarded, as it is useful
+                    //for non-notification-related features as well. however, in practice, the notification prompt will not be
+                    //shown on these versions anyway, as they do not have runtime notification permissions nor support for BG wifi scanning
+                    pendingPermissionRequests.remove(Manifest.permission.ACCESS_BACKGROUND_LOCATION);
+                }
+            }
+            processPermissionRequests();
         });
 
         ui.ivCard.setImageDrawable(new EmptyDrawable());
@@ -113,6 +126,7 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
             if (pendingPermissions != null) {
                 pendingPermissionRequests.addAll(Arrays.asList(pendingPermissions));
             }
+            processPermissionsUponReturn = savedInstanceState.getBoolean(STATE_PROCESS_PERMISSIONS_UPON_RETURN, false);
         } else {
             showingProvider = null;
             localAutoDetectEnabled = prefs.getWlanAutoDetect();
@@ -326,6 +340,7 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
         outState.putString(STATE_SHOWING_PROVIDER, showingProvider);
         outState.putBoolean(STATE_LOCAL_AUTO_DETECT_ENABLED, localAutoDetectEnabled);
         outState.putStringArray(STATE_PENDING_PERMISSIONS, pendingPermissionRequests.toArray(new String[0]));
+        outState.putBoolean(STATE_PROCESS_PERMISSIONS_UPON_RETURN, processPermissionsUponReturn);
     }
 
     @Override
@@ -335,9 +350,14 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
             wlanFencingManager.update();
         }
         tryScheduleWorker();
+        showNotificationPermissionPromptIfNeeded();
         showBackgroundLocationPromptIfNeeded();
         cardNotificationManager.clearNotification();
-        processPermissionRequests();
+
+        if (processPermissionsUponReturn) {
+            processPermissionsUponReturn = false;
+            processPermissionRequests();
+        }
 
         if (wlanFencingManager.isExplicitScanNeeded() && wlanScanUpdater != null) {
             handler.post(wlanScanUpdater);
@@ -352,6 +372,14 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
     protected void onPause() {
         super.onPause();
         handler.removeCallbacks(wlanScanUpdater);
+    }
+
+    private void showNotificationPermissionPromptIfNeeded() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (prefs.isBGNotificationEnabled() && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                pushPermissionToRequest(Manifest.permission.POST_NOTIFICATIONS);
+            }
+        }
     }
 
     public boolean showBackgroundLocationPromptIfNeeded() {
@@ -393,6 +421,7 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
     private void callApplicationDetails() {
         startActivity(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                 .setData(Uri.fromParts("package", getPackageName(), null))
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         );
     }
 
@@ -400,7 +429,10 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
         new MaterialAlertDialogBuilder(this)
                 .setTitle(R.string.location_permission_required_title)
                 .setMessage(R.string.location_permission_required_message)
-                .setPositiveButton(R.string.open_settings, (dialog, which) -> callApplicationDetails())
+                .setPositiveButton(R.string.open_settings, (dialog, which) -> {
+                    callApplicationDetails();
+                    processPermissionsUponReturn = true;
+                })
                 .setNegativeButton(android.R.string.cancel, null)
                 .show();
     }
@@ -456,7 +488,7 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
         }
         permRequestProcessing = true;
         String permission = pendingPermissionRequests.peek();
-        runOnUiThread(() -> {
+        runLater(() -> {
             permRequestProcessing = false;
             pendingPermissionRequests.remove();
         }); //run on next loop
@@ -469,6 +501,10 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
         } else {
             Log.w(LOG_TAG, "Unknown permission requested: " + permission);
         }
+    }
+
+    private void runLater(Runnable runnable) {
+        handler.post(runnable);
     }
 
     private void requestRuntimeNotificationPermission() {
@@ -495,11 +531,14 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
         new MaterialAlertDialogBuilder(this)
                 .setTitle(R.string.background_location_permission_title)
                 .setMessage(getString(
-                        !wasBackgroundLocationAlreadyRequested()
+                        !shouldUseBackgroundLocationUpgradeText()
                                 ? R.string.background_location_permission_message
                                 : R.string.background_location_permission_message_again,
                         settingLabel
-                )).setPositiveButton(R.string.open_settings, (dialog, which) -> callApplicationDetails())
+                )).setPositiveButton(R.string.open_settings, (dialog, which) -> {
+                    callApplicationDetails();
+                    processPermissionsUponReturn = true;
+                })
                 .setNegativeButton(android.R.string.cancel, (dialog, which) -> {
                     prefs.putBGNotificationEnabled(false);
                     processPermissionRequests();
@@ -507,8 +546,8 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
                 .show();
     }
 
-    private boolean wasBackgroundLocationAlreadyRequested() {
-        return prefs.isBGNotificationEnabled();
+    private boolean shouldUseBackgroundLocationUpgradeText() {
+        return prefs.isBGNotificationEnabled() && checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 
     private CompletableFuture<ZxingCodeDrawable> currentAsyncLoadFuture = null;
