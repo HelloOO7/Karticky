@@ -4,44 +4,83 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.net.wifi.ScanResult;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiSsid;
 import android.os.Build;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class WlanFencingManager {
 
     private static final String LOG_TAG = WlanFencingManager.class.getSimpleName();
 
+    private final Context context;
+    private final ConnectivityManager connectivityManager;
     private final WifiManager wifiManager;
     private final ConfigManager config;
 
     private boolean registered = false;
 
-    private String currentProviderSSID = null;
-    private ScanResult currentScanResult = null;
+    private WlanAPInfo currentScanResult = null;
     private String currentProvider = null;
 
     private final List<OnNearbyProviderCallback> callbacks = new ArrayList<>();
 
     private final ReceiverImpl receiverImpl;
 
-    public WlanFencingManager(WifiManager wifiManager, ConfigManager config) {
-        this.wifiManager = wifiManager;
+    private final ConnectivityManager.NetworkCallback networkCallback;
+    private WifiInfo wifiInfoFromCallback;
+    private Network wifiInfoSourceNetwork;
+
+    public WlanFencingManager(Context context, ConfigManager config) {
+        this.context = context;
+        this.connectivityManager = context.getSystemService(ConnectivityManager.class);
+        this.wifiManager = context.getSystemService(WifiManager.class);
         this.config = config;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             receiverImpl = new Api30Impl();
         } else {
             receiverImpl = new LegacyImpl();
+        }
+
+        if (isNetworkCallbackNeededForWifiInfo()) {
+            networkCallback = new ConnectivityManager.NetworkCallback(ConnectivityManager.NetworkCallback.FLAG_INCLUDE_LOCATION_INFO) {
+
+                @Override
+                public void onCapabilitiesChanged(@NonNull Network network, @NonNull NetworkCapabilities networkCapabilities) {
+                    if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                        if (networkCapabilities.getTransportInfo() instanceof WifiInfo wi) {
+                            wifiInfoFromCallback = wi;
+                            wifiInfoSourceNetwork = network;
+                            update();
+                        }
+                    }
+                }
+
+                @Override
+                public void onLost(@NonNull Network network) {
+                    if (Objects.equals(network, wifiInfoSourceNetwork)) {
+                        wifiInfoFromCallback = null;
+                        update();
+                    }
+                }
+            };
+        } else {
+            networkCallback = null;
         }
     }
 
@@ -88,12 +127,18 @@ public class WlanFencingManager {
             return;
         }
         receiverImpl.register();
+        if (networkCallback != null) {
+            connectivityManager.registerDefaultNetworkCallback(networkCallback);
+        }
         registered = true;
     }
 
     private void unregister() {
         if (!registered) {
             return;
+        }
+        if (networkCallback != null) {
+            connectivityManager.unregisterNetworkCallback(networkCallback);
         }
         receiverImpl.unregister();
         registered = false;
@@ -121,18 +166,26 @@ public class WlanFencingManager {
             return null;
         }
         try {
-            List<ScanResult> lastScanResults = wifiManager.getScanResults();
+            List<WlanAPInfo> lastScanResults = wifiManager.getScanResults()
+                    .stream().map(WlanAPInfo::new)
+                    .collect(Collectors.toList());
+
+            WlanAPInfo connectedResult = createCurrentNetworkPlaceholderResult();
+            if (connectedResult != null) {
+                Log.d(LOG_TAG, "Active WLAN: " + connectedResult);
+                implantResult(lastScanResults, connectedResult);
+            }
+
             Log.d(LOG_TAG, "Received " + lastScanResults.size() + " scan results");
             for (var result : lastScanResults) {
-                Log.d(LOG_TAG, "SSID: " + getWlanSSID(result) + ", Level: " + result.level);
+                Log.d(LOG_TAG, "SSID: " + result.ssid() + ", Level: " + result.signal());
             }
-            Optional<ScanResult> nearest = getNearestKnownWlan(lastScanResults);
+            Optional<WlanAPInfo> nearest = getNearestKnownWlan(lastScanResults);
 
             if (nearest.isPresent()) {
-                String ssid = getWlanSSID(nearest.get());
+                String ssid = nearest.get().ssid();
                 Log.d(LOG_TAG, "Nearest known WLAN: " + ssid);
-                if (!Objects.equals(ssid, currentProviderSSID)) {
-                    currentProviderSSID = ssid;
+                if (currentScanResult == null || !Objects.equals(ssid, currentScanResult.ssid())) {
                     currentScanResult = nearest.get();
                     currentProvider = Objects.requireNonNull(config.getProviderForWlan(ssid));
                     Log.d(LOG_TAG, "WLAN changed, new provider: " + currentProvider);
@@ -141,7 +194,6 @@ public class WlanFencingManager {
                 }
             } else {
                 String lostProvider = currentProvider;
-                currentProviderSSID = null;
                 currentScanResult = null;
                 currentProvider = null;
                 invokeOnProviderLostCallback(lostProvider);
@@ -152,21 +204,63 @@ public class WlanFencingManager {
         return getCurrentProviderAP();
     }
 
+    private WlanAPInfo createCurrentNetworkPlaceholderResult() {
+        WifiInfo wi = getCurrentWifiInfo();
+        if (wi == null) {
+            return null;
+        }
+        return new WlanAPInfo(wi.getBSSID(), wi.getSSID(), wi.getRssi());
+    }
+
+    @SuppressWarnings("deprecation")
+    private WifiInfo getCurrentWifiInfo() {
+        if (isNetworkCallbackNeededForWifiInfo()) {
+            return wifiInfoFromCallback;
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            Network network = connectivityManager.getActiveNetwork();
+            if (network == null) {
+                return null;
+            }
+            NetworkCapabilities networkCapabilities = connectivityManager.getNetworkCapabilities(network);
+            if (networkCapabilities == null || !networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                return null;
+            }
+            if (networkCapabilities.getTransportInfo() instanceof WifiInfo wi) {
+                return wi;
+            }
+            return null;
+        } else {
+            return wifiManager.getConnectionInfo();
+        }
+    }
+
+    private boolean isNetworkCallbackNeededForWifiInfo() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.S;
+    }
+
+    private void implantResult(List<WlanAPInfo> results, WlanAPInfo result) {
+        if (results.stream().noneMatch(result2 -> Objects.equals(result2.bssid(), result.bssid()))) {
+            results.add(result);
+        }
+    }
+
     public ProviderAPInfo getCurrentProviderAP() {
         if (currentProvider == null) {
             return null;
         }
-        return new ProviderAPInfo(currentProviderSSID, currentScanResult.BSSID, currentScanResult.level, currentProvider);
+        return new ProviderAPInfo(currentScanResult.ssid(), currentScanResult.bssid(), currentScanResult.signal(), currentProvider);
     }
 
-    private Optional<ScanResult> getNearestKnownWlan(List<ScanResult> scanResults) {
+    private Optional<WlanAPInfo> getNearestKnownWlan(List<WlanAPInfo> scanResults) {
         return scanResults.stream()
-                .filter(scanResult -> config.isWlanCompatible(getWlanSSID(scanResult)))
-                .max((o1, o2) -> WifiManager.compareSignalLevel(o1.level, o2.level));
+                .filter(scanResult -> config.isWlanCompatible(scanResult.ssid()))
+                .max((o1, o2) -> WifiManager.compareSignalLevel(o1.signal(), o2.signal()));
     }
 
     @SuppressWarnings("deprecation")
-    private String getWlanSSID(ScanResult result) {
+    private static String getWlanSSID(ScanResult result) {
         String ssid;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             WifiSsid wifiSsid = result.getWifiSsid();
@@ -238,6 +332,13 @@ public class WlanFencingManager {
         @Override
         public void unregister() {
             NoCardApplication.getInstance().unregisterReceiver(receiver);
+        }
+    }
+
+    private record WlanAPInfo(String bssid, String ssid, int signal) {
+
+        public WlanAPInfo(ScanResult scanResult) {
+            this(scanResult.BSSID, getWlanSSID(scanResult), scanResult.level);
         }
     }
 }

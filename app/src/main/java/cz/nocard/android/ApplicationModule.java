@@ -25,6 +25,6 @@ public class ApplicationModule {
     @Provides
     @Singleton
     public WlanFencingManager wlanFencingManager(ConfigManager config) {
-        return new WlanFencingManager(application.getSystemService(WifiManager.class), config);
+        return new WlanFencingManager(application, config);
     }
 }
