@@ -348,6 +348,7 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
             handler.post(wlanScanUpdater);
         }
         if (!permRequestProcessing && !updateCheckDone) {
+            updateCheckDone = true;
             checkForAppUpdates();
         }
     }
@@ -469,9 +470,7 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
         } else if (Manifest.permission.ACCESS_BACKGROUND_LOCATION.equals(permission)) {
             requestBackgroundLocationPermissions();
         } else if (Manifest.permission.ACCESS_FINE_LOCATION.equals(permission)) {
-            locationPermissionRequester.request(grantedMask -> {
-                processPermissionRequests();
-            });
+            locationPermissionRequester.request(grantedMask -> processPermissionRequests());
         } else {
             Log.w(LOG_TAG, "Unknown permission requested: " + permission);
         }
@@ -634,7 +633,7 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
                         } else {
                             Log.d(LOG_TAG,
                                     "No updates available, current version (" + BuildConfig.VERSION_CODE + ")"
-                                    + " is up to date or newer than remote (" + newVersionCode + ")"
+                                            + " is up to date or newer than remote (" + newVersionCode + ")"
                             );
                         }
                     }
@@ -643,9 +642,10 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
     }
 
     private void showUpdateAvailableSnackbar() {
-        Snackbar.make(ui.clCoordinator, R.string.update_available, Snackbar.LENGTH_INDEFINITE)
-                .setDuration(10000)
+        Snackbar snackbar = Snackbar.make(ui.clCoordinator, R.string.update_available, Snackbar.LENGTH_INDEFINITE);
+        snackbar.setDuration(10000)
                 .setAction(R.string.update_action, v -> {
+                    snackbar.dismiss();
                     try {
                         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(BuildConfig.GITHUB_HOMEPAGE)));
                     } catch (Exception e) {
