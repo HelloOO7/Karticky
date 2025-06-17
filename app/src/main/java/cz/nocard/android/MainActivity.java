@@ -13,6 +13,7 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ScrollView;
 
 import androidx.activity.EdgeToEdge;
@@ -36,7 +37,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
@@ -103,8 +103,6 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
         notificationPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
 
         });
-
-        ui.clRoot.getLayoutTransition().disableTransitionType(LayoutTransition.CHANGE_DISAPPEARING);
 
         ui.ivCard.setImageDrawable(new EmptyDrawable());
 
@@ -254,18 +252,15 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
                 ui.swAutoDetect.setChecked(false);
             }
             fakeShowProviderInfo(provider);
-            scrollToYAndThen(0, () -> showCardForProvider(provider));
+            scrollToYAndThen(0, ViewUtils.dpToPx(this, 100), () -> showCardForProvider(provider));
         });
     }
 
     private void fakeShowProviderInfo(String provider) {
         ui.tvProvider.setText(configManager.getProviderInfo(provider).membershipName());
-        if (!Objects.equals(provider, showingProvider) && ui.ivCard.getVisibility() != View.GONE) {
-            ui.ivCard.setVisibility(View.INVISIBLE);
-        }
     }
 
-    private void scrollToYAndThen(int y, Runnable action) {
+    private void scrollToYAndThen(int y, int threshold, Runnable action) {
         ScrollView sv = ui.svScroller;
         if (sv.getScrollY() == y) {
             action.run();
@@ -273,7 +268,7 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
             sv.setOnScrollChangeListener(new View.OnScrollChangeListener() {
                 @Override
                 public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-                    if (scrollY == y) {
+                    if (Math.abs(scrollY - y) <= threshold) {
                         action.run();
                         sv.setOnScrollChangeListener(null);
                     }
@@ -555,10 +550,30 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
             } else {
                 ui.ivCard.setImageDrawable(zxingCodeDrawable);
             }
-            ui.pbCardImageLoading.setVisibility(View.GONE);
+            runOnTransitionDone(ui.ivCard, LayoutTransition.APPEARING, () -> ui.pbCardImageLoading.setVisibility(View.GONE));
             ui.ivCard.setVisibility(View.VISIBLE);
             return null;
         }, AsyncUtils.getLifecycleExecutor(this));
+    }
+
+    private void runOnTransitionDone(View view, int type, Runnable callback) {
+        LayoutTransition layoutTransition = ui.clRoot.getLayoutTransition();
+        layoutTransition.addTransitionListener(new LayoutTransition.TransitionListener() {
+            @Override
+            public void startTransition(LayoutTransition transition, ViewGroup container, View view2, int transitionType) {
+                if (view2 == view) {
+                    layoutTransition.removeTransitionListener(this);
+                }
+            }
+
+            @Override
+            public void endTransition(LayoutTransition transition, ViewGroup container, View view2, int transitionType) {
+                if (view2 == view && transitionType == type) {
+                    callback.run();
+                    layoutTransition.removeTransitionListener(this);
+                }
+            }
+        });
     }
 
     private void updateRemoteConfig() {
