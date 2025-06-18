@@ -1,7 +1,5 @@
 package cz.nocard.android;
 
-import android.net.wifi.WifiManager;
-
 import javax.inject.Singleton;
 
 import dagger.Module;
@@ -18,6 +16,12 @@ public class ApplicationModule {
 
     @Provides
     @Singleton
+    public NoCardPreferences appPreferences() {
+        return new NoCardPreferences(application);
+    }
+
+    @Provides
+    @Singleton
     public ConfigManager configManager() {
         return new ConfigManager(application);
     }
@@ -26,5 +30,11 @@ public class ApplicationModule {
     @Singleton
     public WlanFencingManager wlanFencingManager(ConfigManager config) {
         return new WlanFencingManager(application, config);
+    }
+
+    @Provides
+    @Singleton
+    public CardNotificationManager cardNotificationManager(NoCardPreferences prefs, ConfigManager configManager) {
+        return new CardNotificationManager(application, prefs, configManager);
     }
 }

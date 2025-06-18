@@ -196,7 +196,9 @@ public class WlanFencingManager {
                 String lostProvider = currentProvider;
                 currentScanResult = null;
                 currentProvider = null;
-                invokeOnProviderLostCallback(lostProvider);
+                if (lostProvider != null) {
+                    invokeOnProviderLostCallback(lostProvider);
+                }
             }
         } catch (SecurityException ex) {
             Log.e(LOG_TAG, "Failed to get scan results due to missing permissions (unexpected)", ex);

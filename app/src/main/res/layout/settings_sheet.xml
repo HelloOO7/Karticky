@@ -87,17 +87,37 @@
         app:layout_constraintStart_toEndOf="@+id/etMinWifiSignal"
         app:layout_constraintTop_toTopOf="@+id/etMinWifiSignal" />
 
-    <Button
-        android:id="@+id/btnClose"
-        style="@style/Widget.Material3.Button"
+    <TextView
+        android:id="@+id/tvCardsTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/item_margin_m"
+        android:text="@string/tv_cards_title"
+        android:textColor="?attr/colorOnSurface"
+        android:textSize="@dimen/text_title_s"
+        android:layout_marginTop="@dimen/item_margin_s"
+        app:layout_constraintStart_toStartOf="@+id/swUseNotifications"
+        app:layout_constraintTop_toBottomOf="@+id/etMinWifiSignal" />
+
+    <Button
+        android:id="@+id/btnBlacklistManagement"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        android:text="@string/btn_blacklist_management"
+        android:layout_marginTop="@dimen/item_margin_s"
+        app:layout_constraintStart_toStartOf="@+id/tvTitle"
+        app:layout_constraintTop_toBottomOf="@+id/tvCardsTitle" />
+
+    <Button
+        android:id="@+id/btnClose"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/Widget.Material3.Button"
         android:layout_marginEnd="@dimen/activity_margin"
         android:layout_marginBottom="@dimen/activity_margin"
         android:text="@string/settings_save"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/etMinWifiSignal" />
+        app:layout_constraintTop_toBottomOf="@+id/btnBlacklistManagement" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

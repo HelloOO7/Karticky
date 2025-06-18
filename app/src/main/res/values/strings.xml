@@ -35,4 +35,14 @@
     <string name="update_action">Zobrazit</string>
     <string name="update_available">Je dostupná nová verze aplikace</string>
     <string name="url_open_error">Nepodařilo se otevřít URL.</string>
+    <string name="btn_blacklist">Nefunguje</string>
+    <string name="code_not_available">Pro tento řetězec momentálně není dostupná žádná karta, nebo jsou všechny zakázané.</string>
+    <string name="blacklist_title">Zakázat kartu</string>
+    <string name="blacklist_message">Pokud vám tato karta nefunguje a nemáte naději, že se to v dohledné době změní, můžete ji zakázat a aplikace příště automaticky vybere jinou.</string>
+    <string name="blacklist_add">Ano, zakázat</string>
+    <string name="btn_blacklist_management">Spravovat zakázané karty</string>
+    <string name="tv_cards_title">Karty</string>
+    <string name="title_blacklist_management">Zakázané karty</string>
+    <string name="blacklist_empty_placeholder">Seznam zakázaných karet je prázdný.</string>
+    <string name="app_version_format">Verze %1$s/%2$s</string>
 </resources>

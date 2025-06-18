@@ -10,14 +10,15 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
+import android.text.TextUtils;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
+import java.util.HashSet;
 import java.util.Objects;
-
-import javax.inject.Inject;
+import java.util.Set;
 
 public class CardNotificationManager {
 
@@ -28,13 +29,14 @@ public class CardNotificationManager {
 
     private final Context context;
     private final NoCardPreferences prefs;
+    private final ConfigManager configManager;
     private final NotificationManagerCompat notificationManager;
     private NotificationChannel channel;
 
-    @Inject
-    public CardNotificationManager(NoCardPreferences prefs) {
-        context = NoCardApplication.getInstance();
+    public CardNotificationManager(Context context, NoCardPreferences prefs, ConfigManager configManager) {
+        this.context = context;
         this.prefs = prefs;
+        this.configManager = configManager;
         notificationManager = NotificationManagerCompat.from(context);
 
         initNotificationChannel();
@@ -76,10 +78,15 @@ public class CardNotificationManager {
     }
 
     private Notification buildNotification(String provider) {
+        NoCardConfig.ProviderInfo providerInfo = configManager.getProviderInfo(provider);
+        String providerName = (providerInfo != null && !TextUtils.isEmpty(providerInfo.providerName()))
+                        ? providerInfo.providerName()
+                        : provider;
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_notification_24px)
                 .setContentTitle(context.getString(R.string.notification_title))
-                .setContentText(context.getString(R.string.notification_text, provider))
+                .setContentText(context.getString(R.string.notification_text, providerName))
                 .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setContentIntent(createLaunchForProviderIntent(provider))
                 .setCategory(NotificationCompat.CATEGORY_RECOMMENDATION)
@@ -95,6 +102,15 @@ public class CardNotificationManager {
         }
         if (Objects.equals(prefs.getLastNofificationKey(), prefs.makeNotificationKey(apInfo))) {
             return false;
+        }
+        NoCardConfig.ProviderInfo pi = configManager.getProviderInfo(apInfo.provider());
+        if (pi == null) {
+            return false;
+        }
+        Set<String> codes = new HashSet<>(pi.codes());
+        codes.removeAll(prefs.getCardBlacklist(apInfo.provider()));
+        if (codes.isEmpty()) {
+            return false; // no valid codes for this provider, do not show notification
         }
         for (StatusBarNotification notification : notificationManager.getActiveNotifications()) {
             if (notification.getId() == GLOBAL_NOTIFICATION_ID) {

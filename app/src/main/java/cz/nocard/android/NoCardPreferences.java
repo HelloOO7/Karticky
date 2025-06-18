@@ -1,11 +1,14 @@
 package cz.nocard.android;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-
-import javax.inject.Inject;
+import java.util.Map;
+import java.util.Set;
 
 public class NoCardPreferences {
 
@@ -18,12 +21,14 @@ public class NoCardPreferences {
     private static final String PK_LAST_REMOTE_ETAG = "last_remote_etag";
     private static final String PK_MIN_WLAN_DBM = "min_wlan_dbm";
     private static final String PK_FAVOURITE_PROVIDERS = "favourite_providers";
+    private static final String PK_CARD_BLACKLIST_PREFIX = "card_blacklist_";
 
     private final SharedPreferences prefs;
 
-    @Inject
-    public NoCardPreferences() {
-        prefs = NoCardApplication.getInstance().getSharedPreferences("nocard", android.content.Context.MODE_PRIVATE);
+    private Map<String, Set<String>> cardBlacklistCache = new HashMap<>();
+
+    public NoCardPreferences(Context context) {
+        prefs = context.getSharedPreferences("nocard", android.content.Context.MODE_PRIVATE);
     }
 
     public SharedPreferences getPrefs() {
@@ -110,5 +115,29 @@ public class NoCardPreferences {
     public void putFavouriteProviders(List<String> providers) {
         String list = String.join(",", providers);
         prefs.edit().putString(PK_FAVOURITE_PROVIDERS, list).apply();
+    }
+
+    public Set<String> getCardBlacklist(String provider) {
+        return cardBlacklistCache.computeIfAbsent(
+                provider,
+                (provider2) -> new HashSet<>(prefs.getStringSet(PK_CARD_BLACKLIST_PREFIX + provider2, Set.of()))
+        );
+    }
+
+    public void putCardBlacklist(String provider, Set<String> blacklist) {
+        cardBlacklistCache.put(provider, blacklist);
+        prefs.edit().putStringSet(PK_CARD_BLACKLIST_PREFIX + provider, blacklist).apply();
+    }
+
+    public void addCardToBlacklist(String provider, String cardId) {
+        Set<String> blacklist = getCardBlacklist(provider);
+        blacklist.add(cardId);
+        putCardBlacklist(provider, blacklist);
+    }
+
+    public void removeCardFromBlacklist(String provider, String cardId) {
+        Set<String> blacklist = getCardBlacklist(provider);
+        blacklist.remove(cardId);
+        putCardBlacklist(provider, blacklist);
     }
 }

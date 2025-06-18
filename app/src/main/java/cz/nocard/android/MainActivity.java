@@ -12,6 +12,7 @@ import android.os.Handler;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ScrollView;
@@ -37,9 +38,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Predicate;
 
 import javax.inject.Inject;
 
@@ -77,6 +81,7 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
 
     private String showingProvider = null;
     private NoCardConfig.ProviderInfo showingProviderInfo = null;
+    private String showingCardCode = null;
     private List<String> favouriteProviders = new ArrayList<>();
     private List<String> allProviders = new ArrayList<>();
 
@@ -186,6 +191,8 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
     }
 
     private void initUI() {
+        ui.btnBlacklist.setOnClickListener(v -> showBlacklistDialog());
+
         ui.swAutoDetect.setChecked(localAutoDetectEnabled);
 
         ui.swAutoDetect.setOnClickListener(v -> {
@@ -204,6 +211,23 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
         displayDefaultRemoteConfigState();
 
         ui.llAvailableCards.setLayoutTransition(new LayoutTransition());
+
+        ui.tvAppVersion.setText(getString(R.string.app_version_format, BuildConfig.VERSION_NAME, BuildConfig.BUILD_TYPE));
+    }
+
+    private void showBlacklistDialog() {
+        if (showingProvider == null || showingCardCode == null) {
+            return;
+        }
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.blacklist_title)
+                .setMessage(R.string.blacklist_message)
+                .setPositiveButton(R.string.blacklist_add, (dialog, which) -> {
+                    prefs.addCardToBlacklist(showingProvider, showingCardCode);
+                    showCardForProvider(showingProvider); //refresh card
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
     }
 
     private List<String> getSortedProviders() {
@@ -550,7 +574,7 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
         return prefs.isBGNotificationEnabled() && checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 
-    private CompletableFuture<ZxingCodeDrawable> currentAsyncLoadFuture = null;
+    private CompletableFuture<Pair<String, ZxingCodeDrawable>> currentAsyncLoadFuture = null;
 
     private void showCardForProvider(String provider) {
         boolean providerChanged = !provider.equals(showingProvider);
@@ -569,15 +593,22 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
 
         (currentAsyncLoadFuture = AsyncUtils.supplyAsync(() -> {
             NoCardConfig.ProviderInfo pi = configManager.getProviderInfo(provider);
+            Set<String> blacklist = prefs.getCardBlacklist(provider);
 
-            return new ZxingCodeDrawable(
+            String code = configManager.getRandomCode(pi, Predicate.not(blacklist::contains));
+
+            if (code == null) {
+                throw new NoSuchElementException();
+            }
+
+            return new Pair<>(code, new ZxingCodeDrawable(
                     getResources(),
                     new ZxingCodeDrawable.Options()
                             .setPadding(0.05f)
-                            .setData(configManager.getRandomCode(pi))
+                            .setData(code)
                             .setFormat(pi.format())
-            );
-        })).handleAsync((zxingCodeDrawable, throwable) -> {
+            ));
+        })).handleAsync((codeAndDrawable, throwable) -> {
             if (throwable instanceof CancellationException) {
                 Log.d(LOG_TAG, "QR code generation cancelled for provider: " + provider);
                 return null; //cancelled
@@ -585,12 +616,22 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
             if (throwable != null) {
                 Log.e(LOG_TAG, "Failed to generate QR code", throwable);
                 ui.ivCard.setImageDrawable(new EmptyDrawable());
-                ui.tvProvider.setText(R.string.code_generation_error);
+                if (throwable instanceof NoSuchElementException) {
+                    //no code available
+                    ui.tvErrorText.setText(R.string.code_not_available);
+                } else {
+                    ui.tvErrorText.setText(R.string.code_generation_error);
+                }
+                ui.tvErrorText.setVisibility(View.VISIBLE);
+                ui.btnBlacklist.setVisibility(View.GONE);
             } else {
-                ui.ivCard.setImageDrawable(zxingCodeDrawable);
+                ui.tvErrorText.setVisibility(View.GONE);
+                ui.btnBlacklist.setVisibility(View.VISIBLE);
+                showingCardCode = codeAndDrawable.first;
+                ui.ivCard.setImageDrawable(codeAndDrawable.second);
             }
-            runOnTransitionDone(ui.ivCard, LayoutTransition.APPEARING, () -> ui.pbCardImageLoading.setVisibility(View.GONE));
             ui.ivCard.setVisibility(View.VISIBLE);
+            runOnTransitionDone(ui.ivCard, LayoutTransition.APPEARING, () -> ui.pbCardImageLoading.setVisibility(View.GONE));
             return null;
         }, AsyncUtils.getLifecycleExecutor(this));
     }

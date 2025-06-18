@@ -1,6 +1,7 @@
 package cz.nocard.android;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
@@ -103,6 +104,8 @@ public class SettingsSheetFragment extends BottomSheetDialogFragment implements 
             } catch (NumberFormatException ignored) {
             }
         });
+
+        binding.btnBlacklistManagement.setOnClickListener(v -> startActivity(new Intent(requireContext(), ManageBlacklistActivity.class)));
     }
 
     private void showBackgroundScanUnsupportedError() {

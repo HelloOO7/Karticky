@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+import java.util.function.Predicate;
 
 public class ConfigManager {
 
@@ -99,7 +100,15 @@ public class ConfigManager {
     }
 
     public String getRandomCode(NoCardConfig.ProviderInfo providerInfo) {
-        return providerInfo.codes().get(codeRandom.nextInt(providerInfo.codes().size()));
+        return getRandomCode(providerInfo, code -> true);
+    }
+
+    public String getRandomCode(NoCardConfig.ProviderInfo providerInfo, Predicate<String> filter) {
+        List<String> filteredCodes = providerInfo.codes().stream().filter(filter).toList();
+        if (filteredCodes.isEmpty()) {
+            return null;
+        }
+        return filteredCodes.get(codeRandom.nextInt(filteredCodes.size()));
     }
 
     public boolean isWlanCompatible(String ssid) {

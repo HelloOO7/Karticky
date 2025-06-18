@@ -11,4 +11,5 @@ public interface ApplicationComponent {
     void inject(MainActivity mainActivity);
     void inject(BackgroundWlanCheckWorker backgroundWlanCheckWorker);
     void inject(SettingsSheetFragment settingsSheetFragment);
+    void inject(ManageBlacklistActivity manageBlacklistActivity);
 }
