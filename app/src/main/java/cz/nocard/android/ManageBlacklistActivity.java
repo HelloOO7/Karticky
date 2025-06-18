@@ -3,6 +3,7 @@ package cz.nocard.android;
 import android.animation.LayoutTransition;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
+import android.view.View;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.Nullable;
@@ -24,14 +25,14 @@ public class ManageBlacklistActivity extends AppCompatActivity {
     @Inject
     ConfigManager config;
 
-    private ActivityBlacklistBinding binding;
+    private ActivityBlacklistBinding ui;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        binding = ActivityBlacklistBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
+        ui = ActivityBlacklistBinding.inflate(getLayoutInflater());
+        setContentView(ui.getRoot());
 
         NoCardApplication.getInstance().getApplicationComponent().inject(this);
 
@@ -45,10 +46,12 @@ public class ManageBlacklistActivity extends AppCompatActivity {
                     .forEach(items::add);
         }
 
-        binding.llBlacklistItems.setLayoutTransition(new LayoutTransition());
+        ui.llBlacklistItems.setLayoutTransition(new LayoutTransition());
+
+        ui.tvBlankPlaceholder.setVisibility(items.isEmpty() ? View.VISIBLE : View.GONE);
 
         for (BlacklistItem item : items) {
-            ProviderCardBinding cardBinding = ProviderCardBinding.inflate(getLayoutInflater(), binding.llBlacklistItems, false);
+            ProviderCardBinding cardBinding = ProviderCardBinding.inflate(getLayoutInflater(), ui.llBlacklistItems, false);
             NoCardConfig.ProviderInfo pi = config.getProviderInfo(item.provider());
             cardBinding.tvProviderName.setText(getCardInfoText(item));
             if (pi.brandColor() != null) {
@@ -57,9 +60,9 @@ public class ManageBlacklistActivity extends AppCompatActivity {
             cardBinding.btnToggleFavourite.setButtonDrawable(R.drawable.ic_close_24px);
             cardBinding.btnToggleFavourite.setOnClickListener(v -> {
                 prefs.removeCardFromBlacklist(item.provider(), item.cardNumber());
-                binding.llBlacklistItems.removeView(cardBinding.getRoot());
+                ui.llBlacklistItems.removeView(cardBinding.getRoot());
             });
-            binding.llBlacklistItems.addView(cardBinding.getRoot());
+            ui.llBlacklistItems.addView(cardBinding.getRoot());
         }
     }
 
