@@ -1,6 +1,8 @@
 package cz.nocard.android;
 
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -15,6 +17,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.work.ExistingWorkPolicy;
 
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
@@ -43,6 +46,12 @@ public class SettingsSheetFragment extends BottomSheetDialogFragment implements 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        Dialog dialog = requireDialog();
+        dialog.setOnShowListener(dialogInterface -> {
+            View bottomSheetView = dialog.findViewById(com.google.android.material.R.id.design_bottom_sheet);
+            BottomSheetBehavior.from(bottomSheetView).setState(BottomSheetBehavior.STATE_EXPANDED);
+        });
+
         binding = SettingsSheetBinding.inflate(inflater, container, false);
         prefs.getPrefs().registerOnSharedPreferenceChangeListener(this);
         return binding.getRoot();
