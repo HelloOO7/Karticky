@@ -29,9 +29,12 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.ColorRes;
 import androidx.annotation.DimenRes;
 import androidx.core.content.res.ResourcesCompat;
+import androidx.core.graphics.Insets;
+import androidx.core.view.OnApplyWindowInsetsListener;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.core.widget.ImageViewCompat;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager.widget.ViewPager;
 import androidx.viewpager2.widget.ViewPager2;
 
 import java.lang.reflect.Field;
@@ -544,6 +547,39 @@ public class ViewUtils {
 
     public static float getTextWidth(TextView textView, String text) {
         return textView.getPaint().measureText(text);
+    }
+
+    /**
+     * Before Android 11, system bar inset values are "approximate" and not guaranteed. Oftentimes, they
+     * are simply zero, which makes snackbars etc. show up underneath the system bars. This method will,
+     * in the case of Android 10 and below, register a listener (with {@link ViewCompat#setOnApplyWindowInsetsListener(View, OnApplyWindowInsetsListener)}
+     * that will apply the system bar insets from {@link View#getRootWindowInsets()}, which works even on those older APIs.
+     *
+     * @param view The View to register the listener on
+     */
+    public static void registerCompatInsetsFixups(View view) {
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
+            ViewGroup.MarginLayoutParams baseLayoutParams = new ViewGroup.MarginLayoutParams(
+                    (ViewGroup.MarginLayoutParams) view.getLayoutParams()
+            );
+
+            ViewCompat.setOnApplyWindowInsetsListener(view, (v, insets) -> {
+                WindowInsetsCompat actualInsets = WindowInsetsCompat.toWindowInsetsCompat(v.getRootWindowInsets());
+                Insets systemBars = actualInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+                ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+
+                params.setMargins(
+                        systemBars.left + baseLayoutParams.leftMargin,
+                        systemBars.top + baseLayoutParams.topMargin,
+                        systemBars.right + baseLayoutParams.rightMargin,
+                        systemBars.bottom + baseLayoutParams.bottomMargin
+                );
+
+                v.setLayoutParams(params);
+
+                return WindowInsetsCompat.CONSUMED;
+            });
+        }
     }
 
     public static class ViewEnabledSaveState {

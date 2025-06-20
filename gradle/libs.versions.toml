@@ -1,5 +1,5 @@
 [versions]
-agp = "8.7.2"
+agp = "8.7.3"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
@@ -11,7 +11,7 @@ zxing = "3.5.3"
 jackson = "2.13.5" # compatibility with API 24
 dagger = "2.56.2"
 desugaring = "2.1.5"
-work = "2.10.1"
+work = "2.10.2"
 jsoup = "1.20.1"
 
 [libraries]

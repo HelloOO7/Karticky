@@ -61,6 +61,7 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
     private static final String STATE_LOCAL_AUTO_DETECT_ENABLED = "local_auto_detect_enabled";
     private static final String STATE_PENDING_PERMISSIONS = "pending_permissions";
     private static final String STATE_PROCESS_PERMISSIONS_UPON_RETURN = "process_permissions_upon_return";
+    private static final String STATE_UPDATE_CHECK_DONE = "update_check_done";
 
     private static final String SETTINGS_SHEET_FRAGMENT_TAG = "settings_sheet";
 
@@ -132,6 +133,7 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
                 pendingPermissionRequests.addAll(Arrays.asList(pendingPermissions));
             }
             processPermissionsUponReturn = savedInstanceState.getBoolean(STATE_PROCESS_PERMISSIONS_UPON_RETURN, false);
+            updateCheckDone = savedInstanceState.getBoolean(STATE_UPDATE_CHECK_DONE, false);
         } else {
             showingProvider = null;
             localAutoDetectEnabled = prefs.getWlanAutoDetect();
@@ -365,6 +367,7 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
         outState.putBoolean(STATE_LOCAL_AUTO_DETECT_ENABLED, localAutoDetectEnabled);
         outState.putStringArray(STATE_PENDING_PERMISSIONS, pendingPermissionRequests.toArray(new String[0]));
         outState.putBoolean(STATE_PROCESS_PERMISSIONS_UPON_RETURN, processPermissionsUponReturn);
+        outState.putBoolean(STATE_UPDATE_CHECK_DONE, updateCheckDone);
     }
 
     @Override
@@ -738,6 +741,7 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
 
     private void showUpdateAvailableSnackbar() {
         Snackbar snackbar = Snackbar.make(ui.clCoordinator, R.string.update_available, Snackbar.LENGTH_INDEFINITE);
+        ViewUtils.registerCompatInsetsFixups(snackbar.getView());
         snackbar.setDuration(10000)
                 .setAction(R.string.update_action, v -> {
                     snackbar.dismiss();
