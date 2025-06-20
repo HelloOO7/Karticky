@@ -76,15 +76,8 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="@id/ivCard"
-                app:layout_constraintBottom_toBottomOf="@id/barrierImageLoading"
+                app:layout_constraintBottom_toBottomOf="@id/ivCard"
                 tools:visibility="visible" />
-
-            <androidx.constraintlayout.widget.Barrier
-                android:id="@+id/barrierImageLoading"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:barrierDirection="bottom"
-                app:constraint_referenced_ids="ivCard,pbCardImageLoading" />
 
             <androidx.constraintlayout.widget.Barrier
                 android:id="@+id/barrierCardAreaBottom"
@@ -122,6 +115,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="-8dp"
                 android:layout_marginEnd="@dimen/activity_margin"
+                android:contentDescription="@string/title_settings"
                 app:icon="@drawable/ic_settings_24px"
                 app:iconSize="36dp"
                 app:layout_constraintEnd_toEndOf="parent"
