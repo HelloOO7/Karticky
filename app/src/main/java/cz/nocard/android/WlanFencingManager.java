@@ -35,7 +35,7 @@ public class WlanFencingManager {
     private boolean registered = false;
 
     private WlanAPInfo currentScanResult = null;
-    private String currentProvider = null;
+    private ProviderAPInfo currentAPInfo = null;
 
     private final List<OnNearbyProviderCallback> callbacks = new ArrayList<>();
 
@@ -89,8 +89,8 @@ public class WlanFencingManager {
             callbacks.add(Objects.requireNonNull(callback));
             register();
         }
-        if (callIfCurrent && currentProvider != null) {
-            callback.providerNearby(currentProvider);
+        if (callIfCurrent && currentAPInfo != null) {
+            callback.providerNearby(currentAPInfo);
         }
     }
 
@@ -101,14 +101,14 @@ public class WlanFencingManager {
         }
     }
 
-    private void invokeOnNearbyProviderCallbacks(String provider) {
+    private void invokeOnNearbyProviderCallbacks(ProviderAPInfo provider) {
         Log.d(LOG_TAG, "Provider nearby: " + provider + ", callback count=" + callbacks.size());
         for (OnNearbyProviderCallback callback : callbacks) {
             callback.providerNearby(provider);
         }
     }
 
-    private void invokeOnProviderLostCallback(String provider) {
+    private void invokeOnProviderLostCallback(ProviderAPInfo provider) {
         Log.d(LOG_TAG, "Provider lost: " + provider + ", callback count=" + callbacks.size());
         for (OnNearbyProviderCallback callback : callbacks) {
             callback.providerLost(provider);
@@ -158,7 +158,7 @@ public class WlanFencingManager {
     }
 
     public boolean isCurrent(String provider) {
-        return Objects.equals(currentProvider, provider);
+        return currentAPInfo != null && currentAPInfo.provider().equals(provider);
     }
 
     public ProviderAPInfo update() {
@@ -183,19 +183,20 @@ public class WlanFencingManager {
             Optional<WlanAPInfo> nearest = getNearestKnownWlan(lastScanResults);
 
             if (nearest.isPresent()) {
+                WlanAPInfo nearestScanResult = nearest.get();
                 String ssid = nearest.get().ssid();
                 Log.d(LOG_TAG, "Nearest known WLAN: " + ssid);
-                if (currentScanResult == null || !Objects.equals(ssid, currentScanResult.ssid())) {
-                    currentScanResult = nearest.get();
-                    currentProvider = Objects.requireNonNull(config.getProviderForWlan(ssid));
-                    Log.d(LOG_TAG, "WLAN changed, new provider: " + currentProvider);
+                if (currentScanResult == null || !Objects.equals(nearestScanResult.bssid(), currentScanResult.bssid())) {
+                    currentScanResult = nearestScanResult;
+                    currentAPInfo = newAPInfo(currentScanResult);
+                    Log.d(LOG_TAG, "WLAN changed, new provider: " + currentAPInfo);
 
-                    invokeOnNearbyProviderCallbacks(currentProvider);
+                    invokeOnNearbyProviderCallbacks(currentAPInfo);
                 }
             } else {
-                String lostProvider = currentProvider;
+                ProviderAPInfo lostProvider = currentAPInfo;
                 currentScanResult = null;
-                currentProvider = null;
+                currentAPInfo = null;
                 if (lostProvider != null) {
                     invokeOnProviderLostCallback(lostProvider);
                 }
@@ -249,10 +250,16 @@ public class WlanFencingManager {
     }
 
     public ProviderAPInfo getCurrentProviderAP() {
-        if (currentProvider == null) {
-            return null;
-        }
-        return new ProviderAPInfo(currentScanResult.ssid(), currentScanResult.bssid(), currentScanResult.signal(), currentProvider);
+        return currentAPInfo;
+    }
+
+    private ProviderAPInfo newAPInfo(WlanAPInfo apInfo) {
+        return new ProviderAPInfo(
+                apInfo.ssid(),
+                apInfo.bssid(),
+                apInfo.signal(),
+                Objects.requireNonNull(config.getProviderForWlan(apInfo.ssid()))
+        );
     }
 
     private Optional<WlanAPInfo> getNearestKnownWlan(List<WlanAPInfo> scanResults) {
@@ -275,9 +282,9 @@ public class WlanFencingManager {
 
     public static interface OnNearbyProviderCallback {
 
-        public void providerNearby(String provider);
+        public void providerNearby(ProviderAPInfo provider);
 
-        public void providerLost(String provider);
+        public void providerLost(ProviderAPInfo provider);
     }
 
     public static record ProviderAPInfo(String ssid, String bssid, int signalLevel,

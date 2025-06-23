@@ -79,7 +79,7 @@ public class BackgroundWlanCheckWorker extends Worker {
 
         wlanFencingManager.registerOnNearbyProviderCallback(lastGlobalCallback = new WlanFencingManager.OnNearbyProviderCallback() {
             @Override
-            public void providerNearby(String provider) {
+            public void providerNearby(WlanFencingManager.ProviderAPInfo provider) {
                 WlanFencingManager.ProviderAPInfo apInfo = filterProviderInfo(wlanFencingManager.getCurrentProviderAP());
                 if (cardNotificationManager.shouldShowNotificationForProviderAP(apInfo)) {
                     Log.d(TAG, "Provider nearby: " + provider + ", attempting to show notification.");
@@ -88,7 +88,7 @@ public class BackgroundWlanCheckWorker extends Worker {
             }
 
             @Override
-            public void providerLost(String provider) {
+            public void providerLost(WlanFencingManager.ProviderAPInfo provider) {
                 cardNotificationManager.clearNotification();
             }
         }, false);

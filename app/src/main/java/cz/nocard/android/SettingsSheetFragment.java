@@ -2,7 +2,6 @@ package cz.nocard.android;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -107,9 +106,7 @@ public class SettingsSheetFragment extends BottomSheetDialogFragment implements 
         registerEditTextListener(binding.etMinWifiSignal, val -> {
             try {
                 int minSignal = Integer.parseInt(val);
-                performChange(() -> {
-                    prefs.putMinWlanDbm(minSignal);
-                });
+                performChange(() -> prefs.putMinWlanDbm(minSignal));
             } catch (NumberFormatException ignored) {
             }
         });

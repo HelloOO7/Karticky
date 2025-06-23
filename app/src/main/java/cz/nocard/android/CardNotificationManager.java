@@ -142,4 +142,8 @@ public class CardNotificationManager {
             prefs.putLastNotificationKey(apInfo);
         }
     }
+
+    public void ackAPForFutureNotification(WlanFencingManager.ProviderAPInfo apInfo) {
+        prefs.putLastNotificationKey(apInfo);
+    }
 }

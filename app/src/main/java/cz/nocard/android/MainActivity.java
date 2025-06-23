@@ -756,15 +756,18 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
     }
 
     @Override
-    public void providerNearby(String provider) {
+    public void providerNearby(WlanFencingManager.ProviderAPInfo provider) {
+        cardNotificationManager.ackAPForFutureNotification(provider);
         if (!localAutoDetectEnabled) {
             return;
         }
-        showCardForProvider(provider);
+        if (!provider.provider().equals(showingProvider)) {
+            showCardForProvider(provider.provider());
+        }
     }
 
     @Override
-    public void providerLost(String provider) {
+    public void providerLost(WlanFencingManager.ProviderAPInfo provider) {
 
     }
 }
