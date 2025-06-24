@@ -1,4 +1,4 @@
-package cz.nocard.android;
+package cz.spojenka.android.util;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -559,27 +559,33 @@ public class ViewUtils {
      */
     public static void registerCompatInsetsFixups(View view) {
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
-            ViewGroup.MarginLayoutParams baseLayoutParams = new ViewGroup.MarginLayoutParams(
-                    (ViewGroup.MarginLayoutParams) view.getLayoutParams()
+            useExplicitFitsSystemWindows(view);
+        }
+    }
+
+    public static void useExplicitFitsSystemWindows(View view) {
+        ViewGroup.MarginLayoutParams baseLayoutParams = new ViewGroup.MarginLayoutParams(
+                (ViewGroup.MarginLayoutParams) view.getLayoutParams()
+        );
+
+        ViewCompat.setOnApplyWindowInsetsListener(view, (v, insets) -> {
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
+                insets = WindowInsetsCompat.toWindowInsetsCompat(v.getRootWindowInsets());
+            }
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+
+            params.setMargins(
+                    systemBars.left + baseLayoutParams.leftMargin,
+                    systemBars.top + baseLayoutParams.topMargin,
+                    systemBars.right + baseLayoutParams.rightMargin,
+                    systemBars.bottom + baseLayoutParams.bottomMargin
             );
 
-            ViewCompat.setOnApplyWindowInsetsListener(view, (v, insets) -> {
-                WindowInsetsCompat actualInsets = WindowInsetsCompat.toWindowInsetsCompat(v.getRootWindowInsets());
-                Insets systemBars = actualInsets.getInsets(WindowInsetsCompat.Type.systemBars());
-                ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+            v.setLayoutParams(params);
 
-                params.setMargins(
-                        systemBars.left + baseLayoutParams.leftMargin,
-                        systemBars.top + baseLayoutParams.topMargin,
-                        systemBars.right + baseLayoutParams.rightMargin,
-                        systemBars.bottom + baseLayoutParams.bottomMargin
-                );
-
-                v.setLayoutParams(params);
-
-                return WindowInsetsCompat.CONSUMED;
-            });
-        }
+            return WindowInsetsCompat.CONSUMED;
+        });
     }
 
     public static class ViewEnabledSaveState {

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/activity_margin"
+        android:text="@string/title_import_method_choice"
+        android:textSize="@dimen/text_title_l"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btnScanCode"
+        style="@style/ChoiceButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/activity_margin"
+        android:layout_marginTop="@dimen/item_margin_l"
+        android:text="@string/import_method_scan_code"
+        app:icon="@drawable/ic_barcode_scanner_48px"
+        app:layout_constraintVertical_chainStyle="packed"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_title"
+        app:layout_constraintBottom_toTopOf="@id/btnPickFile" />
+
+    <Button
+        android:id="@+id/btnPickFile"
+        style="@style/ChoiceButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/item_margin_s"
+        android:text="@string/import_method_pick_file"
+        app:icon="@drawable/ic_add_photo_alternate_48px"
+        app:layout_constraintEnd_toEndOf="@+id/btnScanCode"
+        app:layout_constraintStart_toStartOf="@+id/btnScanCode"
+        app:layout_constraintTop_toBottomOf="@+id/btnScanCode"
+        app:layout_constraintBottom_toTopOf="@id/btnManualInput" />
+
+    <Button
+        android:id="@+id/btnManualInput"
+        style="@style/ChoiceButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/item_margin_s"
+        android:text="@string/import_method_manual_input"
+        app:icon="@drawable/ic_keyboard_48px"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/btnScanCode"
+        app:layout_constraintStart_toStartOf="@+id/btnScanCode"
+        app:layout_constraintTop_toBottomOf="@+id/btnPickFile" />
+</androidx.constraintlayout.widget.ConstraintLayout>

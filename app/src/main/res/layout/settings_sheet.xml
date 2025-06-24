@@ -100,11 +100,25 @@
 
     <Button
         android:id="@+id/btnBlacklistManagement"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         style="@style/Widget.Material3.Button.OutlinedButton"
-        android:text="@string/btn_blacklist_management"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/item_margin_s"
+        android:layout_marginEnd="@dimen/activity_margin"
+        android:layout_marginStart="@dimen/item_margin_s"
+        android:text="@string/btn_blacklist_management"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/btnPersonalCards"
+        app:layout_constraintTop_toBottomOf="@+id/tvCardsTitle" />
+
+    <Button
+        android:id="@+id/btnPersonalCards"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/item_margin_s"
+        android:text="@string/btn_personal_cards"
+        app:layout_constraintEnd_toStartOf="@id/btnBlacklistManagement"
         app:layout_constraintStart_toStartOf="@+id/tvTitle"
         app:layout_constraintTop_toBottomOf="@+id/tvCardsTitle" />
 
@@ -115,6 +129,7 @@
         style="@style/Widget.Material3.Button"
         android:layout_marginEnd="@dimen/activity_margin"
         android:layout_marginBottom="@dimen/activity_margin"
+        android:layout_marginTop="@dimen/item_margin_s"
         android:text="@string/settings_save"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

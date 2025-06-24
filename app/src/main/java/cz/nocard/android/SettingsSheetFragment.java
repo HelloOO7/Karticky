@@ -112,6 +112,7 @@ public class SettingsSheetFragment extends BottomSheetDialogFragment implements 
         });
 
         binding.btnBlacklistManagement.setOnClickListener(v -> startActivity(new Intent(requireContext(), ManageBlacklistActivity.class)));
+        binding.btnPersonalCards.setOnClickListener(v -> startActivity(new Intent(requireContext(), PersonalCardsActivity.class)));
     }
 
     private void showBackgroundScanUnsupportedError() {

@@ -1,6 +1,7 @@
 package cz.nocard.android;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,6 +17,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 import java.util.function.Predicate;
+
+import cz.spojenka.android.polyfills.InputStreamCompat;
 
 public class ConfigManager {
 
@@ -96,7 +99,20 @@ public class ConfigManager {
     }
 
     public NoCardConfig.ProviderInfo getProviderInfo(String key) {
-        return Objects.requireNonNull(getCurrentConfig().cardData().get(key));
+        return Objects.requireNonNull(getProviderInfoOrNull(key));
+    }
+
+    public NoCardConfig.ProviderInfo getProviderInfoOrNull(String key) {
+        return getCurrentConfig().cardData().get(key);
+    }
+
+    public String getProviderNameOrDefault(String key) {
+        NoCardConfig.ProviderInfo pi = getProviderInfo(key);
+        if (!TextUtils.isEmpty(pi.providerName())) {
+            return pi.providerName();
+        } else {
+            return key;
+        }
     }
 
     public String getRandomCode(NoCardConfig.ProviderInfo providerInfo) {

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="ChoiceButton" parent="Widget.Material3.Button.IconButton.Outlined">
+        <item name="iconSize">@dimen/choice_button_icon_size</item>
+        <item name="android:paddingStart">@dimen/item_margin_m</item>
+        <item name="android:paddingEnd">@dimen/item_margin_m</item>
+        <item name="android:paddingTop">@dimen/item_margin_s</item>
+        <item name="android:paddingBottom">@dimen/item_margin_s</item>
+    </style>
+</resources>

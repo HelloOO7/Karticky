@@ -1,4 +1,4 @@
-package cz.nocard.android;
+package cz.spojenka.android.util;
 
 import android.content.Context;
 import android.os.Handler;
@@ -18,6 +18,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
+
+import cz.nocard.android.NoCardApplication;
 
 /**
  * Utility class for running tasks asynchronously using various executors.

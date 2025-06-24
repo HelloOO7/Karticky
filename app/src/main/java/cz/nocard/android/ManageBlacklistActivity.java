@@ -1,73 +1,60 @@
 package cz.nocard.android;
 
-import android.animation.LayoutTransition;
-import android.content.res.ColorStateList;
 import android.os.Bundle;
-import android.view.View;
 
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
+import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
-import cz.nocard.android.databinding.ActivityBlacklistBinding;
-import cz.nocard.android.databinding.ProviderCardBinding;
-
-public class ManageBlacklistActivity extends AppCompatActivity {
+public class ManageBlacklistActivity extends CardListBaseActivity {
 
     @Inject
     NoCardPreferences prefs;
     @Inject
     ConfigManager config;
 
-    private ActivityBlacklistBinding ui;
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        ui = ActivityBlacklistBinding.inflate(getLayoutInflater());
-        setContentView(ui.getRoot());
-
         NoCardApplication.getInstance().getApplicationComponent().inject(this);
+        super.onCreate(savedInstanceState);
+    }
 
-        List<BlacklistItem> items = new ArrayList<>();
+    @Override
+    protected void populateCardList(Consumer<ProviderCardView> callMeMaybe) {
+        config.getAllProviders()
+                .stream()
+                .flatMap(provider -> prefs.getCardBlacklist(provider)
+                        .stream()
+                        .map(cardNumber -> new BlacklistItem(provider, cardNumber))
+                        .sorted(Comparator.comparing(BlacklistItem::cardNumber))
+                )
+                .map(item -> {
+                    NoCardConfig.ProviderInfo pi = config.getProviderInfo(item.provider());
 
-        for (String provider : config.getAllProviders()) {
-            prefs.getCardBlacklist(provider)
-                    .stream()
-                    .map(cardNumber -> new BlacklistItem(provider, cardNumber))
-                    .sorted(Comparator.comparing(BlacklistItem::cardNumber))
-                    .forEach(items::add);
-        }
+                    ProviderCardView.WithRemoveAction providerCard = new ProviderCardView.WithRemoveAction(this);
+                    providerCard.setProvider(item.provider(), pi);
+                    providerCard.overridePrimaryText(getCardInfoText(item));
 
-        ui.llBlacklistItems.setLayoutTransition(new LayoutTransition());
+                    providerCard.setOnRemoveListener(() -> {
+                        prefs.removeCardFromBlacklist(item.provider(), item.cardNumber());
+                        removeCardView(providerCard);
+                    });
 
-        ui.tvBlankPlaceholder.setVisibility(items.isEmpty() ? View.VISIBLE : View.GONE);
+                    return providerCard;
+                })
+                .forEach(callMeMaybe);
+    }
 
-        for (BlacklistItem item : items) {
-            ProviderCardBinding cardBinding = ProviderCardBinding.inflate(getLayoutInflater(), ui.llBlacklistItems, false);
-            NoCardConfig.ProviderInfo pi = config.getProviderInfo(item.provider());
-            cardBinding.tvProviderName.setText(getCardInfoText(item));
-            if (pi.brandColor() != null) {
-                cardBinding.ivBrandColor.setImageTintList(ColorStateList.valueOf(pi.brandColor()));
-            }
-            cardBinding.btnToggleFavourite.setButtonDrawable(R.drawable.ic_close_24px);
-            cardBinding.btnToggleFavourite.setOnClickListener(v -> {
-                prefs.removeCardFromBlacklist(item.provider(), item.cardNumber());
-                ui.llBlacklistItems.removeView(cardBinding.getRoot());
-            });
-            ui.llBlacklistItems.addView(cardBinding.getRoot());
-        }
+    @Override
+    protected int getBlankPlaceholderText() {
+        return R.string.blacklist_empty_placeholder;
     }
 
     private String getCardInfoText(BlacklistItem item) {
-        return config.getProviderInfo(item.provider()).providerName() + "\n" + item.cardNumber();
+        return PersonalCard.formatDefaultName(config.getProviderNameOrDefault(item.provider()), item.cardNumber());
     }
 
     private static record BlacklistItem(String provider, String cardNumber) {

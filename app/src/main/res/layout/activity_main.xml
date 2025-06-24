@@ -52,6 +52,19 @@
                 app:srcCompat="@null"
                 tools:visibility="visible" />
 
+            <TextView
+                android:id="@+id/tvPersonalCardNotice"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/item_margin_s"
+                tools:visibility="visible"
+                android:visibility="gone"
+                tools:text="Osobní karta 123456789"
+                android:gravity="center"
+                app:layout_constraintStart_toStartOf="@id/ivCard"
+                app:layout_constraintEnd_toEndOf="@+id/ivCard"
+                app:layout_constraintTop_toBottomOf="@+id/ivCard"/>
+
             <Button
                 android:id="@+id/btnBlacklist"
                 android:layout_width="wrap_content"
@@ -84,7 +97,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:barrierDirection="bottom"
-                app:constraint_referenced_ids="ivCard,pbCardImageLoading,btnBlacklist" />
+                app:constraint_referenced_ids="ivCard,pbCardImageLoading,btnBlacklist,tvPersonalCardNotice" />
 
             <TextView
                 android:id="@+id/tvAvailableCardsLabel"
@@ -128,6 +141,7 @@
                 android:layout_marginHorizontal="@dimen/activity_margin"
                 android:layout_marginTop="@dimen/item_margin_m"
                 android:orientation="vertical"
+                android:clipChildren="false"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/swAutoDetect" />

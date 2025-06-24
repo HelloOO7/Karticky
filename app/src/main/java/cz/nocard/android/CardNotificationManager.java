@@ -78,10 +78,7 @@ public class CardNotificationManager {
     }
 
     private Notification buildNotification(String provider) {
-        NoCardConfig.ProviderInfo providerInfo = configManager.getProviderInfo(provider);
-        String providerName = (providerInfo != null && !TextUtils.isEmpty(providerInfo.providerName()))
-                        ? providerInfo.providerName()
-                        : provider;
+        String providerName = configManager.getProviderNameOrDefault(provider);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_notification_24px)

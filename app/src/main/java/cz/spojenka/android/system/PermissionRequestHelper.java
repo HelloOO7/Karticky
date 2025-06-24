@@ -1,4 +1,4 @@
-package cz.nocard.android;
+package cz.spojenka.android.system;
 
 import android.Manifest;
 import android.app.Activity;
@@ -14,6 +14,8 @@ import androidx.core.content.ContextCompat;
 
 import java.util.Map;
 import java.util.Optional;
+
+import cz.spojenka.android.util.ViewUtils;
 
 public class PermissionRequestHelper {
 

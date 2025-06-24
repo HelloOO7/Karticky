@@ -10,4 +10,6 @@
     <dimen name="item_margin_m">16dp</dimen>
     <dimen name="item_margin_l">24dp</dimen>
     <dimen name="brand_color_chip_corner_dim">8dp</dimen>
+    <dimen name="choice_button_icon_size">48dp</dimen>
+    <dimen name="fab_overlap_adjust_height">72dp</dimen>
 </resources>

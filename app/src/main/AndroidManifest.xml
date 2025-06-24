@@ -11,6 +11,12 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
 
     <application
         android:name=".NoCardApplication"
@@ -36,6 +42,25 @@
 
         <activity
             android:name=".ManageBlacklistActivity"
+            android:label="@string/title_blacklist_management"
+            android:exported="false" />
+
+        <activity
+            android:name=".PersonalCardsActivity"
+            android:label="@string/title_personal_cards"
+            android:exported="false" />
+
+        <activity
+            android:name=".ImportSpringboardActivity"
+            android:label="@string/title_import_card"
+            android:exported="false" />
+
+        <activity
+            android:name=".ImportMethodJunctionActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ZxingScanActivity"
             android:exported="false" />
     </application>
 

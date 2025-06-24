@@ -4,7 +4,6 @@ import android.Manifest;
 import android.animation.LayoutTransition;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.ColorStateList;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -12,7 +11,6 @@ import android.os.Handler;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
-import android.util.Pair;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ScrollView;
@@ -39,6 +37,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
@@ -48,9 +47,11 @@ import java.util.function.Predicate;
 import javax.inject.Inject;
 
 import cz.nocard.android.databinding.ActivityMainBinding;
-import cz.nocard.android.databinding.ProviderCardBinding;
+import cz.spojenka.android.system.PermissionRequestHelper;
+import cz.spojenka.android.util.AsyncUtils;
+import cz.spojenka.android.util.ViewUtils;
 
-public class MainActivity extends AppCompatActivity implements WlanFencingManager.OnNearbyProviderCallback {
+public class MainActivity extends AppCompatActivity implements WlanFencingManager.OnNearbyProviderCallback, PersonalCardStore.Listener {
 
     private static final String LOG_TAG = "NoCard";
 
@@ -74,6 +75,8 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
     @Inject
     ConfigManager configManager;
     @Inject
+    PersonalCardStore personalCardStore;
+    @Inject
     WlanFencingManager wlanFencingManager;
     @Inject
     CardNotificationManager cardNotificationManager;
@@ -83,6 +86,7 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
     private String showingProvider = null;
     private NoCardConfig.ProviderInfo showingProviderInfo = null;
     private String showingCardCode = null;
+    private Integer showingPersonalCardId = null;
     private List<String> favouriteProviders = new ArrayList<>();
     private List<String> allProviders = new ArrayList<>();
 
@@ -104,6 +108,8 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
         setContentView(ui.getRoot());
 
         NoCardApplication.getInstance().getApplicationComponent().inject(this);
+
+        personalCardStore.addListener(this);
 
         handler = new Handler(getMainLooper());
 
@@ -226,10 +232,14 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
                 .setMessage(R.string.blacklist_message)
                 .setPositiveButton(R.string.blacklist_add, (dialog, which) -> {
                     prefs.addCardToBlacklist(showingProvider, showingCardCode);
-                    showCardForProvider(showingProvider); //refresh card
+                    refreshCurrentProviderCard(); //refresh card
                 })
                 .setNegativeButton(android.R.string.cancel, null)
                 .show();
+    }
+
+    private void refreshCurrentProviderCard() {
+        showCardForProvider(showingProvider);
     }
 
     private List<String> getSortedProviders() {
@@ -247,8 +257,8 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
         while (changed) {
             changed = false;
             for (int i = 0; i < ui.llAvailableCards.getChildCount(); ++i) {
-                View current = ui.llAvailableCards.getChildAt(i);
-                int index = newOrder.indexOf((String) current.getTag());
+                ProviderCardView current = (ProviderCardView) ui.llAvailableCards.getChildAt(i);
+                int index = newOrder.indexOf(current.getProviderId());
                 if (index != -1 && index != i) {
                     ui.llAvailableCards.removeViewAt(i);
                     if (index > i) {
@@ -264,17 +274,11 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
     private void addCardMenuItem(String provider) {
         NoCardConfig.ProviderInfo providerInfo = configManager.getProviderInfo(provider);
 
-        ProviderCardBinding binding = ProviderCardBinding.inflate(getLayoutInflater(), ui.llAvailableCards, false);
-        binding.tvProviderName.setText(providerInfo.providerName() != null ? providerInfo.providerName() : provider);
-        if (providerInfo.brandColor() != null) {
-            binding.ivBrandColor.setImageTintList(ColorStateList.valueOf(providerInfo.brandColor()));
-        } else {
-            binding.ivBrandColor.setVisibility(View.GONE);
-        }
-        binding.getRoot().setTag(provider);
-        binding.btnToggleFavourite.setChecked(favouriteProviders.contains(provider));
-        binding.btnToggleFavourite.setOnClickListener(v -> {
-            boolean favourited = binding.btnToggleFavourite.isChecked();
+        ProviderCardView.WithFavouriteAction providerCard = new ProviderCardView.WithFavouriteAction(this);
+        providerCard.setProvider(provider, providerInfo);
+
+        providerCard.setFavourited(favouriteProviders.contains(provider));
+        providerCard.setOnFavouriteChangeListener(favourited -> {
             if (favourited) {
                 favouriteProviders.add(provider);
             } else {
@@ -284,9 +288,9 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
             updateRowOrder();
         });
 
-        ui.llAvailableCards.addView(binding.getRoot());
+        ui.llAvailableCards.addView(providerCard);
 
-        binding.getRoot().setOnClickListener(v -> {
+        providerCard.setOnClickListener(v -> {
             localAutoDetectEnabled = false; //without persisting
             if (!provider.equals(showingProvider)) {
                 ui.swAutoDetect.setChecked(false);
@@ -433,6 +437,7 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
     protected void onDestroy() {
         super.onDestroy();
         wlanFencingManager.unregisterOnNearbyProviderCallback(this);
+        personalCardStore.removeListener(this);
     }
 
     private void tryBindToWlanFencingManager() {
@@ -577,7 +582,11 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
         return prefs.isBGNotificationEnabled() && checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 
-    private CompletableFuture<Pair<String, ZxingCodeDrawable>> currentAsyncLoadFuture = null;
+    private boolean isShowingPersonalCard() {
+        return showingPersonalCardId != null;
+    }
+
+    private CompletableFuture<CardLoadingResult> currentAsyncLoadFuture = null;
 
     private void showCardForProvider(String provider) {
         boolean providerChanged = !provider.equals(showingProvider);
@@ -598,20 +607,27 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
             NoCardConfig.ProviderInfo pi = configManager.getProviderInfo(provider);
             Set<String> blacklist = prefs.getCardBlacklist(provider);
 
-            String code = configManager.getRandomCode(pi, Predicate.not(blacklist::contains));
+            PersonalCard personal = personalCardStore.getCardForProvider(provider);
+
+            String code;
+            if (personal != null) {
+                code = personal.cardNumber();
+            } else {
+                code = configManager.getRandomCode(pi, Predicate.not(blacklist::contains));
+            }
 
             if (code == null) {
                 throw new NoSuchElementException();
             }
 
-            return new Pair<>(code, new ZxingCodeDrawable(
+            return new CardLoadingResult(code, personal, new ZxingCodeDrawable(
                     getResources(),
                     new ZxingCodeDrawable.Options()
                             .setPadding(0.05f)
                             .setData(code)
                             .setFormat(pi.format())
             ));
-        })).handleAsync((codeAndDrawable, throwable) -> {
+        })).handleAsync((result, throwable) -> {
             if (throwable instanceof CancellationException) {
                 Log.d(LOG_TAG, "QR code generation cancelled for provider: " + provider);
                 return null; //cancelled
@@ -627,11 +643,23 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
                 }
                 ui.tvErrorText.setVisibility(View.VISIBLE);
                 ui.btnBlacklist.setVisibility(View.GONE);
+                ui.tvPersonalCardNotice.setVisibility(View.GONE);
+                showingCardCode = null;
+                showingPersonalCardId = null;
             } else {
                 ui.tvErrorText.setVisibility(View.GONE);
                 ui.btnBlacklist.setVisibility(View.VISIBLE);
-                showingCardCode = codeAndDrawable.first;
-                ui.ivCard.setImageDrawable(codeAndDrawable.second);
+                showingCardCode = result.code();
+                showingPersonalCardId = result.personalCard() != null ? result.personalCard.id() : null;
+                ui.ivCard.setImageDrawable(result.codeDrawable());
+                if (isShowingPersonalCard()) {
+                    ui.btnBlacklist.setVisibility(View.GONE);
+                    ui.tvPersonalCardNotice.setVisibility(View.VISIBLE);
+                    ui.tvPersonalCardNotice.setText(getString(R.string.personal_card_desc_format, result.personalCard().singleLineName()));
+                } else {
+                    ui.btnBlacklist.setVisibility(View.VISIBLE);
+                    ui.tvPersonalCardNotice.setVisibility(View.GONE);
+                }
             }
             ui.ivCard.setVisibility(View.VISIBLE);
             runOnTransitionDone(ui.ivCard, LayoutTransition.APPEARING, () -> ui.pbCardImageLoading.setVisibility(View.GONE));
@@ -680,7 +708,7 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
                         displayDefaultRemoteConfigState();
                         if (showingProvider != null && configManager.getProviderInfo(showingProvider) != null) {
                             //show new card to make sure invalid ones are discarded
-                            showCardForProvider(showingProvider);
+                            refreshCurrentProviderCard();
                         }
                     } catch (IOException e) {
                         Log.e(LOG_TAG, "Failed to update remote config", e);
@@ -768,6 +796,29 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
 
     @Override
     public void providerLost(WlanFencingManager.ProviderAPInfo provider) {
+
+    }
+
+    @Override
+    public void onCardAdded(PersonalCard card) {
+        if (showingProvider != null && Objects.equals(showingProvider, card.provider())) {
+            refreshCurrentProviderCard();
+        }
+    }
+
+    @Override
+    public void onCardRemoved(PersonalCard card) {
+        onCardChanged(card);
+    }
+
+    @Override
+    public void onCardChanged(PersonalCard card) {
+        if (showingPersonalCardId != null && card.id() == showingPersonalCardId) {
+            refreshCurrentProviderCard();
+        }
+    }
+
+    private static record CardLoadingResult(String code, PersonalCard personalCard, ZxingCodeDrawable codeDrawable) {
 
     }
 }

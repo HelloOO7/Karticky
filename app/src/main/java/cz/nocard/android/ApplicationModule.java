@@ -37,4 +37,10 @@ public class ApplicationModule {
     public CardNotificationManager cardNotificationManager(NoCardPreferences prefs, ConfigManager configManager) {
         return new CardNotificationManager(application, prefs, configManager);
     }
+
+    @Provides
+    @Singleton
+    public PersonalCardStore personalCardStore(NoCardPreferences preferences) {
+        return new PersonalCardStore(preferences);
+    }
 }

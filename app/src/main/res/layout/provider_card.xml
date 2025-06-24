@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    app:cardCornerRadius="12dp"
     app:cardElevation="4dp"
+    app:cardBackgroundColor="?attr/colorBackgroundFloating"
+    app:strokeWidth="0dp"
     android:clickable="true"
     android:focusable="true"
     android:foreground="?attr/selectableItemBackground"
@@ -22,7 +23,7 @@
             android:padding="@dimen/item_margin_m"
             android:textSize="@dimen/text_title_m"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/btnToggleFavourite"
+            app:layout_constraintEnd_toStartOf="@+id/btn_action_button"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Tesko" />
@@ -43,18 +44,18 @@
             tools:tint="@android:color/holo_green_dark" />
 
         <com.google.android.material.checkbox.MaterialCheckBox
-            android:id="@+id/btnToggleFavourite"
+            android:id="@+id/btn_action_button"
             app:rippleColor="@null"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            app:buttonCompat="@drawable/ic_favourite"
+            tools:buttonCompat="@drawable/ic_favourite"
+            app:buttonIcon="@drawable/empty"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:paddingHorizontal="@dimen/item_margin_s"
-            android:checkable="true"
             android:saveEnabled="false" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-</androidx.cardview.widget.CardView>
+</com.google.android.material.card.MaterialCardView>

@@ -23,6 +23,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import cz.spojenka.android.system.PermissionRequestHelper;
+import cz.spojenka.android.util.AsyncUtils;
+
 public class WlanFencingManager {
 
     private static final String LOG_TAG = WlanFencingManager.class.getSimpleName();

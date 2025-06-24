@@ -1,4 +1,4 @@
-package cz.nocard.android;
+package cz.spojenka.android.polyfills;
 
 import android.os.Build;
 
