@@ -69,7 +69,7 @@ public class CommonDialogs {
         return new MaterialAlertDialogBuilder(context)
                 .setTitle(title)
                 .setMessage(message)
-                .setPositiveButton(android.R.string.yes, yesListener)
-                .setNegativeButton(android.R.string.no, noListener);
+                .setPositiveButton(R.string.yes, yesListener)
+                .setNegativeButton(R.string.no, noListener);
     }
 }

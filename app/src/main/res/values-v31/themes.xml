@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="SplashOverlay.Theme.NoCard" parent="Base.Theme.NoCard">
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_launcher_animated</item>
+        <item name="android:windowSplashScreenAnimationDuration">930</item>
+    </style>
+</resources>

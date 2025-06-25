@@ -4,7 +4,10 @@
         <item name="android:windowLightStatusBar">true</item>
     </style>
 
-    <style name="Theme.NoCard" parent="Base.Theme.NoCard">
+    <style name="SplashOverlay.Theme.NoCard" parent="Base.Theme.NoCard">
+    </style>
+
+    <style name="Theme.NoCard" parent="SplashOverlay.Theme.NoCard">
         <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
 </resources>

@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 
 import androidx.annotation.Nullable;
+import androidx.core.os.BundleCompat;
 
 import java.util.function.Consumer;
 
@@ -59,7 +60,7 @@ public class ProviderCardView extends FrameLayout {
     @Override
     protected void onRestoreInstanceState(Parcelable state) {
         if (state instanceof Bundle bundle) {
-            super.onRestoreInstanceState(bundle.getParcelable("super"));
+            super.onRestoreInstanceState(BundleCompat.getParcelable(bundle, "super", Parcelable.class));
             providerId = bundle.getString(STATE_PROVIDER_ID);
         } else {
             super.onRestoreInstanceState(state);

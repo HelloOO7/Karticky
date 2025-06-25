@@ -1,0 +1,119 @@
+<animated-vector
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:drawable="@drawable/logo_launcher_scene">
+
+  <target android:name="col1">
+    <aapt:attr name="android:animation">
+      <objectAnimator
+          android:interpolator="@android:anim/decelerate_interpolator"
+          android:startOffset="0"
+          android:valueFrom="1.0"
+          android:valueTo="0.0"
+          android:duration="350"
+          android:propertyName="trimPathStart" />
+    </aapt:attr>
+  </target>
+  <target android:name="col2">
+    <aapt:attr name="android:animation">
+      <objectAnimator
+          android:interpolator="@android:anim/decelerate_interpolator"
+          android:startOffset="40"
+          android:valueFrom="1.0"
+          android:valueTo="0.0"
+          android:duration="350"
+          android:propertyName="trimPathStart" />
+    </aapt:attr>
+  </target>
+  <target android:name="col3">
+    <aapt:attr name="android:animation">
+      <objectAnimator
+          android:interpolator="@android:anim/decelerate_interpolator"
+          android:startOffset="80"
+          android:valueFrom="1.0"
+          android:valueTo="0.0"
+          android:duration="350"
+          android:propertyName="trimPathStart" />
+    </aapt:attr>
+  </target>
+  <target android:name="col4">
+    <aapt:attr name="android:animation">
+      <objectAnimator
+          android:interpolator="@android:anim/decelerate_interpolator"
+          android:startOffset="120"
+          android:valueFrom="1.0"
+          android:valueTo="0.0"
+          android:duration="350"
+          android:propertyName="trimPathStart" />
+    </aapt:attr>
+  </target>
+  <target android:name="col5">
+    <aapt:attr name="android:animation">
+      <objectAnimator
+          android:interpolator="@android:anim/decelerate_interpolator"
+          android:startOffset="160"
+          android:valueFrom="1.0"
+          android:valueTo="0.0"
+          android:duration="350"
+          android:propertyName="trimPathStart" />
+    </aapt:attr>
+  </target>
+
+  <target android:name="scanner">
+    <aapt:attr name="android:animation">
+      <objectAnimator
+          android:interpolator="@android:anim/accelerate_decelerate_interpolator"
+          android:startOffset="330"
+          android:valueFrom="0.0"
+          android:valueTo="1.0"
+          android:duration="150"
+          android:propertyName="scaleY" />
+    </aapt:attr>
+  </target>
+  <target android:name="scanner">
+    <aapt:attr name="android:animation">
+      <objectAnimator
+          android:interpolator="@android:anim/accelerate_decelerate_interpolator"
+          android:startOffset="780"
+          android:valueFrom="1.0"
+          android:valueTo="0.0"
+          android:fillAfter="true"
+          android:duration="150"
+          android:propertyName="scaleY" />
+    </aapt:attr>
+  </target>
+
+  <target android:name="scanner">
+    <aapt:attr name="android:animation">
+      <objectAnimator
+          android:interpolator="@android:anim/decelerate_interpolator"
+          android:startOffset="430"
+          android:valueFrom="0.0"
+          android:valueTo="15.5"
+          android:duration="400"
+          android:propertyName="translateX" />
+    </aapt:attr>
+  </target>
+
+  <target android:name="scannerChroma">
+    <aapt:attr name="android:animation">
+      <objectAnimator
+          android:startOffset="430"
+          android:valueFrom="0.0"
+          android:valueTo="1.0"
+          android:duration="100"
+          android:propertyName="fillAlpha" />
+    </aapt:attr>
+  </target>
+  <target android:name="scannerChroma">
+    <aapt:attr name="android:animation">
+      <objectAnimator
+          android:startOffset="750"
+          android:valueFrom="1.0"
+          android:valueTo="0.0"
+          android:duration="100"
+          android:fillAfter="true"
+          android:propertyName="fillAlpha" />
+    </aapt:attr>
+  </target>
+</animated-vector>

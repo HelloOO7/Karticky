@@ -5,4 +5,5 @@
     <color name="light_green">#AAFFAA</color>
     <color name="spanish_red">#ffe60026</color>
     <color name="overlay_white">#80FFFFFF</color>
+    <color name="splash_code_color">@color/black</color>
 </resources>

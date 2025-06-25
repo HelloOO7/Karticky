@@ -66,4 +66,6 @@
     <string name="personal_cards_empty_placeholder">Zatím jste nepřidali žádnou osobní kartu.</string>
     <string name="title_personal_cards">Osobní karty</string>
     <string name="personal_card_desc_format">%1$s (osobní)</string>
+    <string name="yes">Ano</string>
+    <string name="no">Ne</string>
 </resources>
