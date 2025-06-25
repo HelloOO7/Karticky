@@ -57,12 +57,13 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/item_margin_s"
+                android:layout_marginHorizontal="@dimen/activity_margin"
                 tools:visibility="visible"
                 android:visibility="gone"
                 tools:text="Osobní karta 123456789"
                 android:gravity="center"
-                app:layout_constraintStart_toStartOf="@id/ivCard"
-                app:layout_constraintEnd_toEndOf="@+id/ivCard"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/ivCard"/>
 
             <Button
@@ -76,7 +77,8 @@
                 android:visibility="gone"
                 tools:visibility="visible"
                 android:layout_marginTop="@dimen/item_margin_s"
-                app:layout_constraintEnd_toEndOf="@+id/ivCard"
+                android:layout_marginHorizontal="@dimen/activity_margin"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/ivCard" />
 
             <ProgressBar
@@ -157,7 +159,7 @@
                 tools:text="Aktualizuju se" />
 
             <TextView
-                android:id="@+id/tv_gdpr_link"
+                android:id="@+id/tvGdprLink"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/activity_margin"
@@ -170,7 +172,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/tvRemoteConfigState" />
 
             <TextView
-                android:id="@+id/tv_error_text"
+                android:id="@+id/tvErrorText"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 tools:text="Load error"
@@ -190,9 +192,9 @@
                 android:layout_height="wrap_content"
                 tools:text="Verze aplikace"
                 android:layout_marginEnd="@dimen/activity_margin"
-                app:layout_constraintBottom_toBottomOf="@+id/tv_gdpr_link"
+                app:layout_constraintBottom_toBottomOf="@+id/tvGdprLink"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/tv_gdpr_link" />
+                app:layout_constraintTop_toTopOf="@+id/tvGdprLink" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>

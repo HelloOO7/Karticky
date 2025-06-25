@@ -43,6 +43,7 @@ import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -648,38 +649,41 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
                 showingPersonalCardId = null;
             } else {
                 ui.tvErrorText.setVisibility(View.GONE);
-                ui.btnBlacklist.setVisibility(View.VISIBLE);
                 showingCardCode = result.code();
                 showingPersonalCardId = result.personalCard() != null ? result.personalCard.id() : null;
                 ui.ivCard.setImageDrawable(result.codeDrawable());
                 if (isShowingPersonalCard()) {
-                    ui.btnBlacklist.setVisibility(View.GONE);
+                    ui.btnBlacklist.setVisibility(View.INVISIBLE);
                     ui.tvPersonalCardNotice.setVisibility(View.VISIBLE);
                     ui.tvPersonalCardNotice.setText(getString(R.string.personal_card_desc_format, result.personalCard().singleLineName()));
                 } else {
                     ui.btnBlacklist.setVisibility(View.VISIBLE);
-                    ui.tvPersonalCardNotice.setVisibility(View.GONE);
+                    ui.tvPersonalCardNotice.setVisibility(View.INVISIBLE);
                 }
             }
             ui.ivCard.setVisibility(View.VISIBLE);
-            runOnTransitionDone(ui.ivCard, LayoutTransition.APPEARING, () -> ui.pbCardImageLoading.setVisibility(View.GONE));
+            runOnTransitionDone(ui.ivCard, () -> {
+                ui.pbCardImageLoading.setVisibility(View.GONE);
+            }, LayoutTransition.APPEARING, LayoutTransition.CHANGE_APPEARING);
             return null;
         }, AsyncUtils.getLifecycleExecutor(this));
     }
 
-    private void runOnTransitionDone(View view, int type, Runnable callback) {
+    private void runOnTransitionDone(View view, Runnable callback, int... types) {
+        Set<Integer> acceptedTypes = Arrays.stream(types).boxed().collect(Collectors.toSet());
+
         LayoutTransition layoutTransition = ui.clRoot.getLayoutTransition();
         layoutTransition.addTransitionListener(new LayoutTransition.TransitionListener() {
             @Override
             public void startTransition(LayoutTransition transition, ViewGroup container, View view2, int transitionType) {
-                if (view2 == view) {
+                if (view2 == view && !acceptedTypes.contains(transitionType)) {
                     layoutTransition.removeTransitionListener(this);
                 }
             }
 
             @Override
             public void endTransition(LayoutTransition transition, ViewGroup container, View view2, int transitionType) {
-                if (view2 == view && transitionType == type) {
+                if (view2 == view && acceptedTypes.contains(transitionType)) {
                     callback.run();
                     layoutTransition.removeTransitionListener(this);
                 }

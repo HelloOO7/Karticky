@@ -54,7 +54,7 @@
     <string name="code_camera_permission_rationale">Pro skenování čárových kódů potřebuje aplikace přístup k fotoaparátu.</string>
     <string name="grant_permission">Autorizovat</string>
     <string name="import_method_scan_code">Naskenovat fotoaparátem</string>
-    <string name="import_method_pick_file">Z existujícího obrázku</string>
+    <string name="import_method_pick_file">Vybrat z galerie</string>
     <string name="import_method_manual_input">Zadat kód ručně</string>
     <string name="confirm">Potvrdit</string>
     <string name="reading_code">Čtení kódu</string>

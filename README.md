@@ -5,7 +5,9 @@ Aplikace slouží jako klient pro webové stránky projektu [NoCard](https://noc
 - off-line režim (data se aktualizují, až když je to potřeba a zařízení je připojené k internetu)
 - automatická detekce kartičky k použití podle signálu Wi-Fi z prodejen
 - tichá oznámení, ze kterých je lze rovnou otevřít
-- tmavý režim na Androidu 10+, dynamické barvy na Androidu 12+
+- podpora přidávání vlastních karet načtením kódu fotoaparátem nebo z obrázku či jeho ručním zadáním
+- možnost "zakázat" nefunkční karty
+- tmavý režim na Androidu 10+, dynamické barvy a animovaná startovací obrazovka na Androidu 12+
 
 Zatím je to tak nějak experimentální, ale už jsem s ní párkrát úspěšně nakoupil.
 
