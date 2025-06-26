@@ -35,8 +35,10 @@ jobs:
         keyPassword: ${{ secrets.KEY_PASSWORD }}
       env:
         BUILD_TOOLS_VERSION: "35.0.0"
+    - name: Move signed APK into place
+      run: mv "${{steps.signArtifact.outputs.signedReleaseFile}}" app/build/outputs/apk/release/app-release.apk
     - name: Upload APK artifact
       uses: actions/upload-artifact@v4.6.2
       with:
-        name: Release artifact
-        path: ${{steps.signArtifact.outputs.signedReleaseFile}}
+        name: Signed release APK
+        path: app/build/outputs/apk/release/app-release.apk
