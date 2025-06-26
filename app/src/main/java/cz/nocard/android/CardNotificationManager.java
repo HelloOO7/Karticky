@@ -20,6 +20,8 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+import cz.spojenka.android.util.CollectionUtils;
+
 public class CardNotificationManager {
 
     private static final String CHANNEL_ID = "nocard_channel";
@@ -97,8 +99,12 @@ public class CardNotificationManager {
         if (apInfo == null) {
             return true; //always cancel
         }
-        if (Objects.equals(prefs.getLastNofificationKey(), prefs.makeNotificationKey(apInfo))) {
-            return false;
+        if (Objects.equals(prefs.getLastNofificationProvider(), apInfo.provider())) {
+            if (CollectionUtils.setIntersects(prefs.getLastNotificationBSSIDClosure(), apInfo.getBSSIDClosure())) {
+                //update persisted closure
+                prefs.putLastNotificationAPInfo(apInfo);
+                return false;
+            }
         }
         NoCardConfig.ProviderInfo pi = configManager.getProviderInfo(apInfo.provider());
         if (pi == null) {
@@ -124,7 +130,7 @@ public class CardNotificationManager {
     }
 
     public void clearNotification() {
-        showNotificationForProviderAP(null);
+        notificationManager.cancel(GLOBAL_NOTIFICATION_ID);
     }
 
     public void showNotificationForProviderAP(WlanFencingManager.ProviderAPInfo apInfo) {
@@ -132,15 +138,15 @@ public class CardNotificationManager {
             return;
         }
         if (apInfo == null) {
-            notificationManager.cancel(GLOBAL_NOTIFICATION_ID);
+            clearNotification();
         } else {
             Notification notification = buildNotification(apInfo.provider());
             notificationManager.notify(GLOBAL_NOTIFICATION_ID, notification);
-            prefs.putLastNotificationKey(apInfo);
         }
+        prefs.putLastNotificationAPInfo(apInfo);
     }
 
     public void ackAPForFutureNotification(WlanFencingManager.ProviderAPInfo apInfo) {
-        prefs.putLastNotificationKey(apInfo);
+        prefs.putLastNotificationAPInfo(apInfo);
     }
 }

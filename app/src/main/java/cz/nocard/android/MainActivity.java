@@ -800,7 +800,7 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
 
     @Override
     public void providerLost(WlanFencingManager.ProviderAPInfo provider) {
-
+        cardNotificationManager.ackAPForFutureNotification(null);
     }
 
     @Override

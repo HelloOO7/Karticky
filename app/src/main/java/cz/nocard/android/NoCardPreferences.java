@@ -10,12 +10,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import cz.spojenka.android.util.CollectionUtils;
+
 public class NoCardPreferences {
 
     private static final String PK_WLAN_AUTO_DETECT = "wlan_auto_detect";
     private static final String PK_NOTIFICATION_ENABLED = "notification_enabled";
     private static final String PK_NOTIFICATION_NAG_DISABLED = "notification_nag_disabled";
-    private static final String PK_LAST_NOTIFICATION_KEY = "last_notification_key";
+    private static final String PK_LAST_NOTIFICATION_PROVIDER = "last_notification_provider";
+    private static final String PK_LAST_NOTIFICATION_BSSID_CLOSURE = "last_notification_bssid_closure";
     private static final String PK_BACKGROUND_CHECK_INTERVAL = "background_check_interval";
     private static final String PK_LAST_REMOTE_UPDATE = "last_remote_update";
     private static final String PK_LAST_REMOTE_ETAG = "last_remote_etag";
@@ -43,16 +46,33 @@ public class NoCardPreferences {
         prefs.edit().putBoolean(PK_WLAN_AUTO_DETECT, enabled).apply();
     }
 
-    public String getLastNofificationKey() {
-        return prefs.getString(PK_LAST_NOTIFICATION_KEY, null);
+    public String getLastNofificationProvider() {
+        return prefs.getString(PK_LAST_NOTIFICATION_PROVIDER, null);
     }
 
-    public void putLastNotificationKey(WlanFencingManager.ProviderAPInfo apInfo) {
-        prefs.edit().putString(PK_LAST_NOTIFICATION_KEY, makeNotificationKey(apInfo)).apply();
+    public Set<String> getLastNotificationBSSIDClosure() {
+        return prefs.getStringSet(PK_LAST_NOTIFICATION_BSSID_CLOSURE, Set.of());
     }
 
-    public String makeNotificationKey(WlanFencingManager.ProviderAPInfo apInfo) {
-        return apInfo.bssid() + "|" + apInfo.ssid();
+    public void putLastNotificationAPInfo(WlanFencingManager.ProviderAPInfo apInfo) {
+        if (apInfo != null) {
+            Set<String> currentClosure = getLastNotificationBSSIDClosure();
+            Set<String> newClosure = apInfo.getBSSIDClosure();
+
+            if (CollectionUtils.setIntersects(currentClosure, newClosure)) {
+                newClosure = CollectionUtils.setUnion(currentClosure, newClosure);
+            }
+
+            prefs.edit()
+                    .putString(PK_LAST_NOTIFICATION_PROVIDER, apInfo.provider())
+                    .putStringSet(PK_LAST_NOTIFICATION_BSSID_CLOSURE, newClosure)
+                    .apply();
+        } else {
+            prefs.edit()
+                    .remove(PK_LAST_NOTIFICATION_PROVIDER)
+                    .remove(PK_LAST_NOTIFICATION_BSSID_CLOSURE)
+                    .apply();
+        }
     }
 
     public boolean isBGNotificationEnabled() {

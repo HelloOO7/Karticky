@@ -18,15 +18,20 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import cz.spojenka.android.system.PermissionRequestHelper;
 import cz.spojenka.android.util.AsyncUtils;
+import cz.spojenka.android.util.CollectionUtils;
 
 public class WlanFencingManager {
+
+    public static final int SIGNAL_OUT_OF_RANGE = Integer.MIN_VALUE;
 
     private static final String LOG_TAG = WlanFencingManager.class.getSimpleName();
 
@@ -37,7 +42,6 @@ public class WlanFencingManager {
 
     private boolean registered = false;
 
-    private WlanAPInfo currentScanResult = null;
     private ProviderAPInfo currentAPInfo = null;
 
     private final List<OnNearbyProviderCallback> callbacks = new ArrayList<>();
@@ -189,16 +193,25 @@ public class WlanFencingManager {
                 WlanAPInfo nearestScanResult = nearest.get();
                 String ssid = nearest.get().ssid();
                 Log.d(LOG_TAG, "Nearest known WLAN: " + ssid);
-                if (currentScanResult == null || !Objects.equals(nearestScanResult.bssid(), currentScanResult.bssid())) {
-                    currentScanResult = nearestScanResult;
-                    currentAPInfo = newAPInfo(currentScanResult);
+
+                ProviderAPInfo newAPInfo = new ProviderAPInfo(
+                        nearestScanResult,
+                        getSameSSIDAPs(lastScanResults, ssid),
+                        Objects.requireNonNull(config.getProviderForWlan(ssid))
+                );
+                ProviderAPInfo previousAPInfo = currentAPInfo;
+                if (currentAPInfo != null && newAPInfo.transitiveMatches(currentAPInfo)) {
+                    newAPInfo = newAPInfo.mergeFrom(currentAPInfo);
+                }
+                currentAPInfo = newAPInfo;
+
+                if (previousAPInfo == null || !newAPInfo.apSetMatches(previousAPInfo)) {
                     Log.d(LOG_TAG, "WLAN changed, new provider: " + currentAPInfo);
 
                     invokeOnNearbyProviderCallbacks(currentAPInfo);
                 }
             } else {
                 ProviderAPInfo lostProvider = currentAPInfo;
-                currentScanResult = null;
                 currentAPInfo = null;
                 if (lostProvider != null) {
                     invokeOnProviderLostCallback(lostProvider);
@@ -256,19 +269,16 @@ public class WlanFencingManager {
         return currentAPInfo;
     }
 
-    private ProviderAPInfo newAPInfo(WlanAPInfo apInfo) {
-        return new ProviderAPInfo(
-                apInfo.ssid(),
-                apInfo.bssid(),
-                apInfo.signal(),
-                Objects.requireNonNull(config.getProviderForWlan(apInfo.ssid()))
-        );
-    }
-
     private Optional<WlanAPInfo> getNearestKnownWlan(List<WlanAPInfo> scanResults) {
         return scanResults.stream()
                 .filter(scanResult -> config.isWlanCompatible(scanResult.ssid()))
                 .max((o1, o2) -> WifiManager.compareSignalLevel(o1.signal(), o2.signal()));
+    }
+
+    private Set<WlanAPInfo> getSameSSIDAPs(List<WlanAPInfo> scanResults, String ssid) {
+        return scanResults.stream()
+                .filter(scanResult -> Objects.equals(scanResult.ssid(), ssid))
+                .collect(Collectors.toSet());
     }
 
     @SuppressWarnings("deprecation")
@@ -290,9 +300,46 @@ public class WlanFencingManager {
         public void providerLost(ProviderAPInfo provider);
     }
 
-    public static record ProviderAPInfo(String ssid, String bssid, int signalLevel,
-                                        String provider) {
+    public static record ProviderAPInfo(
+            WlanAPInfo primaryAP,
+            Set<WlanAPInfo> transitiveClosureAPs,
+            String provider
+    ) {
 
+        public Set<String> getBSSIDClosure() {
+            return transitiveClosureAPs().stream()
+                    .map(WlanAPInfo::bssid)
+                    .collect(Collectors.toSet());
+        }
+
+        public boolean transitiveMatches(ProviderAPInfo other) {
+            if (!Objects.equals(provider(), other.provider())) {
+                return false;
+            }
+            return CollectionUtils.setIntersects(getBSSIDClosure(), other.getBSSIDClosure());
+        }
+
+        public boolean apSetMatches(ProviderAPInfo other) {
+            if (!Objects.equals(provider(), other.provider())) {
+                return false;
+            }
+            return CollectionUtils.setEquals(getBSSIDClosure(), other.getBSSIDClosure());
+        }
+
+        public ProviderAPInfo mergeFrom(ProviderAPInfo other) {
+            Set<String> myBSSIDs = getBSSIDClosure();
+            Set<WlanAPInfo> aps = new HashSet<>(transitiveClosureAPs());
+            for (WlanAPInfo ap : other.transitiveClosureAPs()) {
+                if (!myBSSIDs.contains(ap.bssid())) {
+                    aps.add(new WlanAPInfo(
+                            ap.bssid(),
+                            ap.ssid(),
+                            SIGNAL_OUT_OF_RANGE
+                    ));
+                }
+            }
+            return new ProviderAPInfo(primaryAP(), aps, provider());
+        }
     }
 
     private interface ReceiverImpl {
@@ -347,7 +394,7 @@ public class WlanFencingManager {
         }
     }
 
-    private record WlanAPInfo(String bssid, String ssid, int signal) {
+    public record WlanAPInfo(String bssid, String ssid, int signal) {
 
         public WlanAPInfo(ScanResult scanResult) {
             this(scanResult.BSSID, getWlanSSID(scanResult), scanResult.level);

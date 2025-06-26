@@ -1,5 +1,7 @@
 # NoCard pro Android
 
+**\>\> Ke stažení [zde](#instalace) \<\<**
+
 Aplikace slouží jako klient pro webové stránky projektu [NoCard](https://nocard.cz). Kromě toho, co umí samotný web, umí několik věcí navíc:
 
 - off-line režim (data se aktualizují, až když je to potřeba a zařízení je připojené k internetu)
@@ -19,9 +21,11 @@ Hlavní obrazovka            |  Notifikace
 
 ## Instalace
 
-Aplikaci lze zkompilovat ze zdrojových kódů nebo stáhnout nejnovější verzi na odkazu níže:
+Aplikaci lze zkompilovat ze zdrojových kódů nebo stáhnout nejnovější stabilní verzi na odkazu níže:
 
 https://lab.d3s.mff.cuni.cz:27083/update/download-latest/cz.nocard.android
+
+Automaticky sestavené artefakty z nejnovějšího commitu, podepsané tímtéž klíčem, jsou dostupné z [GitHub Actions](https://github.com/HelloOO7/NoCard-Android/actions/).
 
 ## Kompatibilita
 

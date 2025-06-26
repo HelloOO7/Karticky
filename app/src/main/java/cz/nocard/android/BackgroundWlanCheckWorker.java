@@ -97,7 +97,7 @@ public class BackgroundWlanCheckWorker extends Worker {
     }
 
     private WlanFencingManager.ProviderAPInfo filterProviderInfo(WlanFencingManager.ProviderAPInfo providerAPInfo) {
-        if (providerAPInfo != null && providerAPInfo.signalLevel() < prefs.getMinWlanDbm()) {
+        if (providerAPInfo != null && providerAPInfo.primaryAP().signal() < prefs.getMinWlanDbm()) {
             return null; //act as if no AP is found
         }
         return providerAPInfo;
