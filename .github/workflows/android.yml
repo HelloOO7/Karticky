@@ -25,7 +25,8 @@ jobs:
     - name: Run Gradle build
       run: ./gradlew assembleRelease
     - name: Sign artifact
-      uses: r0adkll/sign-android-release@v1.0.1
+      id: signArtifact
+      uses: filippoLeporati93/android-release-signer@v1
       with:
         releaseDirectory: app/build/outputs/apk/release
         alias: ${{ secrets.KEYALIAS }}
@@ -38,4 +39,4 @@ jobs:
       uses: actions/upload-artifact@v4.6.2
       with:
         name: Release artifact
-        path: app/build/outputs/apk/release/app-release.apk
+        path: ${{steps.signArtifact.outputs.signedReleaseFile}}
