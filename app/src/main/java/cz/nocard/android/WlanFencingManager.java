@@ -91,7 +91,7 @@ public class WlanFencingManager {
         }
     }
 
-    public void registerOnNearbyProviderCallback(OnNearbyProviderCallback callback, boolean callIfCurrent) {
+    public synchronized void registerOnNearbyProviderCallback(OnNearbyProviderCallback callback, boolean callIfCurrent) {
         if (!callbacks.contains(callback)) {
             callbacks.add(Objects.requireNonNull(callback));
             register();
@@ -101,7 +101,7 @@ public class WlanFencingManager {
         }
     }
 
-    public void unregisterOnNearbyProviderCallback(OnNearbyProviderCallback callback) {
+    public synchronized void unregisterOnNearbyProviderCallback(OnNearbyProviderCallback callback) {
         callbacks.remove(Objects.requireNonNull(callback));
         if (callbacks.isEmpty()) {
             unregister();
@@ -126,7 +126,7 @@ public class WlanFencingManager {
         return PermissionRequestHelper.hasFineLocationPermission(NoCardApplication.getInstance());
     }
 
-    public void register() {
+    public synchronized void register() {
         if (registered) {
             return;
         }
@@ -140,7 +140,7 @@ public class WlanFencingManager {
         registered = true;
     }
 
-    private void unregister() {
+    private synchronized void unregister() {
         if (!registered) {
             return;
         }
@@ -156,7 +156,7 @@ public class WlanFencingManager {
     }
 
     @SuppressWarnings("deprecation")
-    public void performExplicitScan() {
+    public synchronized void performExplicitScan() {
         if (!holdsNeededPermissions()) {
             return;
         }
@@ -164,11 +164,11 @@ public class WlanFencingManager {
         wifiManager.startScan();
     }
 
-    public boolean isCurrent(String provider) {
+    public synchronized boolean isCurrent(String provider) {
         return currentAPInfo != null && currentAPInfo.provider().equals(provider);
     }
 
-    public ProviderAPInfo update() {
+    public synchronized ProviderAPInfo update() {
         if (!holdsNeededPermissions()) {
             return null;
         }
