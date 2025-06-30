@@ -9,11 +9,12 @@
 
     <TextView
         android:id="@+id/tvTitle"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_margin="@dimen/activity_margin"
         android:text="@string/title_settings"
         android:textSize="@dimen/text_title_l"
-        android:layout_margin="@dimen/activity_margin"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -59,12 +60,13 @@
 
     <TextView
         android:id="@+id/tvMinWifiSignalLabel"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/item_margin_s"
         android:text="@string/tv_min_wlan_signal_label"
         android:textColor="?attr/colorOnSurface"
         android:textSize="@dimen/text_title_s"
-        android:layout_marginTop="@dimen/item_margin_s"
+        app:layout_constraintEnd_toEndOf="@+id/swUseNotifications"
         app:layout_constraintStart_toStartOf="@+id/swUseNotifications"
         app:layout_constraintTop_toBottomOf="@+id/etWlanCheckInterval" />
 
@@ -89,12 +91,13 @@
 
     <TextView
         android:id="@+id/tvCardsTitle"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/item_margin_s"
         android:text="@string/tv_cards_title"
         android:textColor="?attr/colorOnSurface"
         android:textSize="@dimen/text_title_s"
-        android:layout_marginTop="@dimen/item_margin_s"
+        app:layout_constraintEnd_toEndOf="@+id/tvMinWifiSignalLabel"
         app:layout_constraintStart_toStartOf="@+id/swUseNotifications"
         app:layout_constraintTop_toBottomOf="@+id/etMinWifiSignal" />
 
