@@ -4,21 +4,27 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import cz.spojenka.android.util.CollectionUtils;
 
 public class NoCardPreferences {
 
+    private static final int AP_CONTINUITY_DROPOUT_MAX_SECONDS = 90;
+
     private static final String PK_WLAN_AUTO_DETECT = "wlan_auto_detect";
     private static final String PK_NOTIFICATION_ENABLED = "notification_enabled";
     private static final String PK_NOTIFICATION_NAG_DISABLED = "notification_nag_disabled";
     private static final String PK_LAST_NOTIFICATION_PROVIDER = "last_notification_provider";
     private static final String PK_LAST_NOTIFICATION_BSSID_CLOSURE = "last_notification_bssid_closure";
+    private static final String PK_LAST_CONNECTED_TS = "last_connected_ts";
+    private static final String PK_LAST_CONNECTION_LOST_TS = "last_connection_lost_ts";
     private static final String PK_BACKGROUND_CHECK_INTERVAL = "background_check_interval";
     private static final String PK_LAST_REMOTE_UPDATE = "last_remote_update";
     private static final String PK_LAST_REMOTE_ETAG = "last_remote_etag";
@@ -50,8 +56,36 @@ public class NoCardPreferences {
         return prefs.getString(PK_LAST_NOTIFICATION_PROVIDER, null);
     }
 
-    public Set<String> getLastNotificationBSSIDClosure() {
+    private Set<String> getLastNotificationBSSIDClosure() {
         return prefs.getStringSet(PK_LAST_NOTIFICATION_BSSID_CLOSURE, Set.of());
+    }
+
+    public boolean checkLastAPsNeighboring(WlanFencingManager.ProviderAPInfo currentAPs) {
+        Instant now = Instant.now();
+        Instant connectionLostAt = null;
+        Instant connectedAt = null;
+
+        if (prefs.contains(PK_LAST_CONNECTION_LOST_TS)) {
+            connectionLostAt = Instant.ofEpochMilli(prefs.getLong(PK_LAST_CONNECTION_LOST_TS, 0));
+        }
+        if (prefs.contains(PK_LAST_CONNECTED_TS)) {
+            connectedAt = Instant.ofEpochMilli(prefs.getLong(PK_LAST_CONNECTED_TS, 0));
+        }
+
+        if (connectedAt != null) {
+            if (connectionLostAt == null || connectionLostAt.isBefore(connectedAt)) {
+                if (CollectionUtils.setIntersects(getLastNotificationBSSIDClosure(), currentAPs.getBSSIDClosure())) {
+                    return true;
+                }
+            }
+
+            String currentProvider = getLastNofificationProvider();
+            if (Objects.equals(currentProvider, currentAPs.provider())) {
+                return ChronoUnit.SECONDS.between(connectedAt, now) < AP_CONTINUITY_DROPOUT_MAX_SECONDS;
+            }
+        }
+
+        return false;
     }
 
     public void putLastNotificationAPInfo(WlanFencingManager.ProviderAPInfo apInfo) {
@@ -59,18 +93,18 @@ public class NoCardPreferences {
             Set<String> currentClosure = getLastNotificationBSSIDClosure();
             Set<String> newClosure = apInfo.getBSSIDClosure();
 
-            if (CollectionUtils.setIntersects(currentClosure, newClosure)) {
+            if (checkLastAPsNeighboring(apInfo)) {
                 newClosure = CollectionUtils.setUnion(currentClosure, newClosure);
             }
 
             prefs.edit()
                     .putString(PK_LAST_NOTIFICATION_PROVIDER, apInfo.provider())
                     .putStringSet(PK_LAST_NOTIFICATION_BSSID_CLOSURE, newClosure)
+                    .putLong(PK_LAST_CONNECTED_TS, Instant.now().toEpochMilli())
                     .apply();
         } else {
             prefs.edit()
-                    .remove(PK_LAST_NOTIFICATION_PROVIDER)
-                    .remove(PK_LAST_NOTIFICATION_BSSID_CLOSURE)
+                    .putLong(PK_LAST_CONNECTION_LOST_TS, Instant.now().toEpochMilli())
                     .apply();
         }
     }

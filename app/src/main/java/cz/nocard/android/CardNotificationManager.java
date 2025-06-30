@@ -10,17 +10,13 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
-import android.text.TextUtils;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
-
-import cz.spojenka.android.util.CollectionUtils;
 
 public class CardNotificationManager {
 
@@ -99,12 +95,10 @@ public class CardNotificationManager {
         if (apInfo == null) {
             return true; //always cancel
         }
-        if (Objects.equals(prefs.getLastNofificationProvider(), apInfo.provider())) {
-            if (CollectionUtils.setIntersects(prefs.getLastNotificationBSSIDClosure(), apInfo.getBSSIDClosure())) {
-                //update persisted closure
-                prefs.putLastNotificationAPInfo(apInfo);
-                return false;
-            }
+        if (prefs.checkLastAPsNeighboring(apInfo)) {
+            //update persisted closure
+            prefs.putLastNotificationAPInfo(apInfo);
+            return false;
         }
         NoCardConfig.ProviderInfo pi = configManager.getProviderInfo(apInfo.provider());
         if (pi == null) {
