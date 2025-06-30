@@ -90,6 +90,7 @@ public class BackgroundWlanCheckWorker extends Worker {
             @Override
             public void providerLost(WlanFencingManager.ProviderAPInfo provider) {
                 cardNotificationManager.clearNotification();
+                cardNotificationManager.ackAPForFutureNotification(null);
             }
         }, false);
 
