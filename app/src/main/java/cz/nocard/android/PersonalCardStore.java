@@ -2,6 +2,8 @@ package cz.nocard.android;
 
 import android.content.SharedPreferences;
 
+import androidx.annotation.Keep;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -91,6 +93,7 @@ public class PersonalCardStore {
         SharedPrefsHelper.saveObject(sharedPreferences, PREF_KEY, personalCards, true);
     }
 
+    @Keep
     private static class SettingValueType extends ArrayList<PersonalCard> {
 
     }

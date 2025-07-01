@@ -30,7 +30,7 @@ public class PersonalCard {
         return providerName + "\n" + cardNumber;
     }
 
-    @JsonProperty
+    @JsonProperty("id")
     public int id() {
         return id;
     }
