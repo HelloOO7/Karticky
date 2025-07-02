@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
 
+import androidx.annotation.DrawableRes;
 import androidx.annotation.Nullable;
 import androidx.core.os.BundleCompat;
 
@@ -72,8 +73,9 @@ public class ProviderCardView extends FrameLayout {
         binding.tvProviderName.setText(providerInfo != null && providerInfo.providerName() != null ? providerInfo.providerName() : providerId);
         if (providerInfo != null && providerInfo.brandColor() != null) {
             binding.ivBrandColor.setImageTintList(ColorStateList.valueOf(providerInfo.brandColor()));
+            binding.ivBrandColor.setVisibility(VISIBLE);
         } else {
-            binding.ivBrandColor.setVisibility(View.GONE);
+            binding.ivBrandColor.setVisibility(GONE);
         }
     }
 
@@ -83,6 +85,11 @@ public class ProviderCardView extends FrameLayout {
 
     public void overridePrimaryText(String text) {
         binding.tvProviderName.setText(text);
+    }
+
+    public void setIcon(@DrawableRes int resId) {
+        binding.ivCardIcon.setImageResource(resId);
+        binding.ivCardIcon.setVisibility(VISIBLE);
     }
 
     public static class WithFavouriteAction extends ProviderCardView {

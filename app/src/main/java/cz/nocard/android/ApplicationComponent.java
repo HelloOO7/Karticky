@@ -14,4 +14,8 @@ public interface ApplicationComponent {
     void inject(ManageBlacklistActivity manageBlacklistActivity);
     void inject(ImportSpringboardActivity importSpringboardActivity);
     void inject(PersonalCardsActivity personalCardsActivity);
+    void inject(NfcExportHceService nfcExportHceService);
+    void inject(CardTransfer cardTransfer);
+    void inject(NfcImportActivity nfcImportActivity);
+    void inject(NfcExportActivity nfcExportActivity);
 }

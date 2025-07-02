@@ -68,4 +68,21 @@
     <string name="personal_card_desc_format">%1$s (osobní)</string>
     <string name="yes">Ano</string>
     <string name="no">Ne</string>
+    <string name="nfc_aid" translatable="false">F0110CA4DBEAC011</string>
+    <string name="card_export_service_desc">Sdílení věrnostních karet</string>
+    <string name="card_export_aid_desc">Odeslat kartu přes NFC</string>
+    <string name="btn_enable_nfc">Zapnout</string>
+    <string name="btn_scan_again">Načíst další</string>
+    <string name="btn_finish">Dokončit</string>
+    <string name="nfc_read_error">Chyba NFC přenosu (%1$s).</string>
+    <string name="nfc_import_finished">Přijato %1$d karet.</string>
+    <string name="nfc_enable_prompt">Pro zahájení přenosu je potřeba zapnout NFC.</string>
+    <string name="title_batch_import">Z jiného zařízení</string>
+    <string name="nfc_listening">Připraveno na přijetí</string>
+    <string name="btn_share_cards">Sdílet karty</string>
+    <string name="nfc_not_supported">Vaše zařízení bohužel nepodporuje technologii NFC.</string>
+    <string name="nfc_sharing">Sdílení přes NFC je aktivní.\nPřiložte zařízení příjemce pro zahájení přenosu.</string>
+    <string name="nfc_tag_lost">Připojení není stabilní - zkuste to prosím znovu.</string>
+    <string name="nfc_unsupported_protocol">Aplikace nejsou navzájem kompatibilní. Nainstalujte prosím nejnovější verzi.</string>
+    <string name="nfc_security_violation">Ujistěte se, že má druhé zařízení odemčenou obrazovku a je v režimu sdílení.</string>
 </resources>

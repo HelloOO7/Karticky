@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="card">
+        <item quantity="one">karta</item>
+        <item quantity="few">karty</item>
+        <item quantity="other">karet</item>
+    </plurals>
+    <plurals name="cards_received">
+        <item quantity="zero">Žádné nové karty.</item>
+        <item quantity="one">Karta přijata.</item>
+        <item quantity="few">Přijaty %1$d karty.</item>
+        <item quantity="other">Přijato %1$d karet.</item>
+    </plurals>
+</resources>

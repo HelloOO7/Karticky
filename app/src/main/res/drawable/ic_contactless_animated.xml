@@ -1,0 +1,97 @@
+<animated-vector
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt">
+
+  <aapt:attr name="android:drawable">
+    <vector
+        android:width="48dp"
+        android:height="48dp"
+        android:tint="?attr/colorControlNormal"
+        android:viewportWidth="960"
+        android:viewportHeight="960">
+
+      <path
+          android:name="wave1"
+          android:fillColor="@android:color/white"
+          android:fillAlpha="0.0"
+          android:pathData="m322,575c6.67,-15.33 12.17,-30.83 16.5,-46.5 4.33,-15.67 6.5,-31.83 6.5,-48.5 0,-16.67 -2,-33 -6,-49 -4,-16 -10,-31.33 -18,-46l-56,20c7.33,11.33 12.5,23.33 15.5,36 3,12.67 4.5,25.67 4.5,39 0,13.33 -1.83,26.33 -5.5,39 -3.67,12.67 -8.5,25 -14.5,37z" />
+
+      <path
+          android:name="wave2"
+          android:fillColor="@android:color/white"
+          android:fillAlpha="0.0"
+          android:pathData="m458,632c10.67,-24 18.33,-48.83 23,-74.5 4.67,-25.67 7,-51.5 7,-77.5 0,-26 -2.33,-51.67 -7,-77 -4.67,-25.33 -12.33,-50 -23,-74l-57,20c10,20.67 17,42 21,64 4,22 6,44.33 6,67 0,22.67 -2.17,45.17 -6.5,67.5 -4.33,22.33 -11.17,43.83 -20.5,64.5z" />
+
+      <path
+          android:name="wave3"
+          android:fillColor="@android:color/white"
+          android:fillAlpha="0.0"
+          android:pathData="m589,688c14.67,-33.33 25.33,-67.33 32,-102 6.67,-34.67 10,-70 10,-106 0,-36 -3.33,-71.33 -10,-106 -6.67,-34.67 -17.33,-68.33 -32,-101l-56,22c13.33,29.33 23,59.5 29,90.5 6,31 9,62.5 9,94.5 0,32 -3,63.67 -9,95 -6,31.33 -15.67,61.67 -29,91z" />
+
+      <group
+          android:name="ringGroup"
+          android:pivotX="480"
+          android:pivotY="480">
+
+        <path
+            android:name="ring"
+            android:pathData="M109.33,480.04a370.71,370.71 0,1 0,741.42 0a370.71,370.71 0,1 0,-741.42 0z"
+            android:strokeWidth="58.6666666"
+            android:strokeColor="@android:color/white"
+            android:strokeLineCap="round"
+            android:trimPathStart="0.05" />
+      </group>
+    </vector>
+  </aapt:attr>
+
+  <target android:name="ringGroup">
+    <aapt:attr name="android:animation">
+      <objectAnimator
+          android:interpolator="@android:anim/linear_interpolator"
+          android:valueFrom="0"
+          android:valueTo="360"
+          android:duration="5000"
+          android:repeatCount="infinite"
+          android:propertyName="rotation" />
+    </aapt:attr>
+  </target>
+  <target android:name="wave1">
+    <aapt:attr name="android:animation">
+      <objectAnimator
+          android:interpolator="@android:anim/decelerate_interpolator"
+          android:valueFrom="0.0"
+          android:valueTo="1.0"
+          android:duration="750"
+          android:startOffset="300"
+          android:fillBefore="true"
+          android:fillAfter="true"
+          android:propertyName="fillAlpha" />
+    </aapt:attr>
+  </target>
+  <target android:name="wave2">
+    <aapt:attr name="android:animation">
+      <objectAnimator
+          android:interpolator="@android:anim/decelerate_interpolator"
+          android:valueFrom="0.0"
+          android:valueTo="1.0"
+          android:duration="750"
+          android:startOffset="400"
+          android:fillBefore="true"
+          android:fillAfter="true"
+          android:propertyName="fillAlpha" />
+    </aapt:attr>
+  </target>
+  <target android:name="wave3">
+    <aapt:attr name="android:animation">
+      <objectAnimator
+          android:interpolator="@android:anim/decelerate_interpolator"
+          android:valueFrom="0.0"
+          android:valueTo="1.0"
+          android:duration="750"
+          android:startOffset="500"
+          android:fillBefore="true"
+          android:fillAfter="true"
+          android:propertyName="fillAlpha" />
+    </aapt:attr>
+  </target>
+</animated-vector>

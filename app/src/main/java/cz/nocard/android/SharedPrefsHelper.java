@@ -7,20 +7,21 @@ import androidx.annotation.NonNull;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 
 public class SharedPrefsHelper {
 
     private static final String TAG = SharedPrefsHelper.class.getSimpleName();
 
-    private static final ObjectMapper JSON_MAPPER = new ObjectMapper();
-
-    static {
-        JSON_MAPPER
-                .disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE)
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-    }
+    private static final ObjectMapper JSON_MAPPER = JsonMapper.builder()
+            .disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE)
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            .enable(MapperFeature.REQUIRE_SETTERS_FOR_GETTERS)
+            .build();
 
     public static boolean saveObject(SharedPreferences prefs, String key, Object object) {
         return saveObject(prefs, key, object, false);

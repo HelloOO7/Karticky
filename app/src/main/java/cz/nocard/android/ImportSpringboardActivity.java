@@ -1,5 +1,6 @@
 package cz.nocard.android;
 
+import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
 
@@ -52,6 +53,15 @@ public class ImportSpringboardActivity extends CardListBaseActivity {
 
     @Override
     protected void populateCardList(Consumer<ProviderCardView> callMeMaybe) {
+        ProviderCardView batchImportCard = new ProviderCardView.WithoutAction(this);
+        batchImportCard.overridePrimaryText(getString(R.string.title_batch_import));
+        batchImportCard.setIcon(R.drawable.ic_p2p_40px);
+        batchImportCard.setOnClickListener(v -> {
+            finish();
+            startActivity(new Intent(this, NfcImportActivity.class));
+        });
+        callMeMaybe.accept(batchImportCard);
+
         config.getAllProviders()
                 .stream()
                 .map(provider -> {

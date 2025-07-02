@@ -6,9 +6,13 @@ import androidx.annotation.Keep;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 public class PersonalCardStore {
+
+    public static final int CARD_ID_INVALID = -1;
+    public static final int CARD_ID_TEMPORARY = -2;
 
     private static final String PREF_KEY = "personal_cards";
     private static final String ID_AUTOINCREMENT_PREF_KEY = "personal_card_id_autoincrement";
@@ -16,6 +20,8 @@ public class PersonalCardStore {
     private final SharedPreferences sharedPreferences;
     private List<PersonalCard> personalCards;
     private List<Listener> listeners = new ArrayList<>();
+    private int inTransaction = 0;
+    private boolean dirty = false;
 
     public PersonalCardStore(NoCardPreferences preferences) {
         sharedPreferences = preferences.getPrefs();
@@ -68,9 +74,56 @@ public class PersonalCardStore {
     }
 
     public void addCard(PersonalCard card) {
+        if (card.id() == CARD_ID_TEMPORARY) {
+            card = new PersonalCard(newCardId(), card.name(), card.provider(), card.customProperties(), card.cardNumber());
+        }
+        final PersonalCard card_ = card;
         getPersonalCards().add(card);
         persist();
-        invokeListeners(listener -> listener.onCardAdded(card));
+        invokeListeners(listener -> listener.onCardAdded(card_));
+    }
+
+    public void merge(List<PersonalCard> personalCards) {
+        try {
+            beginTransaction();
+            for (PersonalCard card : personalCards) {
+                merge(card);
+            }
+        } finally {
+            endTransaction();
+        }
+    }
+
+    private PersonalCard findSameCard(PersonalCard card) {
+        for (PersonalCard other : getPersonalCards()) {
+            if (other.cardNumber().equals(card.cardNumber())) {
+                if (Objects.equals(other.provider(), card.provider())) {
+                    if (!other.isCustom()) {
+                        return other;
+                    } else {
+                        PersonalCard.CustomCardProperties srcCustomProps = card.customProperties();
+                        PersonalCard.CustomCardProperties dstCustomProps = other.customProperties();
+                        if (srcCustomProps != null && dstCustomProps != null) {
+                            if (srcCustomProps.providerName().equals(dstCustomProps.providerName()) && srcCustomProps.format() == dstCustomProps.format()) {
+                                return other;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public void merge(PersonalCard card) {
+        PersonalCard existing = findSameCard(card);
+        if (existing != null) {
+            return;
+        } else {
+            addCard(card);
+        }
+
+        persist();
     }
 
     public void removeCard(PersonalCard card) {
@@ -90,7 +143,25 @@ public class PersonalCardStore {
     }
 
     public void persist() {
+        if (inTransaction > 0) {
+            dirty = true;
+            return; // Don't persist during a transaction
+        }
         SharedPrefsHelper.saveObject(sharedPreferences, PREF_KEY, personalCards, true);
+    }
+
+    public void beginTransaction() {
+        inTransaction++;
+    }
+
+    public void endTransaction() {
+        if (inTransaction > 0) {
+            inTransaction--;
+        }
+        if (inTransaction == 0 && dirty) {
+            persist();
+            dirty = false;
+        }
     }
 
     @Keep

@@ -25,7 +25,7 @@ import javax.inject.Inject;
 
 public class BackgroundWlanCheckWorker extends Worker {
 
-    private static final String TAG = BackgroundWlanCheckWorker.class.getSimpleName();
+    private static final String TAG = "BackgroundWlanScanner"; //log character limit is 23 until Oreo
 
     private static final String WORK_NAME = "BackgroundWlanCheck";
 
@@ -66,7 +66,7 @@ public class BackgroundWlanCheckWorker extends Worker {
         }
 
         Log.d(TAG, "Showing notification for AP: " + provider);
-        if (!isAppInForeground()) {
+        if (!NoCardApplication.isAppInForeground()) {
             cardNotificationManager.showNotificationForProviderAP(provider);
         } else {
             Log.d(TAG, "App is in foreground, notification is suppressed.");
@@ -131,12 +131,6 @@ public class BackgroundWlanCheckWorker extends Worker {
                 }
             });
         });
-    }
-
-    private static boolean isAppInForeground() {
-        ActivityManager.RunningAppProcessInfo state = new ActivityManager.RunningAppProcessInfo();
-        ActivityManager.getMyMemoryState(state);
-        return state.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND || state.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE;
     }
 
     public static synchronized void scheduleWork(Context context, NoCardPreferences prefs) {

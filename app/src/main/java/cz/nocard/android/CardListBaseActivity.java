@@ -36,11 +36,24 @@ public abstract class CardListBaseActivity extends AppCompatActivity {
             ui.fabAddCard.setVisibility(View.GONE);
         }
 
+        if (isShareButtonEnabled()) {
+            ui.btnShareCards.setVisibility(View.VISIBLE);
+            ui.btnShareCards.setOnClickListener(v -> callShareCards());
+        }
+
         buildCardList();
     }
 
     protected boolean isAddButtonEnabled() {
         return false;
+    }
+
+    protected boolean isShareButtonEnabled() {
+        return false;
+    }
+
+    protected void callShareCards() {
+
     }
 
     protected void setAddButtonCallback(View.OnClickListener l) {

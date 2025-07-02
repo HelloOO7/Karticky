@@ -10,6 +10,7 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Typeface;
+import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.text.Spanned;
@@ -28,6 +29,8 @@ import android.widget.TextView;
 import androidx.annotation.ColorInt;
 import androidx.annotation.ColorRes;
 import androidx.annotation.DimenRes;
+import androidx.annotation.DrawableRes;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
@@ -586,6 +589,17 @@ public class ViewUtils {
 
             return WindowInsetsCompat.CONSUMED;
         });
+    }
+
+    public static void startDrawableAnimation(ImageView imageView) {
+        if (imageView.getDrawable() instanceof AnimatedVectorDrawable avd) {
+            avd.start();
+        }
+    }
+
+    public static void setAnimatedDrawableAndStart(ImageView imageView, @DrawableRes int resId) {
+        imageView.setImageDrawable(AppCompatResources.getDrawable(imageView.getContext(), resId).mutate());
+        startDrawableAnimation(imageView);
     }
 
     public static class ViewEnabledSaveState {

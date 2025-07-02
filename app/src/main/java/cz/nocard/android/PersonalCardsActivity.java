@@ -41,6 +41,16 @@ public class PersonalCardsActivity extends CardListBaseActivity implements Perso
     }
 
     @Override
+    protected boolean isShareButtonEnabled() {
+        return true;
+    }
+
+    @Override
+    protected void callShareCards() {
+        startActivity(new Intent(this, NfcExportActivity.class));
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         personalCardStore.removeListener(this);

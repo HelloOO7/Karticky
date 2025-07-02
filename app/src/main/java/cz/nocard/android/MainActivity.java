@@ -49,6 +49,7 @@ import javax.inject.Inject;
 
 import cz.nocard.android.databinding.ActivityMainBinding;
 import cz.spojenka.android.system.PermissionRequestHelper;
+import cz.spojenka.android.ui.drawable.EmptyDrawable;
 import cz.spojenka.android.util.AsyncUtils;
 import cz.spojenka.android.util.ViewUtils;
 

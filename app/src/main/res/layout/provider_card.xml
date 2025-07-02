@@ -16,6 +16,19 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <ImageView
+            android:id="@+id/ivCardIcon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:layout_marginStart="@dimen/item_margin_m"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:srcCompat="@drawable/ic_help_24px"
+            tools:visibility="visible"
+            android:visibility="gone"/>
+
         <TextView
             android:id="@+id/tvProviderName"
             android:layout_width="0dp"
@@ -24,7 +37,7 @@
             android:textSize="@dimen/text_title_m"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/btn_action_button"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@id/ivCardIcon"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Tesko" />
 
@@ -40,6 +53,8 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.0"
             app:layout_constraintWidth_percent="0.33"
+            android:visibility="gone"
+            tools:visibility="visible"
             app:srcCompat="@drawable/brand_color_chip"
             tools:tint="@android:color/holo_green_dark" />
 

@@ -43,4 +43,10 @@ public class ApplicationModule {
     public PersonalCardStore personalCardStore(NoCardPreferences preferences) {
         return new PersonalCardStore(preferences);
     }
+
+    @Provides
+    @Singleton
+    public NfcExportServiceState nfcExportServiceState() {
+        return new NfcExportServiceState();
+    }
 }

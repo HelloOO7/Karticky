@@ -1,5 +1,6 @@
 package cz.nocard.android;
 
+import android.app.ActivityManager;
 import android.app.Application;
 
 import com.google.android.material.color.DynamicColors;
@@ -20,6 +21,8 @@ public class NoCardApplication extends Application {
     WlanFencingManager wlanFencingManager;
     @Inject
     NoCardPreferences prefs;
+    @Inject
+    NfcExportServiceState nfcExportServiceState;
 
     @Override
     public void onCreate() {
@@ -32,6 +35,10 @@ public class NoCardApplication extends Application {
 
         applicationComponent.inject(this);
 
+        // if the app crashed before, do not allow sneaking into the NFC service
+        // (until the appropriate activity is explicitly launched by the user)
+        nfcExportServiceState.setEnabled(false);
+
         if (prefs.isBGNotificationEnabled() && BackgroundWlanCheckWorker.isUseable(this)) {
             BackgroundWlanCheckWorker.scheduleWork(this, prefs);
         }
@@ -43,5 +50,11 @@ public class NoCardApplication extends Application {
 
     public static NoCardApplication getInstance() {
         return INSTANCE;
+    }
+
+    public static boolean isAppInForeground() {
+        ActivityManager.RunningAppProcessInfo state = new ActivityManager.RunningAppProcessInfo();
+        ActivityManager.getMyMemoryState(state);
+        return state.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND || state.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE;
     }
 }
