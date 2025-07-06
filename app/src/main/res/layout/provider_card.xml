@@ -7,9 +7,6 @@
     app:cardElevation="4dp"
     app:cardBackgroundColor="?attr/colorBackgroundFloating"
     app:strokeWidth="0dp"
-    android:clickable="true"
-    android:focusable="true"
-    android:foreground="?attr/selectableItemBackground"
     android:layout_marginBottom="@dimen/item_margin_s">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -36,7 +33,7 @@
             android:padding="@dimen/item_margin_m"
             android:textSize="@dimen/text_title_m"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/btn_action_button"
+            app:layout_constraintEnd_toStartOf="@+id/btnActionButton"
             app:layout_constraintStart_toEndOf="@id/ivCardIcon"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Tesko" />
@@ -59,7 +56,7 @@
             tools:tint="@android:color/holo_green_dark" />
 
         <com.google.android.material.checkbox.MaterialCheckBox
-            android:id="@+id/btn_action_button"
+            android:id="@+id/btnActionButton"
             app:rippleColor="@null"
             android:layout_width="wrap_content"
             android:layout_height="0dp"

@@ -73,7 +73,9 @@ public abstract class NfcActivityBase extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unregisterReceiver(adapterStateChangedReceiver);
+        if (adapterStateChangedReceiver != null) {
+            unregisterReceiver(adapterStateChangedReceiver);
+        }
     }
 
     @Override

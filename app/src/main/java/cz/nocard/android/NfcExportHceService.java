@@ -62,7 +62,7 @@ public class NfcExportHceService extends HostApduService {
         try {
             byte[] response = transfer.respondToRequest(nfcRequest.payload(), (command, requestIn) -> switch (command) {
                 case CardTransfer.COMMAND_GET_PERSONAL_CARDS ->
-                        transfer.createPersonalCardPacket(personalCardStore.getPersonalCards());
+                        transfer.createPersonalCardPacket(serviceState.getCardsForExport(personalCardStore));
                 default ->
                         throw new CardTransfer.CardTransferException(CardTransfer.ErrorCode.UNKNOWN_COMMAND);
             });

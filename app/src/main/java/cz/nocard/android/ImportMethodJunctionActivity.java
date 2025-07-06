@@ -96,7 +96,11 @@ public class ImportMethodJunctionActivity extends AppCompatActivity {
             }).handleAsync((scanned, ex) -> {
                 if (ex != null) {
                     Log.e(getClass().getSimpleName(), "Error reading code from image", ex);
-                    CommonDialogs.newInfoDialog(this, getString(R.string.error), getString(R.string.error_reading_code, barcodeFormat.toString())).show();
+                    CommonDialogs.newInfoDialog(
+                            this,
+                            getString(R.string.error),
+                            getString(R.string.error_reading_code, BarcodeTypeNames.getOrDefault(this, barcodeFormat))
+                    ).show();
                 } else if (scanned != null) {
                     finishWithResult(scanned.getText());
                 }

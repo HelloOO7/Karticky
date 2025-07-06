@@ -1,9 +1,11 @@
 package cz.nocard.android;
 
+import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -16,6 +18,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -51,6 +54,7 @@ public class WlanFencingManager {
     private final ConnectivityManager.NetworkCallback networkCallback;
     private WifiInfo wifiInfoFromCallback;
     private Network wifiInfoSourceNetwork;
+    private boolean isDoneInitialScan = false;
 
     public WlanFencingManager(Context context, ConfigManager config) {
         this.context = context;
@@ -69,6 +73,9 @@ public class WlanFencingManager {
 
                 @Override
                 public void onCapabilitiesChanged(@NonNull Network network, @NonNull NetworkCapabilities networkCapabilities) {
+                    if (isBackgroundedAndNotAllowed()) {
+                        return;
+                    }
                     if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
                         if (networkCapabilities.getTransportInfo() instanceof WifiInfo wi) {
                             wifiInfoFromCallback = wi;
@@ -82,13 +89,38 @@ public class WlanFencingManager {
                 public void onLost(@NonNull Network network) {
                     if (Objects.equals(network, wifiInfoSourceNetwork)) {
                         wifiInfoFromCallback = null;
+                        wifiInfoSourceNetwork = null;
                         update();
                     }
                 }
             };
         } else {
-            networkCallback = null;
+            networkCallback = new ConnectivityManager.NetworkCallback() {
+
+                @Override
+                public void onCapabilitiesChanged(@NonNull Network network, @NonNull NetworkCapabilities networkCapabilities) {
+                    if (isBackgroundedAndNotAllowed()) {
+                        return;
+                    }
+                    if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                        wifiInfoSourceNetwork = network;
+                        update();
+                    }
+                }
+
+                @Override
+                public void onLost(@NonNull Network network) {
+                    if (Objects.equals(network, wifiInfoSourceNetwork)) {
+                        wifiInfoSourceNetwork = null;
+                        update();
+                    }
+                }
+            };
         }
+    }
+
+    public boolean isDoneInitialScan() {
+        return isDoneInitialScan;
     }
 
     public synchronized void registerOnNearbyProviderCallback(OnNearbyProviderCallback callback, boolean callIfCurrent) {
@@ -122,8 +154,27 @@ public class WlanFencingManager {
         }
     }
 
+    private void invokeNoProviderCallback() {
+        for (OnNearbyProviderCallback callback : callbacks) {
+            callback.noProvider();
+        }
+    }
+
     private boolean holdsNeededPermissions() {
-        return PermissionRequestHelper.hasFineLocationPermission(NoCardApplication.getInstance());
+        return PermissionRequestHelper.hasFineLocationPermission(context);
+    }
+
+    public static boolean canWorkInBackground(Context context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            return ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED;
+        } else {
+            //on older Android versions, the foreground location permission is sufficient
+            return PermissionRequestHelper.hasFineLocationPermission(context);
+        }
+    }
+
+    private boolean canWorkInBackground() {
+        return canWorkInBackground(context);
     }
 
     public synchronized void register() {
@@ -134,9 +185,7 @@ public class WlanFencingManager {
             return;
         }
         receiverImpl.register();
-        if (networkCallback != null) {
-            connectivityManager.registerDefaultNetworkCallback(networkCallback);
-        }
+        connectivityManager.registerDefaultNetworkCallback(networkCallback);
         registered = true;
     }
 
@@ -144,9 +193,7 @@ public class WlanFencingManager {
         if (!registered) {
             return;
         }
-        if (networkCallback != null) {
-            connectivityManager.unregisterNetworkCallback(networkCallback);
-        }
+        connectivityManager.unregisterNetworkCallback(networkCallback);
         receiverImpl.unregister();
         registered = false;
     }
@@ -168,14 +215,26 @@ public class WlanFencingManager {
         return currentAPInfo != null && currentAPInfo.provider().equals(provider);
     }
 
+    private boolean isBackgroundedAndNotAllowed() {
+        return !NoCardApplication.isAppInForeground() && !canWorkInBackground();
+    }
+
     public synchronized ProviderAPInfo update() {
         if (!holdsNeededPermissions()) {
+            return null;
+        }
+        if (isBackgroundedAndNotAllowed()) {
             return null;
         }
         try {
             List<WlanAPInfo> lastScanResults = wifiManager.getScanResults()
                     .stream().map(WlanAPInfo::new)
                     .collect(Collectors.toList());
+
+            if (!lastScanResults.isEmpty()) {
+                //force initial scan done if OS was able to return some results from scans not initiated by this app
+                isDoneInitialScan = true;
+            }
 
             WlanAPInfo connectedResult = createCurrentNetworkPlaceholderResult();
             if (connectedResult != null) {
@@ -216,6 +275,7 @@ public class WlanFencingManager {
                 if (lostProvider != null) {
                     invokeOnProviderLostCallback(lostProvider);
                 }
+                invokeNoProviderCallback();
             }
         } catch (SecurityException ex) {
             Log.e(LOG_TAG, "Failed to get scan results due to missing permissions (unexpected)", ex);
@@ -298,6 +358,10 @@ public class WlanFencingManager {
         public void providerNearby(ProviderAPInfo provider);
 
         public void providerLost(ProviderAPInfo provider);
+
+        public default void noProvider() {
+
+        }
     }
 
     public static record ProviderAPInfo(
@@ -355,6 +419,7 @@ public class WlanFencingManager {
         private final WifiManager.ScanResultsCallback callback = new WifiManager.ScanResultsCallback() {
             @Override
             public void onScanResultsAvailable() {
+                isDoneInitialScan = true;
                 update();
             }
         };
@@ -377,6 +442,7 @@ public class WlanFencingManager {
             @Override
             public void onReceive(Context context, Intent intent) {
                 if (WifiManager.SCAN_RESULTS_AVAILABLE_ACTION.equals(intent.getAction())) {
+                    isDoneInitialScan = true;
                     update();
                 }
             }
@@ -385,12 +451,12 @@ public class WlanFencingManager {
         @Override
         public void register() {
             Log.d(LOG_TAG, "Registering scan results receiver for Android <=Q");
-            NoCardApplication.getInstance().registerReceiver(receiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+            context.registerReceiver(receiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
         }
 
         @Override
         public void unregister() {
-            NoCardApplication.getInstance().unregisterReceiver(receiver);
+            context.unregisterReceiver(receiver);
         }
     }
 

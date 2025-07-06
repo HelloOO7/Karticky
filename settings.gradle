@@ -19,8 +19,12 @@ dependencyResolutionManagement {
         maven {
             url "https://lab.d3s.mff.cuni.cz:27091/snapshots/"
         }
+        maven {
+            url "https://jitpack.io"
+        }
     }
 }
 
 rootProject.name = "NoCard"
 include ':app'
+include ':scraper'

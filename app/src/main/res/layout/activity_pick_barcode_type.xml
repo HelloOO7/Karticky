@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:animateLayoutChanges="true"
+        android:clipChildren="false"
+        android:fitsSystemWindows="true">
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/activity_margin"
+            android:textSize="@dimen/text_title_l"
+            android:text="@string/title_pick_barcode_type"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_goneMarginEnd="@dimen/activity_margin"
+            app:layout_goneMarginStart="@dimen/activity_margin" />
+
+        <LinearLayout
+            android:id="@+id/llBarcodeTypeList"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="@dimen/item_margin_l"
+            android:layout_marginHorizontal="@dimen/item_margin_l"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:orientation="vertical"
+            app:layout_constraintVertical_chainStyle="packed"
+            app:layout_constraintBottom_toTopOf="@+id/btnCodeTypeMoreOptions"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvTitle" />
+
+        <Button
+            android:id="@+id/btnCodeTypeMoreOptions"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/code_type_more_options"
+            app:icon="@drawable/ic_more_horiz_24px"
+            style="@style/Widget.Material3.Button.ElevatedButton"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/llBarcodeTypeList"
+            app:layout_constraintEnd_toEndOf="@+id/llBarcodeTypeList"
+            app:layout_constraintStart_toStartOf="@+id/llBarcodeTypeList"
+            android:layout_marginBottom="@dimen/activity_margin" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

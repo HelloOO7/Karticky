@@ -1,6 +1,7 @@
 package cz.nocard.android;
 
 import android.content.SharedPreferences;
+import android.os.Looper;
 
 import androidx.annotation.Keep;
 
@@ -8,6 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
+
+import cz.spojenka.android.util.AsyncUtils;
 
 public class PersonalCardStore {
 
@@ -27,17 +30,17 @@ public class PersonalCardStore {
         sharedPreferences = preferences.getPrefs();
     }
 
-    public void addListener(Listener listener) {
+    public synchronized void addListener(Listener listener) {
         if (!listeners.contains(listener)) {
             listeners.add(listener);
         }
     }
 
-    public void removeListener(Listener listener) {
+    public synchronized void removeListener(Listener listener) {
         listeners.remove(listener);
     }
 
-    public int newCardId() {
+    public synchronized int newCardId() {
         int id = sharedPreferences.getInt(ID_AUTOINCREMENT_PREF_KEY, 1);
         sharedPreferences.edit().putInt(ID_AUTOINCREMENT_PREF_KEY, id + 1).apply();
         return id;
@@ -57,7 +60,7 @@ public class PersonalCardStore {
                 .orElse(null);
     }
 
-    public List<PersonalCard> getPersonalCards() {
+    public synchronized List<PersonalCard> getPersonalCards() {
         if (personalCards == null) {
             personalCards = SharedPrefsHelper.loadObject(sharedPreferences, PREF_KEY, SettingValueType.class);
         }
@@ -68,12 +71,14 @@ public class PersonalCardStore {
     }
 
     private void invokeListeners(Consumer<Listener> action) {
-        for (Listener listener : listeners) {
-            action.accept(listener);
-        }
+        AsyncUtils.runOnMainThread(() -> {
+            for (Listener listener : listeners) {
+                action.accept(listener);
+            }
+        });
     }
 
-    public void addCard(PersonalCard card) {
+    public synchronized void addCard(PersonalCard card) {
         if (card.id() == CARD_ID_TEMPORARY) {
             card = new PersonalCard(newCardId(), card.name(), card.provider(), card.customProperties(), card.cardNumber());
         }
@@ -83,7 +88,7 @@ public class PersonalCardStore {
         invokeListeners(listener -> listener.onCardAdded(card_));
     }
 
-    public void merge(List<PersonalCard> personalCards) {
+    public synchronized void merge(List<PersonalCard> personalCards) {
         try {
             beginTransaction();
             for (PersonalCard card : personalCards) {
@@ -92,6 +97,10 @@ public class PersonalCardStore {
         } finally {
             endTransaction();
         }
+    }
+
+    public boolean cardAlreadyExists(PersonalCard card) {
+        return findSameCard(card) != null;
     }
 
     private PersonalCard findSameCard(PersonalCard card) {
@@ -115,7 +124,7 @@ public class PersonalCardStore {
         return null;
     }
 
-    public void merge(PersonalCard card) {
+    public synchronized void merge(PersonalCard card) {
         PersonalCard existing = findSameCard(card);
         if (existing != null) {
             return;
@@ -126,7 +135,7 @@ public class PersonalCardStore {
         persist();
     }
 
-    public void removeCard(PersonalCard card) {
+    public synchronized void removeCard(PersonalCard card) {
         getPersonalCards().remove(card);
         persist();
         invokeListeners(listener -> listener.onCardRemoved(card));
@@ -136,25 +145,52 @@ public class PersonalCardStore {
         invokeListeners(listener -> listener.onCardChanged(card));
     }
 
-    public void renameCard(PersonalCard card, String newName) {
+    public String getCardName(PersonalCard card, ConfigManager config) {
+        if (card.name() == null) {
+            return PersonalCard.formatDefaultName(config.getProviderNameOrDefault(card.provider()), card.cardNumber());
+        } else {
+            return card.name();
+        }
+    }
+
+    public String getCardSingleLineName(PersonalCard card, ConfigManager configManager) {
+        return getCardName(card, configManager).replace("\n", " ");
+    }
+
+    public NoCardConfig.ProviderInfo getCardProviderInfo(PersonalCard card, ConfigManager configManager) {
+        PersonalCard.CustomCardProperties custom = card.customProperties();
+        if (custom != null) {
+            return new NoCardConfig.ProviderInfo(
+                    custom.providerName(),
+                    custom.providerName(),
+                    custom.color(),
+                    custom.color(),
+                    custom.format(),
+                    List.of(card.cardNumber())
+            );
+        }
+        return configManager.getProviderInfoOrNull(card.provider());
+    }
+
+    public synchronized void renameCard(PersonalCard card, String newName) {
         card.rename(newName);
         persist();
         invokeCardChanged(card);
     }
 
-    public void persist() {
+    public synchronized void persist() {
         if (inTransaction > 0) {
             dirty = true;
             return; // Don't persist during a transaction
         }
-        SharedPrefsHelper.saveObject(sharedPreferences, PREF_KEY, personalCards, true);
+        SharedPrefsHelper.saveObject(sharedPreferences, PREF_KEY, personalCards, Looper.getMainLooper().isCurrentThread());
     }
 
-    public void beginTransaction() {
+    private void beginTransaction() {
         inTransaction++;
     }
 
-    public void endTransaction() {
+    private void endTransaction() {
         if (inTransaction > 0) {
             inTransaction--;
         }

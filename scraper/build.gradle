@@ -1,0 +1,15 @@
+plugins {
+    id 'java-library'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+dependencies {
+    implementation libs.zxing
+    implementation libs.jackson.core
+    implementation libs.jackson.databind
+    implementation libs.jsoup
+}

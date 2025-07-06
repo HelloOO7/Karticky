@@ -1,7 +1,6 @@
 package cz.nocard.android;
 
 import android.content.Intent;
-import android.content.res.Resources;
 import android.os.Bundle;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -26,7 +25,8 @@ public class ImportSpringboardActivity extends CardListBaseActivity {
 
     private String importingProvider;
 
-    private ActivityResultLauncher<BarcodeFormat> importLauncher;
+    private ActivityResultLauncher<BarcodeFormat> codeImportLauncher;
+    private ActivityResultLauncher<Void> newCustomCardLauncher;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -37,18 +37,32 @@ public class ImportSpringboardActivity extends CardListBaseActivity {
             importingProvider = savedInstanceState.getString(STATE_IMPORTING_PROVIDER, null);
         }
 
-        importLauncher = registerForActivityResult(ImportMethodJunctionActivity.IMPORT_CARD_CODE, cardCode -> {
+        codeImportLauncher = registerForActivityResult(ImportMethodJunctionActivity.IMPORT_CARD_CODE, cardCode -> {
             if (cardCode != null) {
                 PersonalCard card = new PersonalCard(
                         personalCardStore.newCardId(),
-                        PersonalCard.formatDefaultName(config.getProviderNameOrDefault(importingProvider), cardCode),
+                        null,
                         importingProvider,
                         cardCode
                 );
-                personalCardStore.addCard(card);
-                finish();
+                onNewCardResultReceived(card);
             }
         });
+
+        newCustomCardLauncher = registerForActivityResult(NewCustomCardActivity.NEW_CUSTOM_CARD, newCard -> {
+            if (newCard != null) {
+                onNewCardResultReceived(newCard);
+            }
+        });
+    }
+
+    private void onNewCardResultReceived(PersonalCard card) {
+        if (personalCardStore.cardAlreadyExists(card)) {
+            CommonDialogs.newInfoDialog(this, R.string.card_already_exists_title, R.string.card_already_exists_desc).show();
+        } else {
+            personalCardStore.addCard(card);
+            finish();
+        }
     }
 
     @Override
@@ -61,6 +75,13 @@ public class ImportSpringboardActivity extends CardListBaseActivity {
             startActivity(new Intent(this, NfcImportActivity.class));
         });
         callMeMaybe.accept(batchImportCard);
+
+        ProviderCardView customImportCard = new ProviderCardView.WithoutAction(this);
+        customImportCard.overridePrimaryText(getString(R.string.title_custom_card));
+        customImportCard.setIcon(R.drawable.ic_brush_40px);
+        customImportCard.setCustomChipGradient(getResources().getIntArray(R.array.rainbow_gradient));
+        customImportCard.setOnClickListener(v -> newCustomCardLauncher.launch(null));
+        callMeMaybe.accept(customImportCard);
 
         config.getAllProviders()
                 .stream()
@@ -78,7 +99,7 @@ public class ImportSpringboardActivity extends CardListBaseActivity {
 
     private void callCardImport(String providerId) {
         importingProvider = providerId;
-        importLauncher.launch(config.getProviderInfo(providerId).format());
+        codeImportLauncher.launch(config.getProviderInfo(providerId).format());
     }
 
     @Override

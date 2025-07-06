@@ -10,15 +10,22 @@ android {
         applicationId "cz.nocard.android"
         minSdk 24
         targetSdk 35
-        versionCode 18
-        versionName "1.2.6"
+        versionCode 19
+        versionName "2.0.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
+        def DEEP_LINK_DOMAIN = "nocard.spojenka.cz"
+        def DEEP_LINK_PATH_PREFIX = "/share";
+
         buildConfigField "java.time.Instant", "BUILD_TIME", "java.time.Instant.parse(\"${Instant.now()}\")"
-        buildConfigField "String", "REMOTE_CONFIG_PAGE", "\"https://nocard.cz/\""
+        buildConfigField "String", "REMOTE_CONFIG_LOCATION", "\"https://nocard.spojenka.cz/appdata/config.json\""
         buildConfigField "String", "REMOTE_BUILD_GRADLE", "\"https://raw.githubusercontent.com/HelloOO7/NoCard-Android/refs/heads/master/app/build.gradle\""
         buildConfigField "String", "GITHUB_HOMEPAGE", "\"https://github.com/HelloOO7/NoCard-Android\""
+        buildConfigField "String", "DEEP_LINK_BASE_URL", "\"https://${DEEP_LINK_DOMAIN}${DEEP_LINK_PATH_PREFIX}\""
+
+        resValue "string", "deep_link_domain", DEEP_LINK_DOMAIN
+        resValue "string", "deep_link_path_prefix", DEEP_LINK_PATH_PREFIX
     }
 
     buildFeatures {
@@ -57,6 +64,7 @@ dependencies {
     implementation libs.camerax.camera2
     implementation libs.camerax.lifecycle
     implementation libs.camerax.view
+    implementation libs.colorpicker
 
     annotationProcessor libs.dagger.compiler
 

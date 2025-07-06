@@ -8,9 +8,14 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.zip.CRC32;
 
 import javax.inject.Inject;
@@ -21,6 +26,42 @@ public class CardTransfer {
     public static final int CURRENT_FORMAT_VERSION = 1;
 
     public static final int COMMAND_GET_PERSONAL_CARDS = 0x11;
+
+    /*
+    Barcode format constants
+     */
+    public static final int BCFCONST_AZTEC = 1;
+    public static final int BCFCONST_CODABAR = 2;
+    public static final int BCFCONST_CODE_39 = 3;
+    public static final int BCFCONST_CODE_93 = 4;
+    public static final int BCFCONST_CODE_128 = 5;
+    public static final int BCFCONST_DATA_MATRIX = 6;
+    public static final int BCFCONST_EAN_8 = 7;
+    public static final int BCFCONST_EAN_13 = 8;
+    public static final int BCFCONST_ITF = 9;
+    public static final int BCFCONST_MAXICODE = 10;
+    public static final int BCFCONST_PDF_417 = 11;
+    public static final int BCFCONST_QR_CODE = 12;
+    public static final int BCFCONST_RSS_14 = 13;
+    public static final int BCFCONST_RSS_EXPANDED = 14;
+    public static final int BCFCONST_UPC_A = 15;
+    public static final int BCFCONST_UPC_E = 16;
+    public static final int BCFCONST_UPC_EAN_EXTENSION = 17;
+
+    /*
+    Card number format constants
+     */
+    public static final int CNFCONST_INT = 1;
+    public static final int CNFCONST_LONG = 2;
+    public static final int CNFCONST_BIGINTEGER = 3;
+    public static final int CNFCONST_STRING = 4;
+
+    /*
+    Card record flags
+     */
+    public static final int CRFLAG_HAS_NAME = 1;
+    public static final int CRFLAG_IS_CUSTOM = (1 << 1);
+    public static final int CRFLAG_HAS_FALLBACK = (1 << 2);
 
     private int negotiatedFormatVersion = CURRENT_FORMAT_VERSION;
     @Inject
@@ -90,10 +131,13 @@ public class CardTransfer {
         return createResponsePacket(out -> {
             out.writeInt(cards.size());
             for (PersonalCard card : cards) {
-                out.writeUTF(card.name());
-                out.writeUTF(card.cardNumber());
-                out.writeUTF(card.provider());
-                out.writeBoolean(card.isCustom());
+                int flags = 0;
+                if (card.name() != null) {
+                    flags |= CRFLAG_HAS_NAME;
+                }
+                if (card.isCustom()) {
+                    flags |= CRFLAG_IS_CUSTOM;
+                }
                 // target app may not support the providers in source app - create fallback custom
                 // properties for that scenario
                 PersonalCard.CustomCardProperties customProps = card.customProperties();
@@ -108,12 +152,18 @@ public class CardTransfer {
                     }
                 }
                 if (customProps != null) {
-                    out.writeBoolean(true);
+                    flags |= CRFLAG_HAS_FALLBACK;
+                }
+                out.writeByte(flags);
+                if (card.name() != null) {
+                    out.writeUTF(card.name());
+                }
+                writeCardNumber(out, card.cardNumber());
+                out.writeUTF(card.provider());
+                if (customProps != null) {
                     out.writeUTF(customProps.providerName());
-                    out.writeUTF(customProps.format().name());
+                    out.writeByte(serializeBarcodeFormat(customProps.format()));
                     out.writeInt(customProps.color());
-                } else {
-                    out.writeBoolean(false);
                 }
             }
         });
@@ -158,16 +208,20 @@ public class CardTransfer {
 
             int count = in.readInt();
             for (int i = 0; i < count; i++) {
-                String name = in.readUTF();
-                String cardNumber = in.readUTF();
+                int flags = in.readUnsignedByte();
+
+                boolean hasName = (flags & CRFLAG_HAS_NAME) != 0;
+                boolean isCustom = (flags & CRFLAG_IS_CUSTOM) != 0;
+                boolean hasFallbackCustomProps = (flags & CRFLAG_HAS_FALLBACK) != 0;
+
+                String name = hasName ? in.readUTF() : null;
+                String cardNumber = readCardNumber(in);
                 String provider = in.readUTF();
-                boolean isCustom = in.readBoolean();
-                boolean hasCustomProps = in.readBoolean();
 
                 PersonalCard.CustomCardProperties customProps = null;
-                if (hasCustomProps) {
+                if (isCustom || hasFallbackCustomProps) {
                     String providerName = in.readUTF();
-                    BarcodeFormat format = BarcodeFormat.valueOf(in.readUTF());
+                    BarcodeFormat format = deserializeBarcodeFormat(in.readUnsignedByte());
                     int color = in.readInt();
                     customProps = new PersonalCard.CustomCardProperties(providerName, format, color);
                 }
@@ -184,7 +238,7 @@ public class CardTransfer {
                 } else {
                     if (providerInfo != null) {
                         out.add(new PersonalCard(PersonalCardStore.CARD_ID_TEMPORARY, name, provider, cardNumber));
-                    } else if (hasCustomProps) {
+                    } else if (hasFallbackCustomProps) {
                         //use fallback
                         out.add(new PersonalCard(PersonalCardStore.CARD_ID_TEMPORARY, name, provider, customProps, cardNumber));
                     }
@@ -193,6 +247,122 @@ public class CardTransfer {
 
             return out;
         });
+    }
+
+    private static String readCardNumber(DataInputStream in) throws IOException {
+        int header = in.readUnsignedByte();
+        int type = header & 0b111;
+        int numLeadingZeros = (header >> 3) & 0b11111;
+        return "0".repeat(numLeadingZeros) + switch (type) {
+            case CNFCONST_INT -> Integer.toString(in.readInt());
+            case CNFCONST_LONG -> Long.toString(in.readLong());
+            case CNFCONST_BIGINTEGER -> {
+                int length = in.readUnsignedByte();
+                byte[] bytes = new byte[length];
+                in.readFully(bytes);
+                yield new BigInteger(bytes).toString();
+            }
+            case CNFCONST_STRING -> in.readUTF();
+            default -> throw new CardTransferException(ErrorCode.INVALID_DATA, new IOException("Unknown card number type: " + type));
+        };
+    }
+
+    private static int countLeadingZeros(String number) {
+        int count = 0;
+        for (int i = 0; i < number.length(); i++) {
+            if (number.charAt(i) == '0') {
+                count++;
+            } else {
+                break;
+            }
+        }
+        return count;
+    }
+
+    private static void writeNumStringHeader(DataOutputStream out, int type, String number) throws IOException {
+        int clz = countLeadingZeros(number);
+        if (clz >= 32) {
+            throw new UnsupportedEncodingException("Too many (>= 32) leading zeros in number: " + number);
+        }
+        out.writeByte(type | (clz << 3));
+    }
+
+    private static void writeCardNumber(DataOutputStream out, String number) throws IOException {
+        PacketWriter tryAsInt = out1 -> {
+            int val = Integer.parseInt(number);
+            writeNumStringHeader(out, CNFCONST_INT, number);
+            out1.writeInt(val);
+        };
+        PacketWriter tryAsLong = out1 -> {
+            long val = Long.parseLong(number);
+            writeNumStringHeader(out, CNFCONST_LONG, number);
+            out1.writeLong(val);
+        };
+        PacketWriter tryAsBigInteger = out1 -> {
+            BigInteger val = new BigInteger(number);
+            writeNumStringHeader(out, CNFCONST_BIGINTEGER, number);
+            byte[] bytes = val.toByteArray();
+            out1.write(bytes.length);
+            out1.write(bytes);
+        };
+
+        for (PacketWriter attempt : new PacketWriter[]{tryAsInt, tryAsLong, tryAsBigInteger}) {
+            try {
+                attempt.write(out);
+                return;
+            } catch (NumberFormatException | UnsupportedOperationException e) {
+                // continue to the next attempt
+            }
+        }
+
+        //if all attempts failed, write raw string, do not count leading zeros (leave as part of the string)
+        out.writeByte(CNFCONST_STRING);
+        out.writeUTF(number);
+    }
+
+    private static int serializeBarcodeFormat(BarcodeFormat barcodeFormat) {
+        return Objects.requireNonNull(BARCODE_FORMAT_TO_INT.get(barcodeFormat));
+    }
+
+    private static BarcodeFormat deserializeBarcodeFormat(int barcodeFormatInt) {
+        BarcodeFormat format = INT_TO_BARCODE_FORMAT.get(barcodeFormatInt);
+        if (format == null) {
+            throw new IllegalArgumentException("Unknown barcode format: " + barcodeFormatInt);
+        }
+        return format;
+    }
+
+    private static int getSerializedBarcodeFormatInt(BarcodeFormat barcodeFormat) {
+        return switch (barcodeFormat) {
+            case AZTEC -> BCFCONST_AZTEC;
+            case CODABAR -> BCFCONST_CODABAR;
+            case CODE_39 -> BCFCONST_CODE_39;
+            case CODE_93 -> BCFCONST_CODE_93;
+            case CODE_128 -> BCFCONST_CODE_128;
+            case DATA_MATRIX -> BCFCONST_DATA_MATRIX;
+            case EAN_8 -> BCFCONST_EAN_8;
+            case EAN_13 -> BCFCONST_EAN_13;
+            case ITF -> BCFCONST_ITF;
+            case MAXICODE -> BCFCONST_MAXICODE;
+            case PDF_417 -> BCFCONST_PDF_417;
+            case QR_CODE -> BCFCONST_QR_CODE;
+            case RSS_14 -> BCFCONST_RSS_14;
+            case RSS_EXPANDED -> BCFCONST_RSS_EXPANDED;
+            case UPC_A -> BCFCONST_UPC_A;
+            case UPC_E -> BCFCONST_UPC_E;
+            case UPC_EAN_EXTENSION -> BCFCONST_UPC_EAN_EXTENSION;
+        };
+    }
+
+    private static final Map<BarcodeFormat, Integer> BARCODE_FORMAT_TO_INT = new HashMap<>();
+    private static final Map<Integer, BarcodeFormat> INT_TO_BARCODE_FORMAT = new HashMap<>();
+
+    static {
+        for (BarcodeFormat bcf : BarcodeFormat.values()) {
+            int intVal = getSerializedBarcodeFormatInt(bcf);
+            BARCODE_FORMAT_TO_INT.put(bcf, intVal);
+            INT_TO_BARCODE_FORMAT.put(intVal, bcf);
+        }
     }
 
     private static int calcCRC32(byte[] buf) {

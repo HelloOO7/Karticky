@@ -14,6 +14,7 @@ desugaring = "2.1.5"
 work = "2.10.2"
 jsoup = "1.20.1"
 camerax = "1.4.2"
+colorpicker = "3.1.0"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -34,6 +35,7 @@ jsoup = { group = "org.jsoup", name = "jsoup", version.ref = "jsoup" }
 camerax-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "camerax" }
 camerax-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "camerax" }
 camerax-view = { group = "androidx.camera", name = "camera-view", version.ref = "camerax" }
+colorpicker = { group = "com.github.martin-stone", name = "hsv-alpha-color-picker-android", version.ref = "colorpicker" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

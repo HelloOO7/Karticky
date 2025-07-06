@@ -9,10 +9,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
+import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
 import androidx.activity.EdgeToEdge;
@@ -23,6 +25,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.tabs.TabLayout;
 
 import java.io.IOException;
 import java.net.SocketException;
@@ -49,6 +52,7 @@ import javax.inject.Inject;
 
 import cz.nocard.android.databinding.ActivityMainBinding;
 import cz.spojenka.android.system.PermissionRequestHelper;
+import cz.spojenka.android.system.SubscreenSwitcher;
 import cz.spojenka.android.ui.drawable.EmptyDrawable;
 import cz.spojenka.android.util.AsyncUtils;
 import cz.spojenka.android.util.ViewUtils;
@@ -61,7 +65,8 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
     public static final String EXTRA_PROVIDER = MainActivity.class.getName() + ".EXTRA_PROVIDER";
 
     private static final String STATE_SHOWING_PROVIDER = "showing_provider";
-    private static final String STATE_LOCAL_AUTO_DETECT_ENABLED = "local_auto_detect_enabled";
+    private static final String STATE_SHOWING_AUTO_PROVIDER = "showing_auto_provider";
+    private static final String STATE_CURRENT_AUTO_PROVIDER = "current_auto_provider";
     private static final String STATE_PENDING_PERMISSIONS = "pending_permissions";
     private static final String STATE_PROCESS_PERMISSIONS_UPON_RETURN = "process_permissions_upon_return";
     private static final String STATE_UPDATE_CHECK_DONE = "update_check_done";
@@ -84,15 +89,22 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
     CardNotificationManager cardNotificationManager;
 
     private ActivityMainBinding ui;
+    private ProviderCardView autoDetectCard;
+    private SubscreenSwitcher cardListSubscreens;
+    private LinearLayout personalCardList;
+    private LinearLayout universalCardList;
+
+    private boolean showingAutoProvider;
+    private String currentAutoProvider;
+    private boolean autodetectCallbackBound = false;
 
     private String showingProvider = null;
     private NoCardConfig.ProviderInfo showingProviderInfo = null;
     private String showingCardCode = null;
     private Integer showingPersonalCardId = null;
+
     private List<String> favouriteProviders = new ArrayList<>();
     private List<String> allProviders = new ArrayList<>();
-
-    private boolean localAutoDetectEnabled;
 
     private final Queue<String> pendingPermissionRequests = new LinkedList<>();
     private boolean processPermissionsUponReturn = false;
@@ -135,7 +147,8 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
 
         if (savedInstanceState != null) {
             showingProvider = savedInstanceState.getString(STATE_SHOWING_PROVIDER, null);
-            localAutoDetectEnabled = savedInstanceState.getBoolean(STATE_LOCAL_AUTO_DETECT_ENABLED, false);
+            showingAutoProvider = savedInstanceState.getBoolean(STATE_SHOWING_AUTO_PROVIDER, false);
+            currentAutoProvider = savedInstanceState.getString(STATE_CURRENT_AUTO_PROVIDER, null);
             String[] pendingPermissions = savedInstanceState.getStringArray(STATE_PENDING_PERMISSIONS);
             if (pendingPermissions != null) {
                 pendingPermissionRequests.addAll(Arrays.asList(pendingPermissions));
@@ -144,13 +157,13 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
             updateCheckDone = savedInstanceState.getBoolean(STATE_UPDATE_CHECK_DONE, false);
         } else {
             showingProvider = null;
-            localAutoDetectEnabled = prefs.getWlanAutoDetect();
+            showingAutoProvider = prefs.getWlanAutoDetect();
         }
 
         favouriteProviders = new ArrayList<>(prefs.getFavouriteProviders());
         allProviders = configManager.getAllProviders();
 
-        handleIntent(getIntent(), true);
+        boolean isIntentCardRequested = handleIntent(getIntent(), true);
 
         if (!canUseAutoDetect()) {
             persistAutoDetectSetting(false);
@@ -158,8 +171,13 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
 
         initUI();
 
-        if (showingProvider != null) {
-            showCardForProvider(showingProvider);
+        if (showingPersonalCardId != null) {
+            PersonalCard card = personalCardStore.getCardById(showingPersonalCardId);
+            if (card != null) {
+                showPersonalCard(card);
+            }
+        } else if (showingProvider != null) {
+            showCardForProvider(showingProvider, isIntentCardRequested);
         }
 
         tryBindToWlanFencingManager();
@@ -203,15 +221,28 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
     private void initUI() {
         ui.btnBlacklist.setOnClickListener(v -> showBlacklistDialog());
 
-        ui.swAutoDetect.setChecked(localAutoDetectEnabled);
+        //intellij is stupid and displays a type cast exception when using the viewbinding
+        //with a nested class. therefore, use findViewById.
+        autoDetectCard = ui.getRoot().findViewById(R.id.pcvAutoCard);
+        autoDetectCard.setEnabled(false);
 
-        ui.swAutoDetect.setOnClickListener(v -> {
-            //do not use setOnCheckedChangeListener, as it reacts to programmatic changes
-            updateAutoDetectSetting(ui.swAutoDetect.isChecked());
-        });
+        if (canUseAutoDetect()) {
+            setAutoDetectDiscoveringUI();
+        } else {
+            setAutoDetectInitialUI();
+        }
+
+        personalCardList = newCardList();
+        universalCardList = newCardList();
+        ui.flCardListContainer.addView(personalCardList);
+        ui.flCardListContainer.addView(universalCardList);
 
         for (String provider : getSortedProviders()) {
             addCardMenuItem(provider);
+        }
+
+        for (PersonalCard personalCard : personalCardStore.getPersonalCards()) {
+            addCardMenuItem(personalCard);
         }
 
         ui.btnSettings.setOnClickListener(v -> popupSettingsSheet());
@@ -220,9 +251,77 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
 
         displayDefaultRemoteConfigState();
 
-        ui.llAvailableCards.setLayoutTransition(new LayoutTransition());
+        cardListSubscreens = new SubscreenSwitcher(personalCardList, universalCardList, ui.tvCardListEmptyPlaceholder);
+
+        ui.tlCardListTabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                updateSelectedCardList();
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+                updateSelectedCardList();
+            }
+        });
+        TabLayout.Tab tab = ui.tlCardListTabs.getTabAt(prefs.getLastCardListTab());
+        if (tab != null) {
+            tab.select();
+        } else {
+            ui.tlCardListTabs.selectTab(ui.tlCardListTabs.getTabAt(0));
+        }
+        selectNonEmptyTabIfNeeded();
 
         ui.tvAppVersion.setText(getString(R.string.app_version_format, BuildConfig.VERSION_NAME, BuildConfig.BUILD_TYPE));
+    }
+
+    private void selectNonEmptyTabIfNeeded() {
+        LinearLayout list = getSelectedCardListView();
+        if (list.getChildCount() == 0) {
+            for (int i = 0; i < ui.tlCardListTabs.getTabCount(); i++) {
+                if (getCardListViewByTabIndex(i).getChildCount() > 0) {
+                    ui.tlCardListTabs.getTabAt(i).select();
+                    return; //found a non-empty tab
+                }
+            }
+        }
+    }
+
+    private LinearLayout getCardListViewByTabIndex(int tabIndex) {
+        return tabIndex == 0 ? personalCardList : universalCardList;
+    }
+
+    private LinearLayout getSelectedCardListView() {
+        return getCardListViewByTabIndex(ui.tlCardListTabs.getSelectedTabPosition());
+    }
+
+    private void updateSelectedCardList() {
+        LinearLayout actualCardList = getSelectedCardListView();
+        if (actualCardList.getChildCount() == 0) {
+            cardListSubscreens.setSubscreen(ui.tvCardListEmptyPlaceholder);
+        } else {
+            cardListSubscreens.setSubscreen(actualCardList);
+        }
+    }
+
+    private LinearLayout newCardList() {
+        LinearLayout ll = new LinearLayout(this);
+        ll.setOrientation(LinearLayout.VERTICAL);
+        ll.setClipChildren(false);
+        ll.setClipToPadding(false);
+        int padding = getResources().getDimensionPixelSize(R.dimen.activity_margin);
+        ll.setPadding(padding, 0, padding, 0);
+        ll.setLayoutParams(new ViewGroup.MarginLayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        ));
+        ll.setLayoutTransition(new LayoutTransition());
+        return ll;
     }
 
     private void showBlacklistDialog() {
@@ -234,14 +333,16 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
                 .setMessage(R.string.blacklist_message)
                 .setPositiveButton(R.string.blacklist_add, (dialog, which) -> {
                     prefs.addCardToBlacklist(showingProvider, showingCardCode);
-                    refreshCurrentProviderCard(); //refresh card
+                    refreshCurrentUniversalCard(); //refresh card
                 })
                 .setNegativeButton(android.R.string.cancel, null)
                 .show();
     }
 
-    private void refreshCurrentProviderCard() {
-        showCardForProvider(showingProvider);
+    private void refreshCurrentUniversalCard() {
+        if (!Objects.equals(showingProvider, PersonalCard.PROVIDER_CUSTOM)) {
+            showCardForProvider(showingProvider, false);
+        }
     }
 
     private List<String> getSortedProviders() {
@@ -258,15 +359,15 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
         boolean changed = true;
         while (changed) {
             changed = false;
-            for (int i = 0; i < ui.llAvailableCards.getChildCount(); ++i) {
-                ProviderCardView current = (ProviderCardView) ui.llAvailableCards.getChildAt(i);
+            for (int i = 0; i < universalCardList.getChildCount(); ++i) {
+                ProviderCardView current = (ProviderCardView) universalCardList.getChildAt(i);
                 int index = newOrder.indexOf(current.getProviderId());
                 if (index != -1 && index != i) {
-                    ui.llAvailableCards.removeViewAt(i);
+                    universalCardList.removeViewAt(i);
                     if (index > i) {
                         --index;
                     }
-                    ui.llAvailableCards.addView(current, index);
+                    universalCardList.addView(current, index);
                     changed = true;
                 }
             }
@@ -290,20 +391,56 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
             updateRowOrder();
         });
 
-        ui.llAvailableCards.addView(providerCard);
+        universalCardList.addView(providerCard);
 
         providerCard.setOnClickListener(v -> {
-            localAutoDetectEnabled = false; //without persisting
-            if (!provider.equals(showingProvider)) {
-                ui.swAutoDetect.setChecked(false);
-            }
-            fakeShowProviderInfo(provider);
-            scrollToYAndThen(0, ViewUtils.dpToPx(this, 100), () -> showCardForProvider(provider));
+            showingAutoProvider = false;
+            requestShowCard(new UniversalCardRequest(provider, false));
         });
     }
 
-    private void fakeShowProviderInfo(String provider) {
-        ui.tvProvider.setText(configManager.getProviderInfo(provider).membershipName());
+    private void addCardMenuItem(PersonalCard personalCard) {
+        ProviderCardView.WithoutAction providerCard = new ProviderCardView.WithoutAction(this);
+
+        bindPersonalCardToView(providerCard, personalCard);
+
+        personalCardList.addView(providerCard);
+    }
+
+    private void bindPersonalCardToView(ProviderCardView providerCard, PersonalCard personalCard) {
+        NoCardConfig.ProviderInfo providerInfo = personalCardStore.getCardProviderInfo(personalCard, configManager);
+        providerCard.setTag(personalCard);
+        providerCard.setProvider(personalCard.provider(), providerInfo);
+        providerCard.setOnClickListener(v -> {
+            showingAutoProvider = false;
+            requestShowCard(new PersonalCardRequest(personalCard));
+        });
+    }
+
+    private ProviderCardView findViewForCard(PersonalCard personalCard) {
+        for (int i = 0; i < personalCardList.getChildCount(); i++) {
+            View child = personalCardList.getChildAt(i);
+            if (child.getTag() == personalCard && child instanceof ProviderCardView pcv) {
+                return pcv;
+            }
+        }
+        return null;
+    }
+
+    private void removeCardMenuItem(PersonalCard personalCard) {
+        ProviderCardView cardView = findViewForCard(personalCard);
+        if (cardView != null) {
+            personalCardList.removeView(cardView);
+        }
+    }
+
+    private void requestShowCard(CardRequest request) {
+        fakeShowProviderInfo(request.getProviderInfo());
+        scrollToYAndThen(0, ViewUtils.dpToPx(this, 100), () -> showCard(request));
+    }
+
+    private void fakeShowProviderInfo(NoCardConfig.ProviderInfo providerInfo) {
+        ui.tvProvider.setText(providerInfo.membershipName());
     }
 
     private void scrollToYAndThen(int y, int threshold, Runnable action) {
@@ -324,45 +461,87 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
         }
     }
 
-    private void handleIntent(Intent intent, boolean silent) {
+    private boolean handleIntent(Intent intent, boolean silent) {
         if (intent == null) {
-            return;
+            return false;
         }
-        String action = getIntent().getAction();
+        String action = intent.getAction();
         if (ACTION_SHOW_CARD.equals(action)) {
-            showingProvider = getIntent().getStringExtra(EXTRA_PROVIDER);
-            localAutoDetectEnabled = wlanFencingManager.isCurrent(showingProvider) && canUseAutoDetect();
+            showingProvider = intent.getStringExtra(EXTRA_PROVIDER);
+            showingAutoProvider = wlanFencingManager.isCurrent(showingProvider) && canUseAutoDetect();
 
             if (!silent) {
-                showCardForProvider(showingProvider);
+                showCardForProvider(showingProvider, true);
+            }
+            return true;
+        } else if (Intent.ACTION_VIEW.equals(action)) {
+            Uri uri = intent.getData();
+            if (uri != null) {
+                LinkCardTransfer.LinkType type = LinkCardTransfer.getLinkType(uri);
+                if (type == LinkCardTransfer.LinkType.APP_CARD_PACKET) {
+                    ProgressDialog.doInBackground(this, R.string.transferring_cards, () -> {
+                        byte[] packet = LinkCardTransfer.getData(uri);
+                        if (packet != null) {
+                            CardTransfer transfer = LinkCardTransfer.newCardTransfer();
+                            List<PersonalCard> cards = transfer.receivePersonalCardPacket(packet);
+                            personalCardStore.merge(cards);
+                            return cards;
+                        }
+                        return null;
+                    }).handleAsync((mergedCards, throwable) -> {
+                        if (throwable instanceof IllegalArgumentException) {
+                            Log.e(LOG_TAG, "Invalid link data", throwable);
+                            CommonDialogs.newInfoDialog(this, R.string.error, R.string.invalid_deep_link).show();
+                        } else if (throwable instanceof IOException) {
+                            Log.e(LOG_TAG, "Incompatible link data", throwable);
+                            CommonDialogs.newInfoDialog(this, R.string.error, R.string.incompatible_deep_link).show();
+                        } else if (mergedCards != null) {
+                            CommonDialogs
+                                    .newInfoDialog(
+                                            this,
+                                            getString(R.string.success),
+                                            getResources().getQuantityString(R.plurals.link_cards_received, mergedCards.size(), mergedCards.size())
+                                    )
+                                    .setNeutralButton(R.string.open_my_cards, (dialog, which) -> startActivity(new Intent(this, PersonalCardsActivity.class)))
+                                    .show();
+                        }
+                        return null;
+                    }, AsyncUtils.getLifecycleExecutor(this));
+                }
             }
         }
+        return false;
     }
 
     private boolean canUseAutoDetect() {
-        return PermissionRequestHelper.hasFineLocationPermission(this) && prefs.getWlanAutoDetect();
+        return PermissionRequestHelper.hasFineLocationPermission(this);
     }
 
-    private void updateAutoDetectSetting(boolean enabled) {
-        if (enabled) {
-            if (!PermissionRequestHelper.hasFineLocationPermission(this)) {
-                locationPermissionRequester.request(grantedMask -> {
-                    if ((grantedMask & PermissionRequestHelper.FINE_LOCATION) != 0) {
-                        persistAutoDetectSetting(true);
-                        bindToWlanFencingManager();
-                        wlanFencingManager.update();
-                    } else {
-                        persistAutoDetectSetting(false);
-                        ui.swAutoDetect.setChecked(false);
-                        showLocationRationale();
-                    }
-                });
-            } else {
-                persistAutoDetectSetting(true);
-                bindToWlanFencingManager();
+    private void checkPermsAndShowAutoProvider() {
+        if (!canUseAutoDetect()) {
+            unbindFromWlanFencingManager();
+            locationPermissionRequester.request(grantedMask -> {
+                if ((grantedMask & PermissionRequestHelper.FINE_LOCATION) != 0) {
+                    showAutoProviderIfExists();
+                    wlanFencingManager.update();
+                } else {
+                    persistAutoDetectSetting(false);
+                    showLocationRationale();
+                }
+            });
+        } else {
+            showAutoProviderIfExists();
+        }
+    }
+
+    private void showAutoProviderIfExists() {
+        persistAutoDetectSetting(true);
+        if (autodetectCallbackBound) {
+            if (currentAutoProvider != null) {
+                showCardForProvider(currentAutoProvider, true);
             }
         } else {
-            persistAutoDetectSetting(false);
+            bindToWlanFencingManager();
         }
     }
 
@@ -370,7 +549,8 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(STATE_SHOWING_PROVIDER, showingProvider);
-        outState.putBoolean(STATE_LOCAL_AUTO_DETECT_ENABLED, localAutoDetectEnabled);
+        outState.putBoolean(STATE_SHOWING_AUTO_PROVIDER, showingAutoProvider);
+        outState.putString(STATE_CURRENT_AUTO_PROVIDER, currentAutoProvider);
         outState.putStringArray(STATE_PENDING_PERMISSIONS, pendingPermissionRequests.toArray(new String[0]));
         outState.putBoolean(STATE_PROCESS_PERMISSIONS_UPON_RETURN, processPermissionsUponReturn);
         outState.putBoolean(STATE_UPDATE_CHECK_DONE, updateCheckDone);
@@ -379,13 +559,18 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
     @Override
     protected void onResume() {
         super.onResume();
-        if (!wlanFencingManager.isExplicitScanNeeded()) {
+        if (canUseAutoDetect() && !wlanFencingManager.isExplicitScanNeeded()) {
             wlanFencingManager.update();
         }
         tryScheduleWorker();
         showNotificationPermissionPromptIfNeeded();
         showBackgroundLocationPromptIfNeeded();
         cardNotificationManager.clearNotification();
+
+        if (!canUseAutoDetect()) {
+            unbindFromWlanFencingManager();
+            setAutoDetectInitialUI();
+        }
 
         if (processPermissionsUponReturn) {
             processPermissionsUponReturn = false;
@@ -395,6 +580,7 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
         if (wlanFencingManager.isExplicitScanNeeded() && wlanScanUpdater != null) {
             handler.post(wlanScanUpdater);
         }
+
         if (!permRequestProcessing && !updateCheckDone) {
             updateCheckDone = true;
             checkForAppUpdates();
@@ -438,18 +624,82 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        wlanFencingManager.unregisterOnNearbyProviderCallback(this);
+        unbindFromWlanFencingManager();
         personalCardStore.removeListener(this);
     }
 
+    private void unbindFromWlanFencingManager() {
+        if (!autodetectCallbackBound) {
+            return;
+        }
+        autodetectCallbackBound = false;
+        wlanFencingManager.unregisterOnNearbyProviderCallback(this);
+    }
+
     private void tryBindToWlanFencingManager() {
-        if (PermissionRequestHelper.hasFineLocationPermission(this)) {
+        if (canUseAutoDetect()) {
             bindToWlanFencingManager();
         }
     }
 
     private void bindToWlanFencingManager() {
+        if (autodetectCallbackBound) {
+            return;
+        }
+        autodetectCallbackBound = true;
+        currentAutoProvider = null;
+        setAutoDetectDiscoveringUI();
+        //if an auto provider exists, callIfCurrent will make sure it is set
         wlanFencingManager.registerOnNearbyProviderCallback(this, true);
+    }
+
+    private void setAutoDetectText(String text) {
+        CharSequence styledText;
+        int openBrace = text.indexOf('(');
+        int closeBrace = text.indexOf(')');
+        if (openBrace != -1 && closeBrace != -1) {
+            styledText = Html.fromHtml(
+                    text.substring(0, openBrace)
+                            + "<small>" + text.substring(openBrace, closeBrace + 1) + "</small>"
+                            + text.substring(closeBrace + 1),
+                    Html.FROM_HTML_MODE_LEGACY
+            );
+        } else {
+            styledText = text;
+        }
+        autoDetectCard.overridePrimaryText(styledText);
+    }
+
+    private void disableAutoDetectCard() {
+        autoDetectCard.setEnabled(false);
+        autoDetectCard.setCustomChipGradient(getResources().getIntArray(R.array.black_white_gradient));
+        autoDetectCard.setOnClickListener(null);
+    }
+
+    private void enableAutoDetectCard() {
+        autoDetectCard.setCustomChipGradient(getResources().getIntArray(R.array.rainbow_gradient));
+        autoDetectCard.setEnabled(true);
+        autoDetectCard.setOnClickListener(v -> checkPermsAndShowAutoProvider());
+    }
+
+    private void setAutoDetectDiscoveringUI() {
+        disableAutoDetectCard();
+        setAutoDetectText(getString(R.string.autodetect_provider_format, getString(R.string.autodetect_discovering)));
+    }
+
+    private void setAutoDetectInitialUI() {
+        enableAutoDetectCard();
+        setAutoDetectText(getString(R.string.autodetect_provider_initial));
+    }
+
+    private void setAutoDetectNoProviderUI() {
+        disableAutoDetectCard();
+        setAutoDetectText(getString(R.string.autodetect_provider_format, getString(R.string.autodetect_no_provider)));
+    }
+
+    private void setAutoDetectProviderUI(String provider) {
+        enableAutoDetectCard();
+        setAutoDetectText(getString(R.string.autodetect_provider_format, configManager.getProviderNameOrDefault(provider)));
     }
 
     private void callApplicationDetails() {
@@ -472,7 +722,7 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
     }
 
     private void persistAutoDetectSetting(boolean enabled) {
-        localAutoDetectEnabled = enabled;
+        showingAutoProvider = enabled;
         prefs.putWlanAutoDetect(enabled);
     }
 
@@ -590,10 +840,44 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
 
     private CompletableFuture<CardLoadingResult> currentAsyncLoadFuture = null;
 
-    private void showCardForProvider(String provider) {
-        boolean providerChanged = !provider.equals(showingProvider);
-        showingProvider = provider;
-        showingProviderInfo = configManager.getProviderInfo(provider);
+    private void showCardForProvider(String provider, boolean preferPersonal) {
+        if (PersonalCard.PROVIDER_CUSTOM.equals(provider)) {
+            return;
+        }
+        showCard(new UniversalCardRequest(provider, preferPersonal));
+    }
+
+    private void showPersonalCard(PersonalCard card) {
+        showCard(new PersonalCardRequest(card));
+    }
+
+    private boolean isNewProviderDifferent(CardRequest cardRequest) {
+        if (!Objects.equals(cardRequest.getProviderId(), showingProvider)) {
+            return true; //provider changed
+        }
+        if (showingPersonalCardId != null) {
+            PersonalCard personalCard = cardRequest.getPersonalCard();
+            if (personalCard != null) {
+                PersonalCard.CustomCardProperties newCustomProps = personalCard.customProperties();
+                if (newCustomProps != null) {
+                    PersonalCard currentPersonalCard = personalCardStore.getCardById(showingPersonalCardId);
+                    if (currentPersonalCard != null) {
+                        PersonalCard.CustomCardProperties currentCustomProps = currentPersonalCard.customProperties();
+                        if (currentCustomProps != null) {
+                            return !Objects.equals(currentCustomProps.providerName(), newCustomProps.providerName());
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private void showCard(CardRequest card) {
+        boolean providerChanged = isNewProviderDifferent(card);
+        NoCardConfig.ProviderInfo pi = card.getProviderInfo();
+        showingProvider = card.getProviderId();
+        showingProviderInfo = pi;
         ui.tvProvider.setVisibility(View.VISIBLE);
         ui.tvProvider.setText(showingProviderInfo.membershipName());
         if (providerChanged) {
@@ -606,21 +890,8 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
         }
 
         (currentAsyncLoadFuture = AsyncUtils.supplyAsync(() -> {
-            NoCardConfig.ProviderInfo pi = configManager.getProviderInfo(provider);
-            Set<String> blacklist = prefs.getCardBlacklist(provider);
-
-            PersonalCard personal = personalCardStore.getCardForProvider(provider);
-
-            String code;
-            if (personal != null) {
-                code = personal.cardNumber();
-            } else {
-                code = configManager.getRandomCode(pi, Predicate.not(blacklist::contains));
-            }
-
-            if (code == null) {
-                throw new NoSuchElementException();
-            }
+            String code = card.getCardCode();
+            PersonalCard personal = card.getPersonalCard();
 
             return new CardLoadingResult(code, personal, new ZxingCodeDrawable(
                     getResources(),
@@ -631,7 +902,7 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
             ));
         })).handleAsync((result, throwable) -> {
             if (throwable instanceof CancellationException) {
-                Log.d(LOG_TAG, "QR code generation cancelled for provider: " + provider);
+                Log.d(LOG_TAG, "QR code generation cancelled for request: " + card);
                 return null; //cancelled
             }
             if (throwable != null) {
@@ -656,7 +927,7 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
                 if (isShowingPersonalCard()) {
                     ui.btnBlacklist.setVisibility(View.INVISIBLE);
                     ui.tvPersonalCardNotice.setVisibility(View.VISIBLE);
-                    ui.tvPersonalCardNotice.setText(getString(R.string.personal_card_desc_format, result.personalCard().singleLineName()));
+                    ui.tvPersonalCardNotice.setText(getString(R.string.personal_card_desc_format, personalCardStore.getCardSingleLineName(result.personalCard(), configManager)));
                 } else {
                     ui.btnBlacklist.setVisibility(View.VISIBLE);
                     ui.tvPersonalCardNotice.setVisibility(View.INVISIBLE);
@@ -713,7 +984,7 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
                         displayDefaultRemoteConfigState();
                         if (showingProvider != null && configManager.getProviderInfo(showingProvider) != null) {
                             //show new card to make sure invalid ones are discarded
-                            refreshCurrentProviderCard();
+                            refreshCurrentUniversalCard();
                         }
                     } catch (IOException e) {
                         Log.e(LOG_TAG, "Failed to update remote config", e);
@@ -791,39 +1062,155 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
     @Override
     public void providerNearby(WlanFencingManager.ProviderAPInfo provider) {
         cardNotificationManager.ackAPForFutureNotification(provider);
-        if (!localAutoDetectEnabled) {
+        currentAutoProvider = provider.provider();
+        autoDetectCard.setEnabled(true);
+        setAutoDetectProviderUI(provider.provider());
+        if (!showingAutoProvider) {
             return;
         }
         if (!provider.provider().equals(showingProvider)) {
-            showCardForProvider(provider.provider());
+            showCardForProvider(provider.provider(), true);
         }
     }
 
     @Override
     public void providerLost(WlanFencingManager.ProviderAPInfo provider) {
+
+    }
+
+    @Override
+    public void noProvider() {
+        if (!wlanFencingManager.isDoneInitialScan()) {
+            return; //wait till initial scan arrives
+        }
         cardNotificationManager.ackAPForFutureNotification(null);
+        currentAutoProvider = null;
+        setAutoDetectNoProviderUI();
     }
 
     @Override
     public void onCardAdded(PersonalCard card) {
-        if (showingProvider != null && Objects.equals(showingProvider, card.provider())) {
-            refreshCurrentProviderCard();
+        addCardMenuItem(card);
+        updateSelectedCardList();
+        if (showingProvider != null && showingPersonalCardId == null && Objects.equals(showingProvider, card.provider())) {
+            refreshCurrentUniversalCard();
         }
     }
 
     @Override
     public void onCardRemoved(PersonalCard card) {
+        removeCardMenuItem(card);
+        updateSelectedCardList();
         onCardChanged(card);
     }
 
     @Override
     public void onCardChanged(PersonalCard card) {
+        ProviderCardView cardView = findViewForCard(card);
+        if (cardView != null) {
+            bindPersonalCardToView(cardView, card);
+        }
         if (showingPersonalCardId != null && card.id() == showingPersonalCardId) {
-            refreshCurrentProviderCard();
+            refreshCurrentUniversalCard();
         }
     }
 
-    private static record CardLoadingResult(String code, PersonalCard personalCard, ZxingCodeDrawable codeDrawable) {
+    private static record CardLoadingResult(String code, PersonalCard personalCard,
+                                            ZxingCodeDrawable codeDrawable) {
 
+    }
+
+    private static interface CardRequest {
+
+        public String getProviderId();
+
+        public NoCardConfig.ProviderInfo getProviderInfo();
+
+        public String getCardCode();
+
+        public PersonalCard getPersonalCard();
+    }
+
+    private class UniversalCardRequest implements CardRequest {
+
+        private final String providerId;
+        private final boolean preferPersonal;
+
+        public UniversalCardRequest(String providerId, boolean preferPersonal) {
+            this.providerId = providerId;
+            this.preferPersonal = preferPersonal;
+        }
+
+        @Override
+        public String getProviderId() {
+            return providerId;
+        }
+
+        @Override
+        public NoCardConfig.ProviderInfo getProviderInfo() {
+            return configManager.getProviderInfo(providerId);
+        }
+
+        @Override
+        public String getCardCode() {
+            Set<String> blacklist = prefs.getCardBlacklist(providerId);
+
+            String code = null;
+
+            if (preferPersonal) {
+                PersonalCard personal = personalCardStore.getCardForProvider(providerId);
+
+                if (personal != null) {
+                    code = personal.cardNumber();
+                }
+            }
+
+            if (code == null) {
+                code = configManager.getRandomCode(getProviderInfo(), Predicate.not(blacklist::contains));
+            }
+
+            if (code == null) {
+                throw new NoSuchElementException();
+            }
+
+            return code;
+        }
+
+        @Override
+        public PersonalCard getPersonalCard() {
+            if (!preferPersonal) {
+                return null;
+            }
+            return personalCardStore.getCardForProvider(providerId);
+        }
+    }
+
+    private class PersonalCardRequest implements CardRequest {
+
+        private final PersonalCard card;
+
+        public PersonalCardRequest(PersonalCard card) {
+            this.card = card;
+        }
+
+        @Override
+        public String getProviderId() {
+            return card.provider();
+        }
+
+        @Override
+        public NoCardConfig.ProviderInfo getProviderInfo() {
+            return personalCardStore.getCardProviderInfo(card, configManager);
+        }
+
+        @Override
+        public String getCardCode() {
+            return card.cardNumber();
+        }
+
+        @Override
+        public PersonalCard getPersonalCard() {
+            return card;
+        }
     }
 }

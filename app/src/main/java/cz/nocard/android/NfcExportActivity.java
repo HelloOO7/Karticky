@@ -20,6 +20,7 @@ import cz.spojenka.android.util.ViewUtils;
 public class NfcExportActivity extends NfcActivityBase {
 
     private ActivityNfcExportBinding ui;
+    private ExportActivityCommon common;
 
     private CardEmulation cardEmulation;
 
@@ -34,10 +35,17 @@ public class NfcExportActivity extends NfcActivityBase {
 
         NoCardApplication.getInstance().getApplicationComponent().inject(this);
         setContentView(ui.getRoot());
+        common = new ExportActivityCommon(this);
 
         ui.btnEnableNfc.setOnClickListener(v -> callNfcSettings());
 
-        cardEmulation = CardEmulation.getInstance(adapter);
+        serviceState.setExportCardFilter(common.getCardsToExport());
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        serviceState.clearExportCardFilter();
     }
 
     @Override
@@ -49,6 +57,7 @@ public class NfcExportActivity extends NfcActivityBase {
 
     @Override
     protected void onNfcAdapterInitialized() {
+        cardEmulation = CardEmulation.getInstance(adapter);
         if (adapter.isEnabled()) {
             setHceOnStatusInfo();
         } else {

@@ -11,4 +11,10 @@
         <item quantity="few">Přijaty %1$d karty.</item>
         <item quantity="other">Přijato %1$d karet.</item>
     </plurals>
+    <plurals name="link_cards_received">
+        <item quantity="zero">Odkaz neobsahoval žádné karty.</item>
+        <item quantity="one">Sdílená karta byla uložena do zařízení.</item>
+        <item quantity="few">%1$d sdílené karty byly uloženy do zařízení</item>
+        <item quantity="other">%1$d sdílených karet bylo uloženo do zařízení.</item>
+    </plurals>
 </resources>

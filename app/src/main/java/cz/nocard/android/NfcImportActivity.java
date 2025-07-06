@@ -3,7 +3,6 @@ package cz.nocard.android;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.drawable.AnimatedVectorDrawable;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.TagLostException;
@@ -14,6 +13,7 @@ import android.view.View;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.Nullable;
+import androidx.core.content.IntentCompat;
 
 import java.util.List;
 
@@ -136,6 +136,7 @@ public class NfcImportActivity extends NfcActivityBase {
         if (adapter == null) {
             return;
         }
+        Log.d(TAG, "Starting NFC listening");
         isListening = true;
         if (adapter.isEnabled()) {
             setReceiveStatusInfo();
@@ -151,10 +152,11 @@ public class NfcImportActivity extends NfcActivityBase {
     private void handleForegroundDispatch(Intent intent) {
         Log.d(TAG, "Handling foreground dispatch with intent: " + intent);
         if (!isListening || inTransaction) {
+            Log.d(TAG, "Ignoring foreground dispatch, isListening " + isListening + " inTransaction " + inTransaction);
             return;
         }
         inTransaction = true;
-        Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+        Tag tag = IntentCompat.getParcelableExtra(intent, NfcAdapter.EXTRA_TAG, Tag.class);
         if (tag == null) {
             return;
         }
@@ -179,7 +181,9 @@ public class NfcImportActivity extends NfcActivityBase {
                             Log.d(TAG, "Received response: " + NfcCommon.encodeHex(responseData));
                         }
 
-                        return transfer.receivePersonalCardPacket(NfcCardTransfer.unpackResponse(responseData).payload());
+                        List<PersonalCard> cards = transfer.receivePersonalCardPacket(NfcCardTransfer.unpackResponse(responseData).payload());
+                        personalCardStore.merge(cards);
+                        return cards;
                     }
                 }).handleAsync((personalCards, throwable) -> {
                     if (throwable != null) {
@@ -187,18 +191,10 @@ public class NfcImportActivity extends NfcActivityBase {
                         showError(throwable);
                     } else {
                         isListening = false;
-                        personalCardStore.merge(personalCards);
                         showSuccess(personalCards);
                     }
                     inTransaction = false;
                     newTransactionId();
-                    return null;
-                }, AsyncUtils.getLifecycleExecutor(this))
-                .handleAsync((o, throwable) -> {
-                    if (throwable != null) {
-                        Log.e(TAG, "Error after import", throwable);
-                        showError(throwable);
-                    }
                     return null;
                 }, AsyncUtils.getLifecycleExecutor(this));
     }

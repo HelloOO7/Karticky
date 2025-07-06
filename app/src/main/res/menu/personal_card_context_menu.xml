@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/miRename"
+        android:title="@string/card_action_rename" />
+    <item
+        android:id="@+id/miEasyShare"
+        android:title="@string/card_action_easy_share" />
+    <item
+        android:id="@+id/miRemove"
+        android:title="@string/card_action_remove" />
+</menu>

@@ -2,6 +2,8 @@ package cz.nocard.android;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.EditText;
 
 import androidx.annotation.Nullable;
 
@@ -9,6 +11,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -21,7 +24,7 @@ public class PersonalCardsActivity extends CardListBaseActivity implements Perso
     @Inject
     ConfigManager config;
 
-    private final Map<PersonalCard, ProviderCardView.WithRemoveAction> cardViewMap = new HashMap<>();
+    private final Map<PersonalCard, ProviderCardView.WithContextMenu> cardViewMap = new HashMap<>();
     private final Map<ProviderCardView, PersonalCard> cardViewInvMap = new HashMap<>();
 
     private List<String> providerOrder;
@@ -41,13 +44,45 @@ public class PersonalCardsActivity extends CardListBaseActivity implements Perso
     }
 
     @Override
-    protected boolean isShareButtonEnabled() {
+    protected boolean isSelectionModeEnabled() {
         return true;
     }
 
     @Override
-    protected void callShareCards() {
-        startActivity(new Intent(this, NfcExportActivity.class));
+    protected void enterSelectionMode() {
+        super.enterSelectionMode();
+        overrideTitleText(getString(R.string.share_select_cards));
+    }
+
+    @Override
+    protected void exitSelectionMode() {
+        super.exitSelectionMode();
+        overrideTitleText(getTitle());
+    }
+
+    @Override
+    protected int getSelectionModeButtonIcon() {
+        return R.drawable.ic_share_48px;
+    }
+
+    @Override
+    protected void onSelectionDone(List<ProviderCardView> selected) {
+        int[] cardIDs = selected
+                .stream()
+                .map(cardViewInvMap::get)
+                .peek(Objects::requireNonNull)
+                .mapToInt(PersonalCard::id)
+                .toArray();
+
+        if (cardIDs.length == cardViewInvMap.size()) {
+            cardIDs = null; //all
+        }
+
+        callCardSharing(cardIDs);
+    }
+
+    private void callCardSharing(int... cardIDs) {
+        startActivity(ExportMethodJunctionActivity.newIntent(this, cardIDs));
     }
 
     @Override
@@ -72,7 +107,7 @@ public class PersonalCardsActivity extends CardListBaseActivity implements Perso
     }
 
     private ProviderCardView newCardView(PersonalCard card) {
-        ProviderCardView.WithRemoveAction cardView = new ProviderCardView.WithRemoveAction(this);
+        ProviderCardView.WithContextMenu cardView = new ProviderCardView.WithContextMenu(this);
 
         bindCardToView(cardView, card);
 
@@ -82,10 +117,38 @@ public class PersonalCardsActivity extends CardListBaseActivity implements Perso
         return cardView;
     }
 
-    private void bindCardToView(ProviderCardView.WithRemoveAction cardView, PersonalCard card) {
-        cardView.setProvider(card.provider(), config.getProviderInfoOrNull(card.provider()));
-        cardView.overridePrimaryText(card.name());
-        cardView.setOnRemoveListener(() -> personalCardStore.removeCard(card));
+    private void bindCardToView(ProviderCardView.WithContextMenu cardView, PersonalCard card) {
+        cardView.setProvider(card.provider(), personalCardStore.getCardProviderInfo(card, config));
+        cardView.overridePrimaryText(personalCardStore.getCardName(card, config));
+        cardView.setPopupMenuHandler(popupMenu -> {
+            popupMenu.inflate(R.menu.personal_card_context_menu);
+            popupMenu.setOnMenuItemClickListener(item -> {
+                if (item.getItemId() == R.id.miRemove) {
+                    personalCardStore.removeCard(card);
+                } else if (item.getItemId() == R.id.miEasyShare) {
+                    callCardSharing(card.id());
+                } else if (item.getItemId() == R.id.miRename) {
+                    callCardRename(card);
+                } else {
+                    return false;
+                }
+                return true;
+            });
+        });
+    }
+
+    private void callCardRename(PersonalCard card) {
+        EditText et = new EditText(this);
+        et.setText(personalCardStore.getCardName(card, config));
+        et.setSelectAllOnFocus(true);
+        CommonDialogs
+                .newTextInputDialog(this, et)
+                .setTitle(R.string.rename_card_prompt)
+                .setPositiveButton(R.string.card_action_rename, (dialog, which) -> {
+                    personalCardStore.renameCard(card, et.getText().toString());
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
     }
 
     @Override
@@ -112,7 +175,7 @@ public class PersonalCardsActivity extends CardListBaseActivity implements Perso
 
     @Override
     public void onCardRemoved(PersonalCard card) {
-        ProviderCardView.WithRemoveAction view = cardViewMap.get(card);
+        ProviderCardView.WithContextMenu view = cardViewMap.get(card);
         if (view != null) {
             removeCardView(view);
             cardViewMap.remove(card);
@@ -122,7 +185,7 @@ public class PersonalCardsActivity extends CardListBaseActivity implements Perso
 
     @Override
     public void onCardChanged(PersonalCard card) {
-        ProviderCardView.WithRemoveAction view = cardViewMap.get(card);
+        ProviderCardView.WithContextMenu view = cardViewMap.get(card);
         if (view != null) {
             bindCardToView(view, card);
         }

@@ -18,4 +18,5 @@ public interface ApplicationComponent {
     void inject(CardTransfer cardTransfer);
     void inject(NfcImportActivity nfcImportActivity);
     void inject(NfcExportActivity nfcExportActivity);
+    void inject(ExportActivityCommon exportActivityBase);
 }

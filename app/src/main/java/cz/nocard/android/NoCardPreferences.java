@@ -31,6 +31,7 @@ public class NoCardPreferences {
     private static final String PK_MIN_WLAN_DBM = "min_wlan_dbm";
     private static final String PK_FAVOURITE_PROVIDERS = "favourite_providers";
     private static final String PK_CARD_BLACKLIST_PREFIX = "card_blacklist_";
+    private static final String PK_LAST_CARD_LIST_TAB = "last_card_list_tab";
 
     private final SharedPreferences prefs;
 
@@ -193,5 +194,13 @@ public class NoCardPreferences {
         Set<String> blacklist = getCardBlacklist(provider);
         blacklist.remove(cardId);
         putCardBlacklist(provider, blacklist);
+    }
+
+    public void putLastCardListTab(int tabIndex) {
+        prefs.edit().putInt(PK_LAST_CARD_LIST_TAB, tabIndex).apply();
+    }
+
+    public int getLastCardListTab() {
+        return prefs.getInt(PK_LAST_CARD_LIST_TAB, 0);
     }
 }

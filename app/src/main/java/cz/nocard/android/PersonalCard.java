@@ -1,7 +1,12 @@
 package cz.nocard.android;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import androidx.annotation.Keep;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.os.ParcelCompat;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -10,11 +15,24 @@ import com.google.zxing.BarcodeFormat;
 import java.util.function.Function;
 
 @Keep
-public class PersonalCard {
+public class PersonalCard implements Parcelable {
 
     public static final String PROVIDER_CUSTOM = "_CUSTOM";
 
+    public static final Creator<PersonalCard> CREATOR = new Creator<PersonalCard>() {
+        @Override
+        public PersonalCard createFromParcel(Parcel in) {
+            return new PersonalCard(in);
+        }
+
+        @Override
+        public PersonalCard[] newArray(int size) {
+            return new PersonalCard[size];
+        }
+    };
+
     private final int id;
+    @Nullable
     private String name;
     private final String provider;
     private final CustomCardProperties customProperties;
@@ -43,6 +61,14 @@ public class PersonalCard {
         this(id, name, PROVIDER_CUSTOM, customProperties, cardNumber);
     }
 
+    protected PersonalCard(Parcel in) {
+        id = in.readInt();
+        name = in.readString();
+        provider = in.readString();
+        customProperties = ParcelCompat.readParcelable(in, CustomCardProperties.class.getClassLoader(), CustomCardProperties.class);
+        cardNumber = in.readString();
+    }
+
     public static String formatDefaultName(String providerName, String cardNumber) {
         return providerName + "\n" + cardNumber;
     }
@@ -55,10 +81,6 @@ public class PersonalCard {
     @JsonProperty("name")
     public String name() {
         return name;
-    }
-
-    public String singleLineName() {
-        return name.replace("\n", " ");
     }
 
     @JsonProperty("provider")
@@ -89,8 +111,34 @@ public class PersonalCard {
         this.name = newName;
     }
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        dest.writeInt(id);
+        dest.writeString(name);
+        dest.writeString(provider);
+        dest.writeParcelable(customProperties, flags);
+        dest.writeString(cardNumber);
+    }
+
     @Keep
-    public static class CustomCardProperties {
+    public static class CustomCardProperties implements Parcelable {
+
+        public static final Creator<CustomCardProperties> CREATOR = new Creator<CustomCardProperties>() {
+            @Override
+            public CustomCardProperties createFromParcel(Parcel in) {
+                return new CustomCardProperties(in);
+            }
+
+            @Override
+            public CustomCardProperties[] newArray(int size) {
+                return new CustomCardProperties[size];
+            }
+        };
 
         private final String providerName;
         private final BarcodeFormat format;
@@ -105,6 +153,12 @@ public class PersonalCard {
             this.providerName = providerName;
             this.format = format;
             this.color = color;
+        }
+
+        protected CustomCardProperties(Parcel in) {
+            providerName = in.readString();
+            format = ParcelCompat.readSerializable(in, BarcodeFormat.class.getClassLoader(), BarcodeFormat.class);
+            color = in.readInt();
         }
 
         @JsonProperty("providerName")
@@ -124,6 +178,18 @@ public class PersonalCard {
 
         void changeColor(int newColor) {
             this.color = newColor;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
+            dest.writeString(providerName);
+            dest.writeSerializable(format);
+            dest.writeInt(color);
         }
     }
 }

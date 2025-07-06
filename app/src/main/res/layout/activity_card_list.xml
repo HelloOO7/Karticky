@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -14,28 +15,47 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:clipChildren="false"
-            android:fitsSystemWindows="true">
+            android:fitsSystemWindows="true"
+            android:animateLayoutChanges="true">
+
+            <ImageView
+                android:id="@+id/btnExitSelectionMode"
+                android:layout_width="@dimen/card_list_header_button_size"
+                android:layout_height="0dp"
+                android:layout_marginStart="@dimen/activity_margin"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:visibility="gone"
+                tools:visibility="visible"
+                app:layout_constraintBottom_toBottomOf="@+id/tvTitle"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/tvTitle"
+                app:layout_constraintTop_toTopOf="@+id/tvTitle"
+                app:srcCompat="@drawable/ic_arrow_back_48px" />
 
             <TextView
                 android:id="@+id/tvTitle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_margin="@dimen/activity_margin"
+                android:layout_marginTop="@dimen/activity_margin"
                 android:textSize="@dimen/text_title_l"
-                app:layout_constraintEnd_toStartOf="@+id/btnShareCards"
-                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginHorizontal="@dimen/item_margin_m"
+                app:layout_goneMarginStart="@dimen/activity_margin"
+                app:layout_goneMarginEnd="@dimen/activity_margin"
+                app:layout_constraintEnd_toStartOf="@+id/btnSelectionMode"
+                app:layout_constraintStart_toEndOf="@+id/btnExitSelectionMode"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:text="Seznam karet" />
 
             <ImageView
-                android:id="@+id/btnShareCards"
+                android:id="@+id/btnSelectionMode"
                 android:layout_width="wrap_content"
-                android:layout_height="0dp"
+                android:layout_height="@dimen/card_list_header_button_size"
                 android:layout_marginEnd="@dimen/activity_margin"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:visibility="gone"
                 android:contentDescription="@string/btn_share_cards"
                 app:layout_constraintBottom_toBottomOf="@+id/tvTitle"
+                app:layout_constraintStart_toEndOf="@id/tvTitle"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="@+id/tvTitle"
                 app:srcCompat="@drawable/ic_share_48px"

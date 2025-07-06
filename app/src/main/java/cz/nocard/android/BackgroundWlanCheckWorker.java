@@ -44,11 +44,7 @@ public class BackgroundWlanCheckWorker extends Worker {
     }
 
     public static boolean isUseable(Context context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            return ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED;
-        } else {
-            return true;
-        }
+        return WlanFencingManager.canWorkInBackground(context);
     }
 
     @NonNull

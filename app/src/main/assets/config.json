@@ -1,200 +1,195 @@
 {
-    "wlanMappings": {
-        "Albert_FREE": "albert",
-        "BILLA free": "billa",
-        "HezkyCesky": "penny",
-        "Teta_drogerie-free": "teta",
-        "dm Free Wifi Ceska Republika": "dm",
-        "tesco-internet": "tesco",
-        "welcome@kaufland": "kaufland",
-        "LIDL-Free-WiFi": "lidl",
-        "Rossman free wifi": "rossmann",
-        "BENUFREE": "benu",
-        "Globus_WiFi_Free": "globus"
+  "wlanMappings": {
+    "Albert_FREE": "albert",
+    "BILLA free": "billa",
+    "HezkyCesky": "penny",
+    "Teta_drogerie-free": "teta",
+    "dm Free Wifi Ceska Republika": "dm",
+    "tesco-internet": "tesco",
+    "welcome@kaufland": "kaufland",
+    "LIDL-Free-WiFi": "lidl",
+    "Rossman free wifi": "rossmann",
+    "BENUFREE": "benu",
+    "Globus_WiFi_Free": "globus"
+  },
+  "cardData": {
+    "tesco": {
+      "providerName": "Tesco",
+      "membershipName": "Tesco Clubcard",
+      "brandColor": -16755809,
+      "brandColorContrast": -16755809,
+      "format": "CODE_128",
+      "codes": [
+        "634009566001661609",
+        "634009566009602720",
+        "634009569017704926"
+      ]
     },
-    "cardData": {
-        "tesco": {
-            "providerName": "Tesco",
-            "membershipName": "Tesco Clubcard",
-            "brandColor": -16755809,
-            "brandColorContrast": -16755809,
-            "format": "CODE_128",
-            "codes": [
-                "634009566009602720",
-                "634009569017704926",
-                "634009569017704926",
-                "634009566001661609"
-            ]
-        },
-        "albert": {
-            "providerName": "Albert",
-            "membershipName": "Albert",
-            "brandColor": -16744902,
-            "brandColorContrast": -16744902,
-            "format": "CODE_128",
-            "codes": [
-                "9969aZIsL2t3wIl3d0tY",
-                "9969naoydbefk7AoFulK",
-                "9969QKXPoxk3IJ7Guz03"
-            ]
-        },
-        "billa": {
-            "providerName": "BILLA",
-            "membershipName": "BILLA Bonus Club",
-            "brandColor": -13312,
-            "brandColorContrast": -3604480,
-            "format": "EAN_13",
-            "codes": [
-                "400105844033",
-                "400080055011",
-                "0400104248856",
-                "0400106467132",
-                "0400094961698",
-                "0400104344084",
-                "400099851987",
-                "0400132399636",
-                "0400096193493",
-                "408113883440",
-                "0400080454487",
-                "400098372896",
-                "0400031830339"
-            ]
-        },
-        "lidl": {
-            "providerName": "Lidl",
-            "membershipName": "Lidl",
-            "brandColor": -16754020,
-            "brandColorContrast": -16754020,
-            "format": "QR_CODE",
-            "codes": [
-                "77200008361139574",
-                "77200002938327608",
-                "77200006853988591",
-                "77200006055150135",
-                "77200006603064626",
-                "77200008329359173"
-            ]
-        },
-        "globus": {
-            "providerName": "Globus",
-            "membershipName": "Globus Bonus Card",
-            "brandColor": -551907,
-            "brandColorContrast": -551907,
-            "format": "EAN_13",
-            "codes": [
-                "0450104598192",
-                "0450106889137",
-                "0459017070986",
-                "0459019732356",
-                "0459015495637",
-                "0459020191326"
-            ]
-        },
-        "kaufland": {
-            "providerName": "Kaufland",
-            "membershipName": "kaufland",
-            "brandColor": -2818048,
-            "brandColorContrast": -2818048,
-            "format": "QR_CODE",
-            "codes": [
-                "KQR00001:203112819764"
-            ]
-        },
-        "penny": {
-            "providerName": "Penny",
-            "membershipName": "Penny karta",
-            "brandColor": -1900533,
-            "brandColorContrast": -1900533,
-            "format": "EAN_13",
-            "codes": [
-                "2095449731101",
-                "2095450283262",
-                "2095449607185",
-                "2095424318204",
-                "2095411833550",
-                "2095449765090",
-                "2095424011167",
-                "2095451851231"
-            ]
-        },
-        "dm": {
-            "providerName": "DM",
-            "membershipName": "DM drogerie",
-            "brandColor": -1898989,
-            "brandColorContrast": -1898989,
-            "format": "EAN_13",
-            "codes": [
-                "2413056908172",
-                "2413057267964",
-                "2413040255855",
-                "2413027706554",
-                "2413995710010",
-                "2413026818456",
-                "2413026978716",
-                "2413026978716",
-                "2413026978716"
-            ]
-        },
-        "teta": {
-            "providerName": "Teta",
-            "membershipName": "Teta klub",
-            "brandColor": -39246,
-            "brandColorContrast": -52327,
-            "format": "EAN_13",
-            "codes": [
-                "2401028624809",
-                "2401031018091",
-                "2401020925973",
-                "2401036502755",
-                "2401024641237",
-                "2401002573772",
-                "2401002573772",
-                "2401002573772"
-            ]
-        },
-        "rossmann": {
-            "providerName": "Rossmann",
-            "membershipName": "Rossmann",
-            "brandColor": -1966054,
-            "brandColorContrast": -1966054,
-            "format": "EAN_13",
-            "codes": [
-                "9991002135481",
-                "9991002185264",
-                "9991011039695",
-                "9991015480295",
-                "9991014579952",
-                "9991002310840",
-                "9991006048251",
-                "9991006048251",
-                "9991006048251"
-            ]
-        },
-        "drmax": {
-            "providerName": "Dr. Max",
-            "membershipName": "Dr. Max karta",
-            "brandColor": -16734113,
-            "brandColorContrast": -16734113,
-            "format": "EAN_13",
-            "codes": [
-                "2810073455892",
-                "2810095577756",
-                "2810101216051",
-                "2810096977395"
-            ]
-        },
-        "benu": {
-            "providerName": "Benu",
-            "membershipName": "Benu lékárna",
-            "brandColor": -9823334,
-            "brandColorContrast": -9823334,
-            "format": "EAN_13",
-            "codes": [
-                "2150020566456",
-                "2150000428729",
-                "2150012386918",
-                "2180001667346"
-            ]
-        }
+    "albert": {
+      "providerName": "Albert",
+      "membershipName": "Albert",
+      "brandColor": -16744902,
+      "brandColorContrast": -16744902,
+      "format": "CODE_128",
+      "codes": [
+        "9969BSAoldGyph4A9zRL",
+        "9969aZIsL2t3wIl3d0tY",
+        "9969naoydbefk7AoFulK"
+      ]
+    },
+    "billa": {
+      "providerName": "BILLA",
+      "membershipName": "BILLA Bonus Club",
+      "brandColor": -13312,
+      "brandColorContrast": -3604480,
+      "format": "EAN_13",
+      "codes": [
+        "0400031830339",
+        "0400080454487",
+        "0400094961698",
+        "0400096193493",
+        "0400104248856",
+        "0400104344084",
+        "0400106467132",
+        "0400132399636",
+        "400080055011",
+        "400098372896",
+        "400099851987",
+        "400105844033",
+        "408113883440"
+      ]
+    },
+    "lidl": {
+      "providerName": "Lidl",
+      "membershipName": "Lidl",
+      "brandColor": -16754020,
+      "brandColorContrast": -16754020,
+      "format": "QR_CODE",
+      "codes": [
+        "77200002938327608",
+        "77200006055150135",
+        "77200006603064626",
+        "77200006853988591",
+        "772000081813958580",
+        "77200008329359173",
+        "77200008361139574"
+      ]
+    },
+    "globus": {
+      "providerName": "Globus",
+      "membershipName": "Globus Bonus Card",
+      "brandColor": -551907,
+      "brandColorContrast": -551907,
+      "format": "EAN_13",
+      "codes": [
+        "0450104598192",
+        "0450106889137",
+        "0459015495637",
+        "0459017070986",
+        "0459019732356",
+        "0459020191326"
+      ]
+    },
+    "kaufland": {
+      "providerName": "Kaufland",
+      "membershipName": "kaufland",
+      "brandColor": -2818048,
+      "brandColorContrast": -2818048,
+      "format": "QR_CODE",
+      "codes": [
+        "KQR00001:203111502654",
+        "KQR00001:203112819764"
+      ]
+    },
+    "penny": {
+      "providerName": "Penny",
+      "membershipName": "Penny karta",
+      "brandColor": -1900533,
+      "brandColorContrast": -1900533,
+      "format": "EAN_13",
+      "codes": [
+        "2095411833550",
+        "2095424011167",
+        "2095424318204",
+        "2095449607185",
+        "2095449731101",
+        "2095449765090",
+        "2095450283262",
+        "2095451851231"
+      ]
+    },
+    "dm": {
+      "providerName": "DM",
+      "membershipName": "DM drogerie",
+      "brandColor": -1898989,
+      "brandColorContrast": -1898989,
+      "format": "EAN_13",
+      "codes": [
+        "2413026818456",
+        "2413026978716",
+        "2413027706554",
+        "2413040255855",
+        "2413056908172",
+        "2413057267964",
+        "2413995710010"
+      ]
+    },
+    "teta": {
+      "providerName": "Teta",
+      "membershipName": "Teta klub",
+      "brandColor": -39246,
+      "brandColorContrast": -52327,
+      "format": "EAN_13",
+      "codes": [
+        "2401002573772",
+        "2401020925973",
+        "2401024641237",
+        "2401028624809",
+        "2401031018091",
+        "2401036502755"
+      ]
+    },
+    "rossmann": {
+      "providerName": "Rossmann",
+      "membershipName": "Rossmann",
+      "brandColor": -1966054,
+      "brandColorContrast": -1966054,
+      "format": "EAN_13",
+      "codes": [
+        "9991002135481",
+        "9991002185264",
+        "9991002310840",
+        "9991006048251",
+        "9991011039695",
+        "9991014579952",
+        "9991015480295"
+      ]
+    },
+    "drmax": {
+      "providerName": "Dr. Max",
+      "membershipName": "Dr. Max karta",
+      "brandColor": -16734113,
+      "brandColorContrast": -16734113,
+      "format": "EAN_13",
+      "codes": [
+        "2810073455892",
+        "2810095577756",
+        "2810096977395",
+        "2810101216051"
+      ]
+    },
+    "benu": {
+      "providerName": "Benu",
+      "membershipName": "Benu lékárna",
+      "brandColor": -9823334,
+      "brandColorContrast": -9823334,
+      "format": "EAN_13",
+      "codes": [
+        "2150000428729",
+        "2150012386918",
+        "2150020566456",
+        "2180001667346"
+      ]
     }
+  }
 }

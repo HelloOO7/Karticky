@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingBottom="@dimen/item_margin_s">
+
+    <Button
+        android:id="@+id/btnSelectAll"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="0.5"
+        android:layout_marginEnd="@dimen/item_margin_s"
+        android:text="@string/select_all" />
+
+    <Button
+        android:id="@+id/btnSelectNone"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="0.5"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        android:text="@string/select_none" />
+</LinearLayout>

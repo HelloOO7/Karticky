@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="rainbow_red">#FF0000</color>
+    <color name="rainbow_magenta">#FF00FF</color>
+    <color name="rainbow_blue">#0000FF</color>
+    <color name="rainbow_cyan">#00FFFF</color>
+    <color name="rainbow_green">#00FF00</color>
+    <color name="rainbow_yellow">#FFFF00</color>
+
+    <color name="rainbow_dark_gray">#808080</color>
+    <color name="rainbow_gray">#AAAAAA</color>
+    <color name="rainbow_light_gray">#CCCCCC</color>
+
+    <integer-array name="rainbow_gradient">
+        <item>@color/rainbow_magenta</item>
+        <item>@color/rainbow_blue</item>
+        <item>@color/rainbow_cyan</item>
+        <item>@color/rainbow_green</item>
+        <item>@color/rainbow_yellow</item>
+        <item>@color/rainbow_red</item>
+    </integer-array>
+
+    <integer-array name="black_white_gradient">
+        <item>@color/rainbow_dark_gray</item>
+        <item>@color/rainbow_gray</item>
+        <item>@color/rainbow_dark_gray</item>
+        <item>@color/rainbow_light_gray</item>
+    </integer-array>
+</resources>

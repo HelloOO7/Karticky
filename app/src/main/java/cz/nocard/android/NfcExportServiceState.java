@@ -1,13 +1,15 @@
 package cz.nocard.android;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class NfcExportServiceState {
 
     private boolean isEnabled;
-    private long transactionId;
+    private List<PersonalCard> exportCardFilter;
 
     public NfcExportServiceState() {
         isEnabled = false;
-        newTransactionId();
     }
 
     public boolean isEnabled() {
@@ -18,11 +20,21 @@ public class NfcExportServiceState {
         isEnabled = enabled;
     }
 
-    public void newTransactionId() {
-        transactionId = System.currentTimeMillis();
+    public void setExportCardFilter(List<PersonalCard> cards) {
+        this.exportCardFilter = cards;
     }
 
-    public long getTransactionId() {
-        return transactionId;
+    public void clearExportCardFilter() {
+        setExportCardFilter(null);
+    }
+
+    public List<PersonalCard> getCardsForExport(PersonalCardStore store) {
+        if (exportCardFilter == null) {
+            return store.getPersonalCards();
+        } else {
+            List<PersonalCard> out = new ArrayList<>(store.getPersonalCards());
+            out.retainAll(exportCardFilter);
+            return out;
+        }
     }
 }

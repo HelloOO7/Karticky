@@ -12,4 +12,6 @@
     <dimen name="brand_color_chip_corner_dim">8dp</dimen>
     <dimen name="choice_button_icon_size">48dp</dimen>
     <dimen name="fab_overlap_adjust_height">72dp</dimen>
+    <dimen name="card_list_header_button_size">40dp</dimen>
+    <dimen name="color_preview_corner_dim">14dp</dimen>
 </resources>

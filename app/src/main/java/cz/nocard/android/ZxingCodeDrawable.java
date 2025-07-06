@@ -92,7 +92,8 @@ public class ZxingCodeDrawable extends BitmapDrawable {
             } else {
                 return new MultiFormatWriter().encode(text, options.format, 0, 0, Map.of(
                         EncodeHintType.ERROR_CORRECTION, options.errorCorrectionLevel,
-                        EncodeHintType.MARGIN, 0
+                        EncodeHintType.MARGIN, 0,
+                        EncodeHintType.CHARACTER_SET, options.characterSet
                 ));
             }
         } catch (WriterException e) {
@@ -106,6 +107,7 @@ public class ZxingCodeDrawable extends BitmapDrawable {
         private int foregroundColor = Color.BLACK;
         private ErrorCorrectionLevel errorCorrectionLevel = ErrorCorrectionLevel.L;
         private BarcodeFormat format = BarcodeFormat.QR_CODE;
+        private String characterSet = "ISO-8859-1";
         private String text;
         private float padding = 0f;
 
@@ -131,6 +133,11 @@ public class ZxingCodeDrawable extends BitmapDrawable {
 
         public Options setData(String string) {
             this.text = string;
+            return this;
+        }
+
+        public Options setCharacterSet(String characterSet) {
+            this.characterSet = characterSet;
             return this;
         }
 
