@@ -1,0 +1,19 @@
+<IfModule mod_rewrite.c>
+RewriteEngine On
+
+RewriteCond %{HTTP_HOST} !=localhost
+RewriteCond %{HTTP_HOST} !=127.0.0.1
+RewriteCond %{REMOTE_ADDR} !=127.0.0.1
+RewriteCond %{REMOTE_ADDR} !=::1
+
+RewriteCond %{HTTPS} !=on
+RewriteCond %{HTTP:CF-Visitor} '"scheme":"http"'
+
+RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [QSA,R,L]
+
+RewriteCond %{HTTP_HOST} ^[^.]+\.[^.]+$
+RewriteRule ^(.*)$ https://www.%{HTTP_HOST}/$1 [L,R=301]
+
+RewriteRule ^stahnout$ https://lab.d3s.mff.cuni.cz:27083/update/download-latest/cz.nocard.android [L,R=301]
+
+</IfModule>

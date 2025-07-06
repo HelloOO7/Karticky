@@ -8,6 +8,7 @@ Aplikace slouží jako klient pro webové stránky projektu [NoCard](https://noc
 - automatická detekce kartičky k použití podle signálu Wi-Fi z prodejen
 - tichá oznámení, ze kterých je lze rovnou otevřít
 - podpora přidávání vlastních karet načtením kódu fotoaparátem nebo z obrázku či jeho ručním zadáním
+- sdílení osobních karet mezi zařízeními pomocí NFC nebo přes deep linking
 - možnost "zakázat" nefunkční karty
 - tmavý režim na Androidu 10+, dynamické barvy a animovaná startovací obrazovka na Androidu 12+
 
@@ -21,9 +22,10 @@ Hlavní obrazovka            |  Notifikace
 
 ## Instalace
 
-Aplikaci lze zkompilovat ze zdrojových kódů nebo stáhnout nejnovější stabilní verzi na odkazu níže:
+Aplikaci lze zkompilovat ze zdrojových kódů nebo stáhnout nejnovější stabilní verzi na libovolném z odkazů níže (zkrácený je interně přesměrován na úplný):
 
-https://lab.d3s.mff.cuni.cz:27083/update/download-latest/cz.nocard.android
+- https://nocard.spojenka.cz/stahnout
+- https://lab.d3s.mff.cuni.cz:27083/update/download-latest/cz.nocard.android
 
 Automaticky sestavené artefakty z nejnovějšího commitu, podepsané tímtéž klíčem, jsou dostupné z [GitHub Actions](https://github.com/HelloOO7/NoCard-Android/actions/).
 
