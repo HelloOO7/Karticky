@@ -257,6 +257,7 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 updateSelectedCardList();
+                prefs.putLastCardListTab(tab.getPosition());
             }
 
             @Override
