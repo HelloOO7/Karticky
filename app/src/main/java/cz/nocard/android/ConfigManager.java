@@ -107,8 +107,8 @@ public class ConfigManager {
     }
 
     public String getProviderNameOrDefault(String key) {
-        NoCardConfig.ProviderInfo pi = getProviderInfo(key);
-        if (!TextUtils.isEmpty(pi.providerName())) {
+        NoCardConfig.ProviderInfo pi = getProviderInfoOrNull(key);
+        if (pi != null && !TextUtils.isEmpty(pi.providerName())) {
             return pi.providerName();
         } else {
             return key;

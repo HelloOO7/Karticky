@@ -145,9 +145,18 @@ public class PersonalCardStore {
         invokeListeners(listener -> listener.onCardChanged(card));
     }
 
+    public String getCardProviderName(PersonalCard card, ConfigManager config) {
+        PersonalCard.CustomCardProperties props = card.customProperties();
+        if (props != null) {
+            return props.providerName();
+        } else {
+            return config.getProviderNameOrDefault(card.provider());
+        }
+    }
+
     public String getCardName(PersonalCard card, ConfigManager config) {
         if (card.name() == null) {
-            return PersonalCard.formatDefaultName(config.getProviderNameOrDefault(card.provider()), card.cardNumber());
+            return PersonalCard.formatDefaultName(getCardProviderName(card, config), card.cardNumber());
         } else {
             return card.name();
         }
