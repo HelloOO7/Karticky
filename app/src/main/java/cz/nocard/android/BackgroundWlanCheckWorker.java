@@ -88,7 +88,7 @@ public class BackgroundWlanCheckWorker extends Worker {
                 cardNotificationManager.clearNotification();
                 cardNotificationManager.ackAPForFutureNotification(null);
             }
-        }, false);
+        }, null, false); //don't care about the thread, no UI operations are done
 
         return Result.success();
     }

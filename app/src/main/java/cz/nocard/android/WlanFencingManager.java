@@ -20,19 +20,19 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 import cz.spojenka.android.system.PermissionRequestHelper;
 import cz.spojenka.android.util.AsyncUtils;
 import cz.spojenka.android.util.CollectionUtils;
 
-public class WlanFencingManager {
+public class WlanFencingManager extends AbstractListenerTarget<WlanFencingManager.OnNearbyProviderCallback> {
 
     public static final int SIGNAL_OUT_OF_RANGE = Integer.MIN_VALUE;
 
@@ -46,8 +46,6 @@ public class WlanFencingManager {
     private boolean registered = false;
 
     private ProviderAPInfo currentAPInfo = null;
-
-    private final List<OnNearbyProviderCallback> callbacks = new ArrayList<>();
 
     private final ReceiverImpl receiverImpl;
 
@@ -123,9 +121,8 @@ public class WlanFencingManager {
         return isDoneInitialScan;
     }
 
-    public synchronized void registerOnNearbyProviderCallback(OnNearbyProviderCallback callback, boolean callIfCurrent) {
-        if (!callbacks.contains(callback)) {
-            callbacks.add(Objects.requireNonNull(callback));
+    public synchronized void registerOnNearbyProviderCallback(OnNearbyProviderCallback callback, Executor executor, boolean callIfCurrent) {
+        if (addListener(callback, executor)) {
             register();
         }
         if (callIfCurrent && currentAPInfo != null) {
@@ -134,30 +131,24 @@ public class WlanFencingManager {
     }
 
     public synchronized void unregisterOnNearbyProviderCallback(OnNearbyProviderCallback callback) {
-        callbacks.remove(Objects.requireNonNull(callback));
-        if (callbacks.isEmpty()) {
+        removeListener(callback);
+        if (!hasAnyListener()) {
             unregister();
         }
     }
 
     private void invokeOnNearbyProviderCallbacks(ProviderAPInfo provider) {
-        Log.d(LOG_TAG, "Provider nearby: " + provider + ", callback count=" + callbacks.size());
-        for (OnNearbyProviderCallback callback : callbacks) {
-            callback.providerNearby(provider);
-        }
+        Log.d(LOG_TAG, "Provider nearby: " + provider + ", callback count=" + getListenerCount());
+        invokeListeners(cb -> cb.providerNearby(provider));
     }
 
     private void invokeOnProviderLostCallback(ProviderAPInfo provider) {
-        Log.d(LOG_TAG, "Provider lost: " + provider + ", callback count=" + callbacks.size());
-        for (OnNearbyProviderCallback callback : callbacks) {
-            callback.providerLost(provider);
-        }
+        Log.d(LOG_TAG, "Provider lost: " + provider + ", callback count=" + getListenerCount());
+        invokeListeners(cb -> cb.providerLost(provider));
     }
 
     private void invokeNoProviderCallback() {
-        for (OnNearbyProviderCallback callback : callbacks) {
-            callback.noProvider();
-        }
+        invokeListeners(OnNearbyProviderCallback::noProvider);
     }
 
     private boolean holdsNeededPermissions() {

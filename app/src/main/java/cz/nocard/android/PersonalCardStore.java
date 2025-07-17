@@ -12,7 +12,7 @@ import java.util.function.Consumer;
 
 import cz.spojenka.android.util.AsyncUtils;
 
-public class PersonalCardStore {
+public class PersonalCardStore extends AbstractListenerTarget<PersonalCardStore.Listener> {
 
     public static final int CARD_ID_INVALID = -1;
     public static final int CARD_ID_TEMPORARY = -2;
@@ -22,22 +22,11 @@ public class PersonalCardStore {
 
     private final SharedPreferences sharedPreferences;
     private List<PersonalCard> personalCards;
-    private List<Listener> listeners = new ArrayList<>();
     private int inTransaction = 0;
     private boolean dirty = false;
 
     public PersonalCardStore(NoCardPreferences preferences) {
         sharedPreferences = preferences.getPrefs();
-    }
-
-    public synchronized void addListener(Listener listener) {
-        if (!listeners.contains(listener)) {
-            listeners.add(listener);
-        }
-    }
-
-    public synchronized void removeListener(Listener listener) {
-        listeners.remove(listener);
     }
 
     public synchronized int newCardId() {
@@ -68,14 +57,6 @@ public class PersonalCardStore {
             personalCards = new SettingValueType();
         }
         return personalCards;
-    }
-
-    private void invokeListeners(Consumer<Listener> action) {
-        AsyncUtils.runOnMainThread(() -> {
-            for (Listener listener : listeners) {
-                action.accept(listener);
-            }
-        });
     }
 
     public synchronized void addCard(PersonalCard card) {

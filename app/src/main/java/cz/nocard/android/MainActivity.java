@@ -123,7 +123,7 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
 
         NoCardApplication.getInstance().getApplicationComponent().inject(this);
 
-        personalCardStore.addListener(this);
+        personalCardStore.addListener(this, AsyncUtils.getLifecycleExecutor(this));
 
         handler = new Handler(getMainLooper());
 
@@ -651,7 +651,7 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
         currentAutoProvider = null;
         setAutoDetectDiscoveringUI();
         //if an auto provider exists, callIfCurrent will make sure it is set
-        wlanFencingManager.registerOnNearbyProviderCallback(this, true);
+        wlanFencingManager.registerOnNearbyProviderCallback(this, AsyncUtils.getLifecycleExecutor(this), true);
     }
 
     private void setAutoDetectText(String text) {

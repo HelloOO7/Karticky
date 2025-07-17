@@ -17,6 +17,8 @@ import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
+import cz.spojenka.android.util.AsyncUtils;
+
 public class PersonalCardsActivity extends CardListBaseActivity implements PersonalCardStore.Listener {
 
     @Inject
@@ -34,7 +36,7 @@ public class PersonalCardsActivity extends CardListBaseActivity implements Perso
         NoCardApplication.getInstance().getApplicationComponent().inject(this);
         providerOrder = config.getAllProviders();
         super.onCreate(savedInstanceState);
-        personalCardStore.addListener(this);
+        personalCardStore.addListener(this, AsyncUtils.getLifecycleExecutor(this));
         setAddButtonCallback(v -> startActivity(new Intent(this, ImportSpringboardActivity.class)));
     }
 
