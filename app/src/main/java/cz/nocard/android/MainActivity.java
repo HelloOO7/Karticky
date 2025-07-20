@@ -1051,7 +1051,7 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
                 .setAction(R.string.update_action, v -> {
                     snackbar.dismiss();
                     try {
-                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(BuildConfig.GITHUB_HOMEPAGE)));
+                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(BuildConfig.APP_HOMEPAGE)));
                     } catch (Exception e) {
                         Log.e(LOG_TAG, "Failed to open update URL", e);
                         Snackbar.make(ui.clCoordinator, R.string.url_open_error, Snackbar.LENGTH_LONG).show();

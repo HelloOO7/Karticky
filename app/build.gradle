@@ -10,8 +10,8 @@ android {
         applicationId "cz.nocard.android"
         minSdk 24
         targetSdk 35
-        versionCode 22
-        versionName "2.0.3"
+        versionCode 23
+        versionName "2.0.4"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -22,6 +22,7 @@ android {
         buildConfigField "String", "REMOTE_CONFIG_LOCATION", "\"https://nocard.spojenka.cz/appdata/config.json\""
         buildConfigField "String", "REMOTE_BUILD_GRADLE", "\"https://raw.githubusercontent.com/HelloOO7/NoCard-Android/refs/heads/master/app/build.gradle\""
         buildConfigField "String", "GITHUB_HOMEPAGE", "\"https://github.com/HelloOO7/NoCard-Android\""
+        buildConfigField "String", "APP_HOMEPAGE", "\"https://nocard.spojenka.cz\""
         buildConfigField "String", "DEEP_LINK_BASE_URL", "\"https://${DEEP_LINK_DOMAIN}${DEEP_LINK_PATH_PREFIX}\""
 
         resValue "string", "deep_link_domain", DEEP_LINK_DOMAIN
