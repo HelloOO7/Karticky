@@ -1,13 +1,11 @@
 package cz.nocard.scraper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 
 public class NoCardWebScraper {
 
@@ -17,16 +15,14 @@ public class NoCardWebScraper {
     private static final int RETRY_DELAY_MIN = 1000; // 1 second
     private static final int RETRY_DELAY_MAX = 2000;
 
-    private static final ObjectMapper JSON_MAPPER = new ObjectMapper();
-
     public static void main(String[] args) throws Exception {
-        NoCardConfig mergedConfig = JSON_MAPPER.readValue(new File("data/base-config.json"), NoCardConfig.class);
+        NoCardConfig mergedConfig = NoCardConfig.JSON_MAPPER.readValue(new File("data/base-config.json"), NoCardConfig.class);
 
-        Random rng = new Random();
+        RandomWaiting waiting = new RandomWaiting(RETRY_DELAY_MIN, RETRY_DELAY_MAX);
         int failures = 0;
         for (int i = 0; i < RETRIES; i++) {
             if (i != 0) {
-                Thread.sleep(RETRY_DELAY_MIN + rng.nextInt(RETRY_DELAY_MAX - RETRY_DELAY_MIN));
+                waiting.sleep();
             }
             System.out.println("Fetching remote config, pass " + (i + 1) + " of " + RETRIES);
 
@@ -57,6 +53,6 @@ public class NoCardWebScraper {
             Collections.sort(pi.codes());
         }
 
-        JSON_MAPPER.writerWithDefaultPrettyPrinter().writeValue(new File("data/config.json"), mergedConfig);
+        NoCardConfig.JSON_MAPPER.writerWithDefaultPrettyPrinter().writeValue(new File("data/config-nocardcz.json"), mergedConfig);
     }
 }

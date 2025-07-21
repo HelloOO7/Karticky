@@ -2,6 +2,7 @@ package cz.nocard.scraper;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.zxing.BarcodeFormat;
 
 import java.util.LinkedHashMap;
@@ -9,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 
 public class NoCardConfig {
+
+    public static final ObjectMapper JSON_MAPPER = new ObjectMapper();
 
     //bug: records are broken on Android+Jackson when using R8
 

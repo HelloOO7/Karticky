@@ -11,5 +11,9 @@ dependencies {
     implementation libs.zxing
     implementation libs.jackson.core
     implementation libs.jackson.databind
+    implementation libs.jackson.time
     implementation libs.jsoup
+    implementation libs.retrofit2
+    implementation libs.retrofit2.jackson
+    implementation libs.okhttp.logging
 }
