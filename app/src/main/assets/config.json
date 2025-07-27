@@ -20,9 +20,24 @@
       "brandColorContrast": -16755809,
       "format": "CODE_128",
       "codes": [
+        "634009560038053526",
         "634009566001661609",
+        "634009566004382708",
+        "634009566005023954",
+        "634009566009521136",
         "634009566009602720",
-        "634009569017704926"
+        "634009566010479050",
+        "634009567000222179",
+        "634009569001921197",
+        "634009569002198522",
+        "634009569007511547",
+        "634009569010600139",
+        "634009569011143352",
+        "634009569012075660",
+        "634009569014737713",
+        "634009569015127997",
+        "634009569017704926",
+        "634009569018855966"
       ]
     },
     "albert": {
@@ -32,10 +47,22 @@
       "brandColorContrast": -16744902,
       "format": "CODE_128",
       "codes": [
+        "99692Lda3qmII8wwmX0J",
+        "99696CSHNZnlGZkPwhWM",
+        "99699mUoTOkXE9RBJc4Y",
         "9969BSAoldGyph4A9zRL",
+        "9969CXvHA1iLYQfQMR03",
+        "9969GZMnzBR7dhYJnX6u",
+        "9969J3ZH82yWqY9WaNhH",
+        "9969Mng5aeGlI8ldQfdV",
+        "9969OURBI789UGTYg4eZ",
+        "9969RqmB6iaCCLZvtIeh",
+        "9969TQgGKMywNgGIwfCy",
         "9969aZIsL2t3wIl3d0tY",
+        "9969fAcr2IopyiPgR8JK",
         "9969kwZpM0apR3yLUrFe",
-        "9969naoydbefk7AoFulK"
+        "9969naoydbefk7AoFulK",
+        "9969ygxr3evx54eQJakV"
       ]
     },
     "billa": {
@@ -45,15 +72,38 @@
       "brandColorContrast": -3604480,
       "format": "EAN_13",
       "codes": [
+        "0400027081325",
+        "0400030017960",
         "0400031830339",
+        "0400080308674",
         "0400080454487",
+        "0400092713848",
         "0400094961698",
         "0400096193493",
+        "0400096564972",
+        "0400096567706",
+        "0400099851987",
+        "0400103988678",
+        "0400104159787",
+        "0400104205460",
         "0400104248856",
         "0400104344084",
+        "0400105695659",
         "0400106467132",
+        "0400107067447",
+        "0400107266925",
+        "0400128262500",
+        "0400128263040",
+        "0400131596289",
+        "0400132198604",
         "0400132399636",
+        "0400132935339",
+        "0400135101410",
+        "0400135309007",
+        "400024143668",
+        "400050565700",
         "400080055011",
+        "400096466429",
         "400098372896",
         "400099851987",
         "400105844033",
@@ -68,10 +118,24 @@
       "format": "QR_CODE",
       "codes": [
         "77200002938327608",
+        "77200002945302490",
+        "77200003197808331",
         "77200006055150135",
         "77200006603064626",
+        "77200006784211447",
+        "77200006818290457",
         "77200006853988591",
+        "77200006884161314",
+        "77200006967006298",
+        "77200008015075196",
+        "77200008074507484",
+        "77200008124175073",
         "772000081813958580",
+        "772000082054572900",
+        "772000082080798791",
+        "772000082411428140",
+        "772000082446216221",
+        "77200008248740048",
         "77200008329359173",
         "77200008361139574",
         "77200008378459506"
@@ -85,11 +149,23 @@
       "format": "EAN_13",
       "codes": [
         "0450104598192",
+        "0450106718895",
         "0450106889137",
+        "0450110154313",
+        "0450113183808",
+        "0459012986367",
         "0459015495637",
+        "0459015570761",
+        "0459015815688",
+        "0459016947272",
         "0459017070986",
+        "0459017730576",
+        "0459018541591",
         "0459019732356",
-        "0459020191326"
+        "0459020191326",
+        "0459020344586",
+        "0459020397070",
+        "450110041651"
       ]
     },
     "kaufland": {
@@ -99,8 +175,16 @@
       "brandColorContrast": -2818048,
       "format": "QR_CODE",
       "codes": [
+        "6002011084740785",
         "KQR00001:203111502654",
-        "KQR00001:203112819764"
+        "KQR00001:203112363675",
+        "KQR00001:203112819764",
+        "KQR00001:203113290588",
+        "KQR00001:203113395361",
+        "KQR00001:203113558038",
+        "KQR00001:203113939093",
+        "KQR00001:203114299212",
+        "KQR00001:203114302499"
       ]
     },
     "penny": {
@@ -110,6 +194,7 @@
       "brandColorContrast": -1900533,
       "format": "EAN_13",
       "codes": [
+        "2095036422955",
         "2095411833550",
         "2095424011167",
         "2095424318204",
@@ -117,7 +202,22 @@
         "2095449731101",
         "2095449765090",
         "2095450283262",
-        "2095451851231"
+        "2095451186036",
+        "2095451851231",
+        "2095456480597",
+        "2095456815061"
+      ]
+    },
+    "makro": {
+      "providerName": "Makro",
+      "membershipName": "Makro Club",
+      "brandColor": -16750925,
+      "brandColorContrast": -16750925,
+      "format": "CODE_128",
+      "codes": [
+        "2030000200320590010029",
+        "2030000200392387010065",
+        "2030000200420260010019"
       ]
     },
     "dm": {
@@ -127,12 +227,20 @@
       "brandColorContrast": -1898989,
       "format": "EAN_13",
       "codes": [
+        "2016222502",
+        "2413001553501",
         "2413026818456",
         "2413026978716",
         "2413027706554",
+        "2413027982057",
+        "2413029378216",
         "2413040255855",
         "2413056908172",
         "2413057267964",
+        "2413062484851",
+        "2413079765851",
+        "2413080441638",
+        "2413081595637",
         "2413101184667",
         "2413995710010"
       ]
@@ -145,9 +253,13 @@
       "format": "EAN_13",
       "codes": [
         "2401002573772",
+        "2401003063296",
+        "2401006544303",
+        "2401019580367",
         "2401020925973",
         "2401024641237",
         "2401028624809",
+        "2401030044589",
         "2401031018091",
         "2401036502755"
       ]
@@ -165,7 +277,11 @@
         "9991006048251",
         "9991011039695",
         "9991014579952",
-        "9991015480295"
+        "9991015050306",
+        "9991015408237",
+        "9991015480295",
+        "9991015835248",
+        "9991020010593"
       ]
     },
     "drmax": {
@@ -178,7 +294,11 @@
         "2810073455892",
         "2810095577756",
         "2810096977395",
-        "2810101216051"
+        "2810101216051",
+        "2810104276236",
+        "2810113664765",
+        "2810128606569",
+        "2810131088376"
       ]
     },
     "benu": {
@@ -191,7 +311,332 @@
         "2150000428729",
         "2150012386918",
         "2150020566456",
+        "2150027538487",
+        "2180000865125",
+        "2180001308782",
+        "2180001542612",
         "2180001667346"
+      ]
+    },
+    "knihydobrovsky": {
+      "providerName": "Knihy Dobrovský",
+      "membershipName": "Knihy Dobrovský",
+      "brandColor": -16750156,
+      "brandColorContrast": -16750156,
+      "format": "EAN_13",
+      "codes": [
+        "2871703297589",
+        "2871704081255",
+        "2871704592553",
+        "2871706573307",
+        "2871706911703"
+      ]
+    },
+    "luxor": {
+      "providerName": "Luxor",
+      "membershipName": "Luxor Klub",
+      "brandColor": -16777216,
+      "brandColorContrast": -16777216,
+      "format": "CODE_128",
+      "codes": [
+        "A00077332"
+      ]
+    },
+    "superzoo": {
+      "providerName": "Super Zoo",
+      "membershipName": "Super Zoo Klub",
+      "brandColor": -140800,
+      "brandColorContrast": -3927014,
+      "format": "CODE_128",
+      "codes": [
+        "S66-K96-MSD"
+      ]
+    },
+    "baumaxx": {
+      "providerName": "BauMax",
+      "membershipName": "BauMax Klub",
+      "brandColor": -2680544,
+      "brandColorContrast": -2680544,
+      "format": "CODE_128",
+      "codes": [
+        "1744127735105861"
+      ]
+    },
+    "mol": {
+      "providerName": "MOL",
+      "membershipName": "MOL Group karta",
+      "brandColor": -3665874,
+      "brandColorContrast": -3665874,
+      "format": "CODE_128",
+      "codes": [
+        "9203041150415016",
+        "9203042208651065",
+        "9203042210642250",
+        "9203042210886451",
+        "9203042211442742"
+      ]
+    },
+    "orlen": {
+      "providerName": "Orlen",
+      "membershipName": "Orlen Benzina karta",
+      "brandColor": -2678745,
+      "brandColorContrast": -2678745,
+      "format": "QR_CODE",
+      "codes": [
+        "30009eNR4alpfzgPOilL",
+        "3005pcm9FAmWM57Jdel2",
+        "300dmKQ2SSFuxXoptz9t",
+        "300gKWczbOAPxg7sDRZO",
+        "300xLIiuba5U97K0MBMW",
+        "300zdhMEKdammo5uZPpv"
+      ]
+    },
+    "shell": {
+      "providerName": "Shell",
+      "membershipName": "Shell ClubSmart karta",
+      "brandColor": -11008,
+      "brandColorContrast": -1834965,
+      "format": "CODE_128",
+      "codes": [
+        "70043201247653914",
+        "70043208019497214",
+        "70043208077804814",
+        "70043208088588919"
+      ]
+    },
+    "17_Action": {
+      "providerName": "Action",
+      "membershipName": "Action",
+      "brandColor": null,
+      "brandColorContrast": null,
+      "format": "QR_CODE",
+      "codes": [
+        "L2612461834827"
+      ]
+    },
+    "18_Baťa": {
+      "providerName": "Baťa",
+      "membershipName": "Baťa",
+      "brandColor": null,
+      "brandColorContrast": null,
+      "format": "EAN_13",
+      "codes": [
+        "2300050715519",
+        "2300488424519",
+        "2300613217511"
+      ]
+    },
+    "19_CCC": {
+      "providerName": "CCC",
+      "membershipName": "CCC",
+      "brandColor": null,
+      "brandColorContrast": null,
+      "format": "EAN_13",
+      "codes": [
+        "2920044458699",
+        "2921003009310",
+        "2940023837871",
+        "2940046740189"
+      ]
+    },
+    "20_KiK": {
+      "providerName": "KiK",
+      "membershipName": "KiK",
+      "brandColor": null,
+      "brandColorContrast": null,
+      "format": "QR_CODE",
+      "codes": [
+        "98500959510049",
+        "98601831666042"
+      ]
+    },
+    "21_Tescoma": {
+      "providerName": "Tescoma",
+      "membershipName": "Tescoma",
+      "brandColor": null,
+      "brandColorContrast": null,
+      "format": "EAN_13",
+      "codes": [
+        "0463010522687"
+      ]
+    },
+    "22_UNI Hobby": {
+      "providerName": "UNI Hobby",
+      "membershipName": "UNI Hobby",
+      "brandColor": null,
+      "brandColorContrast": null,
+      "format": "EAN_13",
+      "codes": [
+        "9900000117993"
+      ]
+    },
+    "23_Sephora": {
+      "providerName": "Sephora",
+      "membershipName": "Sephora",
+      "brandColor": null,
+      "brandColorContrast": null,
+      "format": "EAN_13",
+      "codes": [
+        "4201010503437",
+        "4201013291287",
+        "4201028400179"
+      ]
+    },
+    "26_Marionnaud": {
+      "providerName": "Marionnaud",
+      "membershipName": "Marionnaud",
+      "brandColor": null,
+      "brandColorContrast": null,
+      "format": "EAN_13",
+      "codes": [
+        "9999355059348"
+      ]
+    },
+    "27_Ovocný světozor": {
+      "providerName": "Ovocný světozor",
+      "membershipName": "Ovocný světozor",
+      "brandColor": null,
+      "brandColorContrast": null,
+      "format": "EAN_13",
+      "codes": [
+        "9970890572424",
+        "9971610911073"
+      ]
+    },
+    "28_Datart": {
+      "providerName": "Datart",
+      "membershipName": "Datart",
+      "brandColor": null,
+      "brandColorContrast": null,
+      "format": "CODE_128",
+      "codes": [
+        "10173569"
+      ]
+    },
+    "29_Intersport": {
+      "providerName": "Intersport",
+      "membershipName": "Intersport",
+      "brandColor": null,
+      "brandColorContrast": null,
+      "format": "EAN_13",
+      "codes": [
+        "0002008968856"
+      ]
+    },
+    "30_IKEA": {
+      "providerName": "IKEA",
+      "membershipName": "IKEA",
+      "brandColor": null,
+      "brandColorContrast": null,
+      "format": "QR_CODE",
+      "codes": [
+        "6275980252954579895",
+        "6275980253009019143",
+        "6275980253048822358"
+      ]
+    },
+    "31_UGO - Salaterie": {
+      "providerName": "UGO - Salaterie",
+      "membershipName": "UGO - Salaterie",
+      "brandColor": null,
+      "brandColorContrast": null,
+      "format": "CODE_128",
+      "codes": [
+        "ZLR-VXU-CFF",
+        "ZSX-5G4-LWH"
+      ]
+    },
+    "32_Marks & Spencer": {
+      "providerName": "Marks & Spencer",
+      "membershipName": "Marks & Spencer",
+      "brandColor": null,
+      "brandColorContrast": null,
+      "format": "EAN_13",
+      "codes": [
+        "9700100621228"
+      ]
+    },
+    "33_DOUGLAS": {
+      "providerName": "DOUGLAS",
+      "membershipName": "DOUGLAS",
+      "brandColor": null,
+      "brandColorContrast": null,
+      "format": "CODE_128",
+      "codes": [
+        "60088458003850996",
+        "60088458004727102"
+      ]
+    },
+    "34_OMV": {
+      "providerName": "OMV",
+      "membershipName": "OMV",
+      "brandColor": null,
+      "brandColorContrast": null,
+      "format": "CODE_128",
+      "codes": [
+        "203100001779974",
+        "203100001984301"
+      ]
+    },
+    "35_H&M": {
+      "providerName": "H&M",
+      "membershipName": "H&M",
+      "brandColor": null,
+      "brandColorContrast": null,
+      "format": "CODE_128",
+      "codes": [
+        "101210887637800"
+      ]
+    },
+    "36_Möbelix": {
+      "providerName": "Möbelix",
+      "membershipName": "Möbelix",
+      "brandColor": null,
+      "brandColorContrast": null,
+      "format": "ITF",
+      "codes": [
+        "1101219878"
+      ]
+    },
+    "37_Lindex": {
+      "providerName": "Lindex",
+      "membershipName": "Lindex",
+      "brandColor": null,
+      "brandColorContrast": null,
+      "format": "CODE_128",
+      "codes": [
+        "6035894200485686",
+        "6037437005495639"
+      ]
+    },
+    "39_Magistra": {
+      "providerName": "Magistra",
+      "membershipName": "Magistra",
+      "brandColor": null,
+      "brandColorContrast": null,
+      "format": "EAN_13",
+      "codes": [
+        "2817778970071"
+      ]
+    },
+    "40_Decathlon": {
+      "providerName": "Decathlon",
+      "membershipName": "Decathlon",
+      "brandColor": null,
+      "brandColorContrast": null,
+      "format": "EAN_13",
+      "codes": [
+        "2093420138147"
+      ]
+    },
+    "41_Gate": {
+      "providerName": "Gate",
+      "membershipName": "Gate",
+      "brandColor": null,
+      "brandColorContrast": null,
+      "format": "QR_CODE",
+      "codes": [
+        "3334932508233"
       ]
     }
   }

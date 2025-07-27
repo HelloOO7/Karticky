@@ -36,7 +36,7 @@ public class ConfigMerger {
                 mergeField(a, b, NoCardConfig.ProviderInfo::brandColor),
                 mergeField(a, b, NoCardConfig.ProviderInfo::brandColorContrast),
                 mergeField(a, b, NoCardConfig.ProviderInfo::format),
-                Stream.concat(a.codes().stream(), b.codes().stream()).sorted().toList()
+                Stream.concat(a.codes().stream(), b.codes().stream()).distinct().sorted().toList()
         );
     }
 

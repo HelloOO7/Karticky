@@ -48,6 +48,14 @@ public class BootlegWebScraper {
         }
     }
 
+    private static int getBaseRetryCountForStore(String storeName) {
+        return switch (storeName) {
+            case "Tesco", "Albert", "Billa", "Lidl", "Globus", "Penny", "DM" -> 20;
+            case "Kaufland", "Teta", "Rossmann", "Dr.Max", "Benu", "CCC" -> 10;
+            default -> 5;
+        };
+    }
+
     public static void scrape(String[] args) throws IOException, InterruptedException {
         NoCardConfig mergedConfig = NoCardConfig.JSON_MAPPER.readValue(new File("data/base-config.json"), NoCardConfig.class);
 
@@ -67,7 +75,7 @@ public class BootlegWebScraper {
         Random random = new Random();
 
         for (StoreInfo store : stores.data()) {
-            for (int i = 0; i < 5 + random.nextInt(5); i++) {
+            for (int i = 0; i < getBaseRetryCountForStore(store.name) + random.nextInt(5); i++) {
                 randomRequests.add(store);
             }
         }

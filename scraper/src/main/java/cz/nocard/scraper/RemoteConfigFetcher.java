@@ -1,5 +1,8 @@
 package cz.nocard.scraper;
 
+import com.fasterxml.jackson.core.json.JsonReadFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.google.zxing.BarcodeFormat;
 
 import org.jsoup.Connection;
@@ -24,6 +27,13 @@ public class RemoteConfigFetcher {
     private static final Pattern COLOR_CLASS_REGEX = Pattern.compile(
             "\\.card\\.([^ :]+)([^#]+)(#[A-Fa-f0-9]+);"
     );
+    private static final Pattern CARD_DATA_REGEX = Pattern.compile(
+            "window.cardData = (\\{.*?\\});"
+    );
+
+    private static final ObjectMapper CARD_DATA_OBJECT_MAPPER = JsonMapper.builder()
+            .enable(JsonReadFeature.ALLOW_UNQUOTED_FIELD_NAMES)
+            .build();
 
     private static Connection.Response sendConfigRequest(String url, Connection.Method method) throws IOException {
         return Jsoup.connect(url)
@@ -56,6 +66,53 @@ public class RemoteConfigFetcher {
         }
 
         return new NoCardConfig(Map.of(), providerInfos);
+    }
+
+    public static NoCardConfig fetchRemoteConfigUsingCardData(String url) throws IOException {
+        Document page = sendConfigRequest(url, Connection.Method.GET).parse();
+
+        LinkedHashMap<String, NoCardConfig.ProviderInfo> providerInfos = new LinkedHashMap<>();
+
+        Map<BrandColorKey, Integer> brandColors = extractBrandColors(page);
+
+        String cardDataScript = getCardDataScript(page);
+
+        WebCardData.Map cardData = CARD_DATA_OBJECT_MAPPER.readValue(cardDataScript, WebCardData.Map.class);
+
+        Elements providers = page.select("div[data-key]");
+        for (Element providerDiv : providers) {
+            String key = providerDiv.attr("data-key");
+            WebCardData jsonData = cardData.get(key);
+            if (jsonData == null) {
+                System.err.println("Warning: No card data found for key: " + key);
+                continue;
+            }
+            providerInfos.put(
+                    key,
+                    new NoCardConfig.ProviderInfo(
+                            providerDiv.text(),
+                            providerDiv.attr("data-name"),
+                            getBrandColor(brandColors, providerDiv, false),
+                            getBrandColor(brandColors, providerDiv, true),
+                            parseBarcodeFormat(jsonData.type()),
+                            jsonData.codes()
+                    )
+            );
+        }
+
+        return new NoCardConfig(Map.of(), providerInfos);
+    }
+
+    private static String getCardDataScript(Document page) {
+        for (Element scriptElement : page.getElementsByTag("script")) {
+            String scriptText = getScriptText(scriptElement);
+
+            Matcher matcher = CARD_DATA_REGEX.matcher(scriptText);
+            if (matcher.find()) {
+                return matcher.group(1);
+            }
+        }
+        return null;
     }
 
     private static Integer getBrandColor(Map<BrandColorKey, Integer> brandColors, Element providerElement, boolean isContrast) {

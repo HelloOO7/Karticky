@@ -14,7 +14,7 @@ public class MergeNcAndBootleg {
     public static void main(String[] args) throws IOException {
         ConfigMerger merger = new ConfigMerger();
 
-        NoCardConfig normalConfig = readConfig("data/config-nocardcz.json");
+        NoCardConfig normalConfig = readConfig("data/config-nocardcz-carddata.json");
         merger.merge(normalConfig);
 
         NoCardConfig bootlegConfig = readConfig("data/config-bootleg.json");
