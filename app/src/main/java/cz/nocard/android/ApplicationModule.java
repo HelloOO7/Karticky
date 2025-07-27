@@ -2,6 +2,12 @@ package cz.nocard.android;
 
 import javax.inject.Singleton;
 
+import cz.nocard.android.beacon.CardNotificationManager;
+import cz.nocard.android.beacon.WlanFencingManager;
+import cz.nocard.android.sharing.NfcExportServiceState;
+import cz.nocard.android.data.ConfigManager;
+import cz.nocard.android.data.NoCardPreferences;
+import cz.nocard.android.data.PersonalCardStore;
 import dagger.Module;
 import dagger.Provides;
 

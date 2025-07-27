@@ -36,7 +36,7 @@
         tools:targetApi="31">
 
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.activity.MainActivity"
             android:launchMode="singleTask"
             android:exported="true">
             <intent-filter>
@@ -57,50 +57,50 @@
         </activity>
 
         <activity
-            android:name=".ManageBlacklistActivity"
+            android:name=".ui.activity.ManageBlacklistActivity"
             android:label="@string/title_blacklist_management"
             android:exported="false" />
 
         <activity
-            android:name=".PersonalCardsActivity"
+            android:name=".ui.activity.PersonalCardsActivity"
             android:label="@string/title_personal_cards"
             android:exported="false" />
 
         <activity
-            android:name=".ImportSpringboardActivity"
+            android:name=".ui.activity.ImportSpringboardActivity"
             android:label="@string/title_import_card"
             android:exported="false" />
 
         <activity
-            android:name=".ImportMethodJunctionActivity"
+            android:name=".ui.activity.ImportMethodJunctionActivity"
             android:exported="false" />
 
         <activity
-            android:name=".ZxingScanActivity"
+            android:name=".ui.activity.ZxingScanActivity"
             android:exported="false" />
 
         <activity
-            android:name=".NfcImportActivity"
+            android:name=".ui.activity.NfcImportActivity"
             android:configChanges="orientation|screenSize"
             android:exported="false" />
 
         <activity
-            android:name=".NfcExportActivity"
+            android:name=".ui.activity.NfcExportActivity"
             android:exported="false" />
 
         <activity
-            android:name=".ExportMethodJunctionActivity"
+            android:name=".ui.activity.ExportMethodJunctionActivity"
             android:exported="false" />
 
         <activity
-            android:name=".PickBarcodeTypeActivity"
+            android:name=".ui.activity.PickBarcodeTypeActivity"
             android:exported="false" />
 
         <activity
-            android:name=".NewCustomCardActivity"
+            android:name=".ui.activity.NewCustomCardActivity"
             android:exported="false" />
 
-        <service android:name=".NfcExportHceService" android:exported="true"
+        <service android:name=".sharing.NfcExportHceService" android:exported="true"
             android:permission="android.permission.BIND_NFC_SERVICE">
             <intent-filter>
                 <action android:name="android.nfc.cardemulation.action.HOST_APDU_SERVICE"/>

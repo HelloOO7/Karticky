@@ -7,6 +7,11 @@ import com.google.android.material.color.DynamicColors;
 
 import javax.inject.Inject;
 
+import cz.nocard.android.beacon.BackgroundWlanCheckWorker;
+import cz.nocard.android.beacon.WlanFencingManager;
+import cz.nocard.android.sharing.NfcExportServiceState;
+import cz.nocard.android.data.NoCardPreferences;
+
 public class NoCardApplication extends Application {
 
     private static NoCardApplication INSTANCE;

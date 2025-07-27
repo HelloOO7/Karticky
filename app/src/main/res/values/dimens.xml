@@ -2,6 +2,7 @@
 <resources>
     <dimen name="barcode_frame_corner_dim">12dp</dimen>
     <dimen name="activity_margin">24dp</dimen>
+    <dimen name="activity_margin_half">12dp</dimen>
     <dimen name="text_title_s">18sp</dimen>
     <dimen name="text_title_m">22sp</dimen>
     <dimen name="text_title_l">28sp</dimen>

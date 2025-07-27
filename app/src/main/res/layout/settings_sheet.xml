@@ -125,14 +125,36 @@
         app:layout_constraintStart_toStartOf="@+id/tvTitle"
         app:layout_constraintTop_toBottomOf="@+id/tvCardsTitle" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnClose"
+    <TextView
+        android:id="@+id/tvAppVersion"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@+id/btnClose"
+        app:layout_constraintStart_toStartOf="@+id/btnPersonalCards"
+        app:layout_constraintTop_toTopOf="@+id/btnClose"
+        tools:text="Verze aplikace" />
+
+    <TextView
+        android:id="@+id/tvGdprLink"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:paddingVertical="@dimen/item_margin_s"
+        android:layout_marginStart="@dimen/item_margin_s"
+        android:text="@string/gdpr_title"
+        android:textColor="?attr/colorPrimary"
+        app:layout_constraintBottom_toBottomOf="@+id/tvAppVersion"
+        app:layout_constraintStart_toEndOf="@+id/tvAppVersion"
+        app:layout_constraintTop_toTopOf="@+id/tvAppVersion" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnClose"
         style="@style/Widget.Material3.Button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/item_margin_s"
         android:layout_marginEnd="@dimen/activity_margin"
         android:layout_marginBottom="@dimen/activity_margin"
-        android:layout_marginTop="@dimen/item_margin_s"
         android:text="@string/settings_save"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

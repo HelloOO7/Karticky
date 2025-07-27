@@ -2,6 +2,17 @@ package cz.nocard.android;
 
 import javax.inject.Singleton;
 
+import cz.nocard.android.beacon.BackgroundWlanCheckWorker;
+import cz.nocard.android.sharing.CardTransfer;
+import cz.nocard.android.sharing.NfcExportHceService;
+import cz.nocard.android.ui.activity.ExportActivityCommon;
+import cz.nocard.android.ui.activity.ImportSpringboardActivity;
+import cz.nocard.android.ui.activity.MainActivity;
+import cz.nocard.android.ui.activity.ManageBlacklistActivity;
+import cz.nocard.android.ui.activity.NfcExportActivity;
+import cz.nocard.android.ui.activity.NfcImportActivity;
+import cz.nocard.android.ui.activity.PersonalCardsActivity;
+import cz.nocard.android.ui.dialogs.SettingsSheetFragment;
 import dagger.Component;
 
 @Singleton
