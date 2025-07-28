@@ -3,9 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/clCoordinator"
-    android:clipToPadding="false"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:clipToPadding="false">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/ablAppBar"
@@ -49,6 +49,7 @@
                     android:adjustViewBounds="true"
                     android:background="@drawable/barcode_frame"
                     android:elevation="16dp"
+                    android:maxHeight="250dp"
                     android:visibility="gone"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -107,6 +108,7 @@
                     android:layout_height="wrap_content"
                     android:padding="@dimen/item_margin_l"
                     android:visibility="gone"
+                    android:elevation="32dp"
                     app:layout_constraintBottom_toBottomOf="@id/ivCard"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -115,78 +117,87 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:clipChildren="false">
-
-            <TextView
-                android:id="@+id/tvAvailableCardsLabel"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/activity_margin"
-                android:layout_marginTop="@dimen/activity_margin"
-                android:text="@string/tv_available_cards_label"
-                android:textSize="@dimen/text_title_m"
-                app:layout_constraintEnd_toStartOf="@+id/btnSettings"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <Button
-                android:id="@+id/btnSettings"
-                style="@style/Widget.Material3.Button.IconButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/activity_margin"
-                android:contentDescription="@string/title_settings"
-                app:icon="@drawable/ic_settings_24px"
-                app:iconSize="36dp"
-                app:layout_constraintBottom_toBottomOf="@+id/tvAvailableCardsLabel"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/tvAvailableCardsLabel" />
-
-            <view
-                android:id="@+id/pcvAutoCard"
-                class="cz.nocard.android.ui.view.ProviderCardView$WithoutAction"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/activity_margin"
-                android:layout_marginTop="@dimen/item_margin_s"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/btnSettings" />
-
-            <com.google.android.material.tabs.TabLayout
-                android:id="@+id/tlCardListTabs"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                app:layout_constraintEnd_toEndOf="@id/pcvAutoCard"
-                app:layout_constraintStart_toStartOf="@id/pcvAutoCard"
-                app:layout_constraintTop_toBottomOf="@+id/pcvAutoCard">
-
-                <com.google.android.material.tabs.TabItem
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:text="@string/tab_personal_cards" />
-
-                <com.google.android.material.tabs.TabItem
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:text="@string/tab_universal_cards" />
-            </com.google.android.material.tabs.TabLayout>
-        </androidx.constraintlayout.widget.ConstraintLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvCards"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingTop="@dimen/item_margin_s"
         android:clipChildren="false"
-        android:clipToPadding="false"
-        android:paddingHorizontal="@dimen/activity_margin"
-        android:paddingBottom="@dimen/activity_margin"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <TextView
+            android:id="@+id/tvAvailableCardsLabel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/activity_margin"
+            android:layout_marginTop="@dimen/activity_margin"
+            android:text="@string/tv_available_cards_label"
+            android:textSize="@dimen/text_title_m"
+            app:layout_constraintEnd_toStartOf="@+id/btnSettings"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/btnSettings"
+            style="@style/Widget.Material3.Button.IconButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/activity_margin"
+            android:contentDescription="@string/title_settings"
+            app:icon="@drawable/ic_settings_24px"
+            app:iconSize="36dp"
+            app:layout_constraintBottom_toBottomOf="@+id/tvAvailableCardsLabel"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tvAvailableCardsLabel" />
+
+        <view
+            android:id="@+id/pcvAutoCard"
+            class="cz.nocard.android.ui.view.ProviderCardView$WithoutAction"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/activity_margin"
+            android:layout_marginTop="@dimen/item_margin_s"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/btnSettings" />
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tlCardListTabs"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="@id/pcvAutoCard"
+            app:layout_constraintStart_toStartOf="@id/pcvAutoCard"
+            app:layout_constraintTop_toBottomOf="@+id/pcvAutoCard">
+
+            <com.google.android.material.tabs.TabItem
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="@string/tab_personal_cards" />
+
+            <com.google.android.material.tabs.TabItem
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="@string/tab_universal_cards" />
+        </com.google.android.material.tabs.TabLayout>
+
+        <FrameLayout
+            android:id="@+id/flRecyclerClipFix"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tlCardListTabs">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvCards"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                android:paddingHorizontal="@dimen/activity_margin"
+                android:paddingTop="@dimen/item_margin_s"
+                android:paddingBottom="@dimen/activity_margin"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+        </FrameLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

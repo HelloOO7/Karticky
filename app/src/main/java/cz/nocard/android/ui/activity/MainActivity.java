@@ -4,6 +4,7 @@ import android.Manifest;
 import android.animation.LayoutTransition;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -376,6 +377,14 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
             ui.tlCardListTabs.selectTab(ui.tlCardListTabs.getTabAt(0));
         }
         selectNonEmptyTabIfNeeded();
+
+        resetCardDisplayLayoutTransition();
+    }
+
+    private void resetCardDisplayLayoutTransition() {
+        LayoutTransition layoutTransition = new LayoutTransition();
+        layoutTransition.setAnimateParentHierarchy(false);
+        ui.clCardDisplay.setLayoutTransition(layoutTransition);
     }
 
     private void selectNonEmptyTabIfNeeded() {
@@ -887,6 +896,15 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
         return false;
     }
 
+    private EmptyDrawable createDummyCardDrawable() {
+        Drawable current = ui.ivCard.getDrawable();
+        if (current == null || current instanceof EmptyDrawable) {
+            return new EmptyDrawable(256, 96);
+        } else {
+            return new EmptyDrawable(current.getIntrinsicWidth(), current.getIntrinsicHeight());
+        }
+    }
+
     private void showCard(CardRequest card) {
         boolean providerChanged = isNewProviderDifferent(card);
         NoCardConfig.ProviderInfo pi = card.getProviderInfo();
@@ -895,8 +913,14 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
         ui.tvProvider.setVisibility(View.VISIBLE);
         ui.tvProvider.setText(showingProviderInfo.membershipName());
         if (providerChanged) {
-            ui.ivCard.setVisibility(View.GONE);
+            ui.ivCard.setImageDrawable(createDummyCardDrawable());
             ui.pbCardImageLoading.setVisibility(View.VISIBLE);
+        }
+        boolean doResetTransition = ui.ivCard.getVisibility() == View.GONE;
+        if (doResetTransition) {
+            ui.ivCard.setVisibility(View.INVISIBLE);
+            ui.clCardDisplay.setLayoutTransition(null);
+            ui.ablAppBar.setExpanded(false, false);
         }
 
         if (currentAsyncLoadFuture != null) {
@@ -948,33 +972,13 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
                 }
             }
             ui.ivCard.setVisibility(View.VISIBLE);
-            runOnTransitionDone(ui.ivCard, () -> {
-                ui.pbCardImageLoading.setVisibility(View.GONE);
-            }, LayoutTransition.APPEARING, LayoutTransition.CHANGE_APPEARING);
+            ui.pbCardImageLoading.setVisibility(View.GONE);
+            if (doResetTransition) {
+                resetCardDisplayLayoutTransition();
+                ui.ablAppBar.setExpanded(true, true);
+            }
             return null;
         }, AsyncUtils.getLifecycleExecutor(this));
-    }
-
-    private void runOnTransitionDone(View view, Runnable callback, int... types) {
-        Set<Integer> acceptedTypes = Arrays.stream(types).boxed().collect(Collectors.toSet());
-
-        LayoutTransition layoutTransition = ui.clCardDisplay.getLayoutTransition();
-        layoutTransition.addTransitionListener(new LayoutTransition.TransitionListener() {
-            @Override
-            public void startTransition(LayoutTransition transition, ViewGroup container, View view2, int transitionType) {
-                if (view2 == view && !acceptedTypes.contains(transitionType)) {
-                    layoutTransition.removeTransitionListener(this);
-                }
-            }
-
-            @Override
-            public void endTransition(LayoutTransition transition, ViewGroup container, View view2, int transitionType) {
-                if (view2 == view && acceptedTypes.contains(transitionType)) {
-                    callback.run();
-                    layoutTransition.removeTransitionListener(this);
-                }
-            }
-        });
     }
 
     private void updateRemoteConfig() {

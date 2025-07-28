@@ -14,6 +14,28 @@ import androidx.annotation.Nullable;
  */
 public class EmptyDrawable extends Drawable {
 
+    private int intrinsicWidth = -1;
+    private int intrinsicHeight = -1;
+
+    public EmptyDrawable() {
+
+    }
+
+    public EmptyDrawable(int intrinsicWidth, int intrinsicHeight) {
+        this.intrinsicWidth = intrinsicWidth;
+        this.intrinsicHeight = intrinsicHeight;
+    }
+
+    @Override
+    public int getIntrinsicWidth() {
+        return intrinsicWidth;
+    }
+
+    @Override
+    public int getIntrinsicHeight() {
+        return intrinsicHeight;
+    }
+
     @Override
     public void draw(@NonNull Canvas canvas) {
 
