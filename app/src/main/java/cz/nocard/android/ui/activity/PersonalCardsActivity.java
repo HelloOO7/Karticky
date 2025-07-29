@@ -9,14 +9,13 @@ import android.widget.EditText;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -26,15 +25,17 @@ import cz.nocard.android.databinding.MultiSelectionControlsBinding;
 import cz.nocard.android.ui.dialogs.CommonDialogs;
 import cz.nocard.android.data.ConfigManager;
 import cz.nocard.android.NoCardApplication;
+import cz.nocard.android.ui.view.PersonalCardListAdapterBase;
 import cz.nocard.android.ui.view.ProviderCardView;
 import cz.nocard.android.R;
 import cz.nocard.android.data.PersonalCard;
 import cz.nocard.android.data.PersonalCardStore;
 import cz.nocard.android.ui.view.ProviderCardViewHolder;
 import cz.spojenka.android.ui.helpers.ArrayListAdapter;
+import cz.spojenka.android.ui.helpers.ListReorderHelper;
 import cz.spojenka.android.util.AsyncUtils;
 
-public class PersonalCardsActivity extends CardListBaseActivity implements PersonalCardStore.Listener {
+public class PersonalCardsActivity extends CardListBaseActivity {
 
     private static final String STATE_IN_SELECTION_MODE = "in_selection_mode";
 
@@ -42,10 +43,6 @@ public class PersonalCardsActivity extends CardListBaseActivity implements Perso
     PersonalCardStore personalCardStore;
     @Inject
     ConfigManager config;
-
-    private final Map<PersonalCard, PersonalCardState> cardToStateMap = new HashMap<>();
-
-    private List<String> providerOrder;
 
     private MultiSelectionControlsBinding multiSelectionControls;
     private boolean inSelectionMode = false;
@@ -57,15 +54,13 @@ public class PersonalCardsActivity extends CardListBaseActivity implements Perso
         }
     };
 
-    private ArrayListAdapter<PersonalCardState, ProviderCardViewHolder<ProviderCardView.WithContextMenu>> adapter;
+    private PersonalCardListAdapterBase<PersonalCardState, ProviderCardView.WithContextMenu> adapter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         NoCardApplication.getInstance().getApplicationComponent().inject(this);
-        providerOrder = config.getAllProviders();
         initAdapter();
         super.onCreate(savedInstanceState);
-        personalCardStore.addListener(this, AsyncUtils.getLifecycleExecutor(this));
         setAddButtonCallback(v -> startActivity(new Intent(this, ImportSpringboardActivity.class)));
 
         if (savedInstanceState != null) {
@@ -103,11 +98,21 @@ public class PersonalCardsActivity extends CardListBaseActivity implements Perso
     }
 
     private void initAdapter() {
-        adapter = new ArrayListAdapter<>() {
+        adapter = new PersonalCardListAdapterBase<>(personalCardStore) {
             @NonNull
             @Override
             public ProviderCardViewHolder<ProviderCardView.WithContextMenu> onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
                 return new ProviderCardViewHolder<>(parent.getContext(), ProviderCardView.WithContextMenu::new);
+            }
+
+            @Override
+            protected PersonalCardState personalCardToElement(PersonalCard card) {
+                return new PersonalCardState(card);
+            }
+
+            @Override
+            protected PersonalCard elementToPersonalCard(PersonalCardState element) {
+                return element.getCard();
             }
 
             @Override
@@ -142,6 +147,8 @@ public class PersonalCardsActivity extends CardListBaseActivity implements Perso
                 cardView.setUserSelected(cardState.selected);
             }
         };
+
+        personalCardStore.addListener(adapter, AsyncUtils.getLifecycleExecutor(this));
     }
 
     private void forAllCardStates(BiConsumer<Integer, PersonalCardState> action) {
@@ -227,26 +234,15 @@ public class PersonalCardsActivity extends CardListBaseActivity implements Perso
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        personalCardStore.removeListener(this);
+        personalCardStore.removeListener(adapter);
     }
 
     @Override
     protected void populateCardList() {
         personalCardStore.getPersonalCards()
                 .stream()
-                .sorted(cardOrderComparator())
-                .map(personalCard -> {
-                    PersonalCardState state = new PersonalCardState(personalCard);
-                    cardToStateMap.put(personalCard, state);
-                    return state;
-                })
+                .map(PersonalCardState::new)
                 .forEach(adapter::add);
-    }
-
-    private Comparator<PersonalCard> cardOrderComparator() {
-        return Comparator
-                .comparing((PersonalCard card) -> providerOrder.indexOf(card.provider()))
-                .thenComparing((PersonalCard card) -> Optional.ofNullable(card.cardNumber()).orElse(""));
     }
 
     private void callCardRename(PersonalCard card) {
@@ -266,42 +262,6 @@ public class PersonalCardsActivity extends CardListBaseActivity implements Perso
     @Override
     protected int getBlankPlaceholderText() {
         return R.string.personal_cards_empty_placeholder;
-    }
-
-    @Override
-    public void onCardAdded(PersonalCard card) {
-        PersonalCardState cardState = new PersonalCardState(card);
-        Comparator<PersonalCard> cardOrderComparator = cardOrderComparator();
-        insertCardState(cardState, (o1, o2) -> cardOrderComparator.compare(o1.getCard(), o2.getCard()));
-    }
-
-    protected void insertCardState(PersonalCardState state, Comparator<PersonalCardState> positionDecisionMaker) {
-        int insertIndex = adapter.size();
-        for (int i = 0; i < adapter.size(); i++) {
-            PersonalCardState existingState = adapter.get(i);
-            if (positionDecisionMaker.compare(existingState, state) > 0) {
-                insertIndex = i;
-                break;
-            }
-        }
-        adapter.add(insertIndex, state);
-    }
-
-    @Override
-    public void onCardRemoved(PersonalCard card) {
-        PersonalCardState state = cardToStateMap.get(card);
-        if (state != null) {
-            adapter.remove(state);
-            cardToStateMap.remove(card);
-        }
-    }
-
-    @Override
-    public void onCardChanged(PersonalCard card) {
-        PersonalCardState state = cardToStateMap.get(card);
-        if (state != null) {
-            adapter.notifyItemChanged(adapter.indexOf(state));
-        }
     }
 
     public static class PersonalCardState {

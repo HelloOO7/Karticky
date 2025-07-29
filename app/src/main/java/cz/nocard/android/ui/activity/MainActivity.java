@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 import android.text.Html;
 import android.text.TextUtils;
@@ -24,6 +25,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -119,8 +121,8 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
     private ActivityMainBinding ui;
     private ProviderCardView autoDetectCard;
     private RecyclerView cardRecycler;
-    private ArrayListAdapter<PersonalCard, ProviderCardViewHolder<ProviderCardView.WithoutAction>> personalCardAdapter;
-    private ArrayListAdapter<String, ProviderCardViewHolder<ProviderCardView.WithFavouriteAction>> universalCardAdapter;
+    private PersonalCardListAdapter personalCardAdapter;
+    private UniversalCardListAdapter universalCardAdapter;
     private SingleViewAdapter listEmptyPlaceholderAdapter;
     private TextView tvRemoteConfigState;
 
@@ -340,6 +342,7 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
         };
 
         personalCardAdapter.addAll(personalCardStore.getPersonalCards());
+        personalCardStore.addListener(personalCardAdapter, AsyncUtils.getLifecycleExecutor(this));
 
         listEmptyPlaceholderAdapter = new SingleViewAdapter(() -> {
             TextView tv = new TextView(this);
@@ -410,9 +413,15 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
     private void updateSelectedCardList() {
         ArrayListAdapter<?, ? extends ProviderCardViewHolder<?>> actualCardList = getSelectedCardListView();
         if (actualCardList.isEmpty()) {
-            cardRecycler.setAdapter(listEmptyPlaceholderAdapter);
+            setCardListAdapter(listEmptyPlaceholderAdapter);
         } else {
-            cardRecycler.setAdapter(actualCardList);
+            setCardListAdapter(actualCardList);
+        }
+    }
+
+    private void setCardListAdapter(RecyclerView.Adapter<?> adapter) {
+        if (adapter != cardRecycler.getAdapter()) {
+            cardRecycler.setAdapter(adapter);
         }
     }
 
@@ -464,10 +473,6 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
                 }
             }
         }
-    }
-
-    private void removeCardMenuItem(PersonalCard personalCard) {
-        personalCardAdapter.remove(personalCard);
     }
 
     private void requestShowCard(CardRequest request) {
@@ -616,6 +621,18 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
         handler.removeCallbacks(wlanScanUpdater);
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        ui.rvCards.post(() -> ui.rvCards.setItemAnimator(new DefaultItemAnimator()));
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        ui.rvCards.setItemAnimator(null);
+    }
+
     private void showNotificationPermissionPromptIfNeeded() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (prefs.isBGNotificationEnabled() && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
@@ -649,6 +666,7 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
         super.onDestroy();
         unbindFromWlanFencingManager();
         personalCardStore.removeListener(this);
+        personalCardStore.removeListener(personalCardAdapter);
     }
 
     private void unbindFromWlanFencingManager() {
@@ -1108,7 +1126,6 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
 
     @Override
     public void onCardAdded(PersonalCard card) {
-        personalCardAdapter.add(card);
         updateSelectedCardList();
         if (showingProvider != null && showingPersonalCardId == null && Objects.equals(showingProvider, card.provider())) {
             refreshCurrentUniversalCard();
@@ -1117,18 +1134,16 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
 
     @Override
     public void onCardRemoved(PersonalCard card) {
-        removeCardMenuItem(card);
+        //assumption: drag and drop will never ever move a row if there is only one row.
+        //otherwise, as reordering first removes the card and then re-adds it, it could
+        //appear that the adapter is empty and the activity would show the empty placeholder,
+        //which would cause crashes
         updateSelectedCardList();
         onCardChanged(card);
     }
 
     @Override
     public void onCardChanged(PersonalCard card) {
-        int adapterIndex = personalCardAdapter.indexOf(card);
-        if (adapterIndex != -1) {
-            //notify items changed
-            personalCardAdapter.set(adapterIndex, card);
-        }
         if (showingPersonalCardId != null && card.id() == showingPersonalCardId) {
             refreshCurrentUniversalCard();
         }

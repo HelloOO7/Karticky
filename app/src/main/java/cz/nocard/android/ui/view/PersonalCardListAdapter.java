@@ -8,14 +8,14 @@ import cz.nocard.android.data.ConfigManager;
 import cz.nocard.android.data.NoCardConfig;
 import cz.nocard.android.data.PersonalCard;
 import cz.nocard.android.data.PersonalCardStore;
-import cz.spojenka.android.ui.helpers.ArrayListAdapter;
 
-public class PersonalCardListAdapter extends ArrayListAdapter<PersonalCard, ProviderCardViewHolder<ProviderCardView.WithoutAction>> {
+public class PersonalCardListAdapter extends PersonalCardListAdapterBase<PersonalCard, ProviderCardView.WithoutAction> {
 
     private final ConfigManager configManager;
     private final PersonalCardStore personalCardStore;
 
     public PersonalCardListAdapter(ConfigManager configManager, PersonalCardStore personalCardStore) {
+        super(personalCardStore);
         this.configManager = configManager;
         this.personalCardStore = personalCardStore;
     }
@@ -39,5 +39,15 @@ public class PersonalCardListAdapter extends ArrayListAdapter<PersonalCard, Prov
         providerCard.setTag(personalCard);
         providerCard.setProvider(personalCard.provider(), providerInfo);
         providerCard.setOnClickListener(v -> onPersonalCardClicked(personalCard));
+    }
+
+    @Override
+    protected PersonalCard personalCardToElement(PersonalCard card) {
+        return card;
+    }
+
+    @Override
+    protected PersonalCard elementToPersonalCard(PersonalCard element) {
+        return element;
     }
 }

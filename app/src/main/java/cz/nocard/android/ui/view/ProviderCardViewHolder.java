@@ -8,14 +8,18 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.Objects;
 import java.util.function.Function;
 
-public class ProviderCardViewHolder<PCV extends ProviderCardView> extends RecyclerView.ViewHolder {
+import cz.spojenka.android.ui.helpers.ListReorderHelper;
+
+public class ProviderCardViewHolder<PCV extends ProviderCardView> extends RecyclerView.ViewHolder implements ListReorderHelper.DraggableViewHolder {
 
     private final PCV pcv;
+    private float baseElevation;
 
     @SuppressWarnings("unchecked")
     public ProviderCardViewHolder(Context context, Function<Context, ? extends PCV> ctor) {
         super(ctor.apply(context));
         pcv = (PCV) itemView;
+        baseElevation = pcv.getElevation();
     }
 
     private ProviderCardViewHolder(View extraView) {
@@ -33,5 +37,19 @@ public class ProviderCardViewHolder<PCV extends ProviderCardView> extends Recycl
 
     public PCV requirePCV() {
         return Objects.requireNonNull(pcv);
+    }
+
+    @Override
+    public void onDragStart() {
+        if (pcv != null) {
+            pcv.setElevation(baseElevation * 2);
+        }
+    }
+
+    @Override
+    public void onDragClear() {
+        if (pcv != null) {
+            pcv.setElevation(baseElevation);
+        }
     }
 }

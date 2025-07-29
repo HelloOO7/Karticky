@@ -42,9 +42,16 @@ public class AbstractListenerTarget<L> {
         }
     }
 
+    protected boolean canInvokeListener(L listener) {
+        return true;
+    }
+
     protected void invokeListeners(Consumer<L> action) {
         synchronized (listeners) {
             for (ListenerInfo info : listeners) {
+                if (!canInvokeListener(info.listener)) {
+                    continue;
+                }
                 if (info.executor != null) {
                     info.executor.execute(() -> action.accept(info.listener));
                 } else {

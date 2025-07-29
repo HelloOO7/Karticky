@@ -58,6 +58,16 @@ public class ProviderCardView extends FrameLayout {
     }
 
     @Override
+    public float getElevation() {
+        return binding.getRoot().getCardElevation();
+    }
+
+    @Override
+    public void setElevation(float elevation) {
+        binding.getRoot().setCardElevation(elevation);
+    }
+
+    @Override
     public void setOnClickListener(@Nullable OnClickListener l) {
         binding.getRoot().setOnClickListener(l);
     }

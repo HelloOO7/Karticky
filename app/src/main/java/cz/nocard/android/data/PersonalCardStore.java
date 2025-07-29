@@ -6,8 +6,10 @@ import android.os.Looper;
 import androidx.annotation.Keep;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import cz.nocard.android.util.AbstractListenerTarget;
 
@@ -23,6 +25,7 @@ public class PersonalCardStore extends AbstractListenerTarget<PersonalCardStore.
     private List<PersonalCard> personalCards;
     private int inTransaction = 0;
     private boolean dirty = false;
+    private Set<Listener> mutedListeners = new HashSet<>();
 
     public PersonalCardStore(NoCardPreferences preferences) {
         sharedPreferences = preferences.getPrefs();
@@ -58,14 +61,29 @@ public class PersonalCardStore extends AbstractListenerTarget<PersonalCardStore.
         return personalCards;
     }
 
-    public synchronized void addCard(PersonalCard card) {
+    private synchronized void addCard(int index, PersonalCard card) {
         if (card.id() == CARD_ID_TEMPORARY) {
             card = new PersonalCard(newCardId(), card.name(), card.provider(), card.customProperties(), card.cardNumber());
         }
         final PersonalCard card_ = card;
-        getPersonalCards().add(card);
-        persist();
+        getPersonalCards().add(index, card);
+        persistAndFinish();
         invokeListeners(listener -> listener.onCardAdded(card_));
+    }
+
+    private void persistAndFinish() {
+        persist();
+        finishOperation();
+    }
+
+    private void finishOperation() {
+        if (inTransaction == 0) {
+            mutedListeners.clear();
+        }
+    }
+
+    public synchronized void addCard(PersonalCard card) {
+        addCard(getPersonalCards().size(), card);
     }
 
     public synchronized void merge(List<PersonalCard> personalCards) {
@@ -112,12 +130,17 @@ public class PersonalCardStore extends AbstractListenerTarget<PersonalCardStore.
             addCard(card);
         }
 
-        persist();
+        persistAndFinish();
+    }
+
+    @Override
+    protected boolean canInvokeListener(Listener listener) {
+        return !mutedListeners.contains(listener);
     }
 
     public synchronized void removeCard(PersonalCard card) {
         getPersonalCards().remove(card);
-        persist();
+        persistAndFinish();
         invokeListeners(listener -> listener.onCardRemoved(card));
     }
 
@@ -163,8 +186,34 @@ public class PersonalCardStore extends AbstractListenerTarget<PersonalCardStore.
 
     public synchronized void renameCard(PersonalCard card, String newName) {
         card.rename(newName);
-        persist();
+        persistAndFinish();
         invokeCardChanged(card);
+    }
+
+    public int getCardOrdinal(PersonalCard card) {
+        return getPersonalCards().indexOf(card);
+    }
+
+    /**
+     * Move a card after another card. The card will effectively be removed from its
+     * current position and reinserted after the specified card.
+     *
+     * @param card The card to move
+     * @param after The card after which to move the specified card. If null or not found,
+     *              the card will be moved to the start of the list. If this is the same as
+     *              "card", then the card will be swapped with its successor.
+     */
+    public synchronized void reorderCardAfter(PersonalCard card, PersonalCard after) {
+        beginTransaction();
+        int insertIndex = getPersonalCards().indexOf(after);
+        removeCard(card);
+        if (insertIndex == -1) {
+            insertIndex = 0;
+        } else {
+            insertIndex++;
+        }
+        addCard(insertIndex, card);
+        endTransaction();
     }
 
     public synchronized void persist() {
@@ -172,7 +221,15 @@ public class PersonalCardStore extends AbstractListenerTarget<PersonalCardStore.
             dirty = true;
             return; // Don't persist during a transaction
         }
+        if (personalCards == null) {
+            //not loaded
+            return;
+        }
         SharedPrefsHelper.saveObject(sharedPreferences, PREF_KEY, personalCards, Looper.getMainLooper().isCurrentThread());
+    }
+
+    public void muteListenerForNextOperation(Listener listener) {
+        mutedListeners.add(listener);
     }
 
     private void beginTransaction() {
@@ -183,10 +240,13 @@ public class PersonalCardStore extends AbstractListenerTarget<PersonalCardStore.
         if (inTransaction > 0) {
             inTransaction--;
         }
-        if (inTransaction == 0 && dirty) {
-            persist();
-            dirty = false;
+        if (inTransaction == 0) {
+            if (dirty) {
+                persist();
+                dirty = false;
+            }
         }
+        finishOperation();
     }
 
     @Keep
