@@ -140,8 +140,8 @@ public class PersonalCardStore extends AbstractListenerTarget<PersonalCardStore.
 
     public synchronized void removeCard(PersonalCard card) {
         getPersonalCards().remove(card);
-        persistAndFinish();
         invokeListeners(listener -> listener.onCardRemoved(card));
+        persistAndFinish();
     }
 
     private void invokeCardChanged(PersonalCard card) {

@@ -48,6 +48,15 @@ public abstract class PersonalCardListAdapterBase<E, PCV extends ProviderCardVie
     protected abstract E personalCardToElement(PersonalCard card);
     protected abstract PersonalCard elementToPersonalCard(E element);
 
+    private E findElementByCard(PersonalCard card) {
+        for (E element : items) {
+            if (elementToPersonalCard(element).equals(card)) {
+                return element;
+            }
+        }
+        return null;
+    }
+
     @Override
     public void onCardAdded(PersonalCard card) {
         add(personalCardStore.getCardOrdinal(card), personalCardToElement(card));
@@ -55,7 +64,7 @@ public abstract class PersonalCardListAdapterBase<E, PCV extends ProviderCardVie
 
     @Override
     public void onCardRemoved(PersonalCard card) {
-        remove(card);
+        remove(findElementByCard(card));
     }
 
     @Override

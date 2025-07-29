@@ -99,6 +99,7 @@ public class PersonalCardsActivity extends CardListBaseActivity {
 
     private void initAdapter() {
         adapter = new PersonalCardListAdapterBase<>(personalCardStore) {
+
             @NonNull
             @Override
             public ProviderCardViewHolder<ProviderCardView.WithContextMenu> onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
