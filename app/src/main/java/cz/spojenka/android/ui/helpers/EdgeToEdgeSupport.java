@@ -22,10 +22,14 @@ public class EdgeToEdgeSupport {
     public static int FLAG_APPLY_AS_PADDING = 1;
 
     public static void useExplicitFitsSystemWindows(View view) {
-        useExplicitFitsSystemWindows(view, SIDE_ALL, 0);
+        useExplicitFitsSystemWindows(view, SIDE_ALL, 0, null);
     }
 
     public static void useExplicitFitsSystemWindows(View view, int sides, int flags) {
+        useExplicitFitsSystemWindows(view, sides, flags, null);
+    }
+
+    public static void useExplicitFitsSystemWindows(View view, int sides, int flags, Interceptor interceptor) {
         ViewGroup.MarginLayoutParams baseLayoutParams = new ViewGroup.MarginLayoutParams(
                 (ViewGroup.MarginLayoutParams) view.getLayoutParams()
         );
@@ -40,24 +44,34 @@ public class EdgeToEdgeSupport {
             }
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
 
-            if ((flags & FLAG_APPLY_AS_PADDING) == 0) {
-                ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+            boolean usePadding = ((flags & FLAG_APPLY_AS_PADDING) != 0);
 
-                params.setMargins(
-                        adjustBySide(systemBars.left, sides, SIDE_LEFT) + baseLayoutParams.leftMargin,
-                        adjustBySide(systemBars.top, sides, SIDE_TOP) + baseLayoutParams.topMargin,
-                        adjustBySide(systemBars.right, sides, SIDE_RIGHT) + baseLayoutParams.rightMargin,
-                        adjustBySide(systemBars.bottom, sides, SIDE_BOTTOM) + baseLayoutParams.bottomMargin
-                );
+            int left, top, right, bottom;
+
+            if (!usePadding) {
+                left = baseLayoutParams.leftMargin;
+                top = baseLayoutParams.topMargin;
+                right = baseLayoutParams.rightMargin;
+                bottom = baseLayoutParams.bottomMargin;
+            } else {
+                left = basePaddingLeft;
+                top = basePaddingTop;
+                right = basePaddingRight;
+                bottom = basePaddingBottom;
+            }
+
+            left = computeSideValue(left, systemBars.left, sides, SIDE_LEFT, interceptor);
+            top = computeSideValue(top, systemBars.top, sides, SIDE_TOP, interceptor);
+            right = computeSideValue(right, systemBars.right, sides, SIDE_RIGHT, interceptor);
+            bottom = computeSideValue(bottom, systemBars.bottom, sides, SIDE_BOTTOM, interceptor);
+
+            if (!usePadding) {
+                ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+                params.setMargins(left, top, right, bottom);
 
                 v.setLayoutParams(params);
             } else {
-                v.setPadding(
-                        adjustBySide(systemBars.left, sides, SIDE_LEFT) + basePaddingLeft,
-                        adjustBySide(systemBars.top, sides, SIDE_TOP) + basePaddingTop,
-                        adjustBySide(systemBars.right, sides, SIDE_RIGHT) + basePaddingRight,
-                        adjustBySide(systemBars.bottom, sides, SIDE_BOTTOM) + basePaddingBottom
-                );
+                v.setPadding(left, top, right, bottom);
             }
 
             return new WindowInsetsCompat.Builder(insets)
@@ -69,6 +83,14 @@ public class EdgeToEdgeSupport {
                     ))
                     .build();
         });
+    }
+
+    private static int computeSideValue(int baseValue, int systemBarValue, int sideMask, int sideBit, Interceptor interceptor) {
+        int computed = baseValue + adjustBySide(systemBarValue, sideMask, sideBit);
+        if (interceptor != null) {
+            computed = interceptor.interceptMargin(sideBit, computed);
+        }
+        return computed;
     }
 
     private static int adjustBySide(int value, int sideMask, int expectedBit) {
@@ -99,5 +121,10 @@ public class EdgeToEdgeSupport {
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
             useExplicitFitsSystemWindows(view);
         }
+    }
+
+    public interface Interceptor {
+
+        int interceptMargin(int side, int computedMargin);
     }
 }

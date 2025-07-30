@@ -106,9 +106,9 @@
                     style="?android:attr/progressBarStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:elevation="32dp"
                     android:padding="@dimen/item_margin_l"
                     android:visibility="gone"
-                    android:elevation="32dp"
                     app:layout_constraintBottom_toBottomOf="@id/ivCard"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -199,5 +199,20 @@
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
         </FrameLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/fabAddCard"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="@dimen/activity_margin"
+        android:clickable="true"
+        android:focusable="true"
+        android:text="@string/add_card"
+        android:visibility="gone"
+        app:icon="@drawable/ic_add_card_48px"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:visibility="visible" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

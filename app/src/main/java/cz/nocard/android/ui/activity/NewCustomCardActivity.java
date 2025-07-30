@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.View;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContract;
@@ -155,7 +156,9 @@ public class NewCustomCardActivity extends AppCompatActivity {
         });
 
         updateColorPreviewUI();
-        ui.btnChangeColor.setOnClickListener(v -> showColorPickerDialog());
+        View.OnClickListener changeColorListener = v -> showColorPickerDialog();
+        ui.btnChangeColor.setOnClickListener(changeColorListener);
+        ui.ivColorPreview.setOnClickListener(changeColorListener);
 
         ui.btnSaveCard.setOnClickListener(v -> {
             PersonalCard.CustomCardProperties customProps = new PersonalCard.CustomCardProperties(

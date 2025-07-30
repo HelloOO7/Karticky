@@ -9,7 +9,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.provider.Settings;
 import android.text.Html;
 import android.text.TextUtils;
@@ -51,7 +50,6 @@ import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -125,6 +123,9 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
     private UniversalCardListAdapter universalCardAdapter;
     private SingleViewAdapter listEmptyPlaceholderAdapter;
     private TextView tvRemoteConfigState;
+    private int fabOverlapAdjustHeight;
+    private EdgeToEdgeSupport.Interceptor rvBottomEdgeInterceptor;
+    private boolean animateCardsOnNextStart = false;
 
     private boolean showingAutoProvider;
     private String currentAutoProvider;
@@ -257,6 +258,22 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
             setAutoDetectInitialUI();
         }
 
+        EdgeToEdgeSupport.useExplicitFitsSystemWindows(ui.fabAddCard);
+        ui.fabAddCard.setOnClickListener(v -> {
+            animateCardsOnNextStart = true;
+            startActivity(new Intent(this, ImportSpringboardActivity.class));
+        });
+        fabOverlapAdjustHeight = getResources().getDimensionPixelSize(R.dimen.fab_overlap_adjust_height);
+        rvBottomEdgeInterceptor = new EdgeToEdgeSupport.Interceptor() {
+            @Override
+            public int interceptMargin(int side, int computedMargin) {
+                if (side == EdgeToEdgeSupport.SIDE_BOTTOM && ui.rvCards.getAdapter() == personalCardAdapter) {
+                    computedMargin += fabOverlapAdjustHeight;
+                }
+                return computedMargin;
+            }
+        };
+
         cardRecycler = ui.rvCards;
         EdgeToEdgeSupport.useExplicitFitsSystemWindows(
                 ui.clCoordinator,
@@ -266,7 +283,8 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
         EdgeToEdgeSupport.useExplicitFitsSystemWindows(
                 cardRecycler,
                 EdgeToEdgeSupport.SIDE_HORIZONTAL | EdgeToEdgeSupport.SIDE_BOTTOM,
-                EdgeToEdgeSupport.FLAG_APPLY_AS_PADDING
+                EdgeToEdgeSupport.FLAG_APPLY_AS_PADDING,
+                rvBottomEdgeInterceptor
         );
 
         tvRemoteConfigState = new TextView(this);
@@ -422,7 +440,27 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
     private void setCardListAdapter(RecyclerView.Adapter<?> adapter) {
         if (adapter != cardRecycler.getAdapter()) {
             cardRecycler.setAdapter(adapter);
+
+            if (adapter == personalCardAdapter) {
+                enableAddPersonalCardFAB();
+            } else {
+                disableAddPersonalCardFAB();
+            }
         }
+    }
+
+    private void setCardListBottomPadding(int margin) {
+        ui.rvCards.requestApplyInsets();
+    }
+
+    private void enableAddPersonalCardFAB() {
+        ui.fabAddCard.setVisibility(View.VISIBLE);
+        setCardListBottomPadding(fabOverlapAdjustHeight);
+    }
+
+    private void disableAddPersonalCardFAB() {
+        ui.fabAddCard.setVisibility(View.GONE);
+        setCardListBottomPadding(0);
     }
 
     private void showBlacklistDialog() {
@@ -624,13 +662,19 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
     @Override
     protected void onStart() {
         super.onStart();
-        ui.rvCards.post(() -> ui.rvCards.setItemAnimator(new DefaultItemAnimator()));
+        if (!animateCardsOnNextStart) {
+            ui.rvCards.post(() -> ui.rvCards.setItemAnimator(new DefaultItemAnimator()));
+        } else {
+            animateCardsOnNextStart = false;
+        }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        ui.rvCards.setItemAnimator(null);
+        if (!animateCardsOnNextStart) {
+            ui.rvCards.setItemAnimator(null);
+        }
     }
 
     private void showNotificationPermissionPromptIfNeeded() {

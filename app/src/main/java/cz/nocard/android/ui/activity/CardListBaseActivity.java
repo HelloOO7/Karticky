@@ -1,6 +1,5 @@
 package cz.nocard.android.ui.activity;
 
-import android.animation.LayoutTransition;
 import android.os.Bundle;
 import android.view.View;
 
@@ -13,9 +12,6 @@ import androidx.core.content.res.ResourcesCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SimpleItemAnimator;
 
-import java.util.Comparator;
-
-import cz.nocard.android.ui.view.ProviderCardView;
 import cz.nocard.android.R;
 import cz.nocard.android.databinding.ActivityCardListBinding;
 import cz.spojenka.android.ui.helpers.EdgeToEdgeSupport;

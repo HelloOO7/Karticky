@@ -9,12 +9,9 @@ import android.widget.EditText;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -31,8 +28,6 @@ import cz.nocard.android.R;
 import cz.nocard.android.data.PersonalCard;
 import cz.nocard.android.data.PersonalCardStore;
 import cz.nocard.android.ui.view.ProviderCardViewHolder;
-import cz.spojenka.android.ui.helpers.ArrayListAdapter;
-import cz.spojenka.android.ui.helpers.ListReorderHelper;
 import cz.spojenka.android.util.AsyncUtils;
 
 public class PersonalCardsActivity extends CardListBaseActivity {
@@ -200,9 +195,7 @@ public class PersonalCardsActivity extends CardListBaseActivity {
         ui.btnExitSelectionMode.setVisibility(View.GONE);
         ui.btnSelectionMode.setImageResource(getSelectionModeButtonIcon());
         exitSelectionModeOnBack.setEnabled(false);
-        if (isAddButtonEnabled()) {
-            ui.fabAddCard.setVisibility(View.VISIBLE);
-        }
+        ui.fabAddCard.setVisibility(View.VISIBLE);
         forAllCardStates((index, pc) -> pc.exitSelectionMode());
         adapter.notifyDataSetChanged();
         overrideTitleText(getTitle());
