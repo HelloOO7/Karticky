@@ -103,6 +103,7 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
 
     private PermissionRequestHelper.Requester<PermissionRequestHelper.LocationPermissionHandler> locationPermissionRequester;
     private ActivityResultLauncher<String> notificationPermissionLauncher;
+    private ActivityResultLauncher<String> backgroundLocationPermissionLauncher;
 
     @Inject
     NoCardPreferences prefs;
@@ -172,6 +173,13 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
                     //shown on these versions anyway, as they do not have runtime notification permissions nor support for BG wifi scanning
                     pendingPermissionRequests.remove(Manifest.permission.ACCESS_BACKGROUND_LOCATION);
                 }
+            }
+            processPermissionRequests();
+        });
+        backgroundLocationPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
+            if (!granted) {
+                prefs.putBGNotificationEnabled(false);
+                prefs.putNotificationNagDisabled(true);
             }
             processPermissionRequests();
         });
@@ -687,13 +695,14 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
 
     public boolean showBackgroundLocationPromptIfNeeded() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            if (
-                    prefs.isBGNotificationEnabled()
-                            && checkSelfPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED
-            ) {
-                //user has probably enabled fine location, but not background location
-                pushPermissionToRequest(Manifest.permission.ACCESS_BACKGROUND_LOCATION);
-                return true;
+            if (checkSelfPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                if (prefs.isBGNotificationEnabled()) {
+                    //user has probably enabled fine location, but not background location
+                    pushPermissionToRequest(Manifest.permission.ACCESS_BACKGROUND_LOCATION);
+                    return true;
+                }
+            } else {
+                prefs.putBGLocationPermissionAttempted(false); //reset state
             }
         }
         return false;
@@ -905,14 +914,37 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
                                 : R.string.background_location_permission_message_again,
                         settingLabel
                 )).setPositiveButton(R.string.open_settings, (dialog, which) -> {
-                    callApplicationDetails();
+                    if (!prefs.isBGLocationPermissionAttempted()) {
+                        /*
+                         * Why the shared preferences:
+                         * The background location permission grant is done by calling the settings
+                         * activity in some specific way. However, if the app is no longer allowed
+                         * to request the permission (to prevent abuse), Android still exits out of
+                         * our activity lifecycle (calls onPause) and then immediately returns.
+                         * Therefore, it would appear as though the user had exited out of the permission
+                         * activity (which triggers the same "permission denied" result), even though
+                         * none has been displayed yet. Worse, shouldShowRequestPermissionRationale
+                         * always returns false (as the rationale is mandatory for this permission anyway).
+                         * <p>
+                         * Therefore, there is no way to distinguish these 2 scenarios, at least as far
+                         * as I know, so we simply force the "real" activity to only be shown once when we
+                         * know that the call will result in some UI actually being displayed.
+                         */
+                        prefs.putBGLocationPermissionAttempted(true);
+                        backgroundLocationPermissionLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION);
+                    } else {
+                        callApplicationDetails();
+                    }
                     processPermissionsUponReturn = true;
                 })
-                .setNegativeButton(android.R.string.cancel, (dialog, which) -> {
-                    prefs.putBGNotificationEnabled(false);
-                    processPermissionRequests();
-                })
+                .setNegativeButton(android.R.string.cancel, (dialog, which) -> onDismissedBackgroundLocation())
+                .setOnCancelListener(dialog -> onDismissedBackgroundLocation())
                 .show();
+    }
+
+    private void onDismissedBackgroundLocation() {
+        prefs.putBGNotificationEnabled(false);
+        processPermissionRequests();
     }
 
     private boolean shouldUseBackgroundLocationUpgradeText() {

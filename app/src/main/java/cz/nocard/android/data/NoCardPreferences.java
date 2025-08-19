@@ -33,6 +33,7 @@ public class NoCardPreferences {
     private static final String PK_FAVOURITE_PROVIDERS = "favourite_providers";
     private static final String PK_CARD_BLACKLIST_PREFIX = "card_blacklist_";
     private static final String PK_LAST_CARD_LIST_TAB = "last_card_list_tab";
+    private static final String PK_BG_LOCATION_PERMISSION_ATTEMPTED = "bg_location_permission_attempted";
 
     private final SharedPreferences prefs;
 
@@ -203,5 +204,13 @@ public class NoCardPreferences {
 
     public int getLastCardListTab() {
         return prefs.getInt(PK_LAST_CARD_LIST_TAB, 0);
+    }
+
+    public boolean isBGLocationPermissionAttempted() {
+        return prefs.getBoolean(PK_BG_LOCATION_PERMISSION_ATTEMPTED, false);
+    }
+
+    public void putBGLocationPermissionAttempted(boolean attempted) {
+        prefs.edit().putBoolean(PK_BG_LOCATION_PERMISSION_ATTEMPTED, attempted).apply();
     }
 }

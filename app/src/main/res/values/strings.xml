@@ -10,7 +10,7 @@
     <string name="notification_enable_title">Povolit notifikace?</string>
     <string name="notification_enable_message">Chcete aplikaci povolit zobrazení (nezvonících) oznámení, když je některá z karet připravena k použití v blízké prodejně?</string>
     <string name="background_location_permission_title">Přístup k poloze na pozadí</string>
-    <string name="background_location_permission_message">Jelikož váš operační systém považuje zjišťování blízkých sítí Wi-Fi za práci s polohou zařízení, je pro funkci doporučování karet potřeba povolit přístup k poloze na pozadí. To se bohužel musí udělat ručně, a to výběrem možnosti \"%1$s\" v sekci "Poloha" v oprávněních aplikace.</string>
+    <string name="background_location_permission_message">Jelikož váš operační systém považuje zjišťování blízkých sítí Wi-Fi za práci s polohou zařízení, je pro funkci doporučování karet potřeba povolit přístup k poloze na pozadí. To se bohužel musí udělat ručně, a to výběrem možnosti \"%1$s\" v sekci \"Poloha\" v oprávněních aplikace.</string>
     <string name="open_settings">Otevřít nastavení</string>
     <string name="background_location_permission_option_default">Povolit vždy</string>
     <string name="do_not_show_again">Znovu nezobrazovat</string>
