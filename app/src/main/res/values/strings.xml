@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">NoCard</string>
+    <string name="app_name">Kartičky</string>
     <string name="tv_available_cards_label">Dostupné karty</string>
     <string name="sw_autodetect_label">Detekovat automaticky</string>
     <string name="location_permission_required_title">Přístup k poloze</string>

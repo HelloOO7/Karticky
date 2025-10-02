@@ -152,7 +152,7 @@
 
         <view
             android:id="@+id/pcvAutoCard"
-            class="cz.nocard.android.ui.view.ProviderCardView$WithoutAction"
+            class="cz.mamstylcendy.cards.ui.view.ProviderCardView$WithoutAction"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/activity_margin"

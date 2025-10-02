@@ -19,7 +19,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
 
-import cz.nocard.android.NoCardApplication;
+import cz.mamstylcendy.cards.CardsApplication;
 
 /**
  * Utility class for running tasks asynchronously using various executors.
@@ -70,7 +70,7 @@ public class AsyncUtils {
      * @see Context#getMainExecutor()
      */
     public static Executor getMainThreadExecutor() {
-        return ContextCompat.getMainExecutor(NoCardApplication.getInstance());
+        return ContextCompat.getMainExecutor(CardsApplication.getInstance());
     }
 
     /**

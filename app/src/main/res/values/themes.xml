@@ -1,13 +1,13 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Base.Theme.NoCard" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Base.Theme.CardsApp" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:windowLightStatusBar">true</item>
     </style>
 
-    <style name="SplashOverlay.Theme.NoCard" parent="Base.Theme.NoCard">
+    <style name="SplashOverlay.Theme.CardsApp" parent="Base.Theme.CardsApp">
     </style>
 
-    <style name="Theme.NoCard" parent="SplashOverlay.Theme.NoCard">
+    <style name="Theme.CardsApp" parent="SplashOverlay.Theme.CardsApp">
         <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
 </resources>

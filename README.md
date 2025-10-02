@@ -1,10 +1,10 @@
-# NoCard pro Android
+# Kartičky
 
 **\>\> Ke stažení [zde](#instalace) \<\<**
 
-Aplikace slouží jako klient pro webové stránky projektu [NoCard](https://nocard.cz). Kromě toho, co umí samotný web, umí několik věcí navíc:
+Aplikace slouží jako správce věrnostních kartiček pro Android a rovněž neoficiální off-line klient pro webové stránky projektu [NoCard](https://nocard.cz).
+Mezi hlavní funkce patří:
 
-- off-line režim (data se aktualizují, až když je to potřeba a zařízení je připojené k internetu)
 - automatická detekce kartičky k použití podle signálu Wi-Fi z prodejen
 - tichá oznámení, ze kterých je lze rovnou otevřít
 - podpora přidávání vlastních karet načtením kódu fotoaparátem nebo z obrázku či jeho ručním zadáním
@@ -12,22 +12,21 @@ Aplikace slouží jako klient pro webové stránky projektu [NoCard](https://noc
 - možnost "zakázat" nefunkční karty
 - tmavý režim na Androidu 10+, dynamické barvy a animovaná startovací obrazovka na Androidu 12+
 
-Zatím je to tak nějak experimentální, ale už jsem s ní párkrát úspěšně nakoupil.
+Kódy "univerzálních" kartiček jsou přebírány z webu NoCard a patří neznámým majitelům. Osobní karty
+nejsou s nikým sdíleny, nicméně je v případně zájmu můžete přidat do původní databáze na https://nocard.cz.
 
-Kódy kartiček jsou přebírány z webu NoCard a patří neznámým majitelům.
-
-Hlavní obrazovka            |  Notifikace
-:-:|:-:
-![Snímek obrazovky - domovská obrazovka](graphics/screenshot_main.png)  |  ![Snímek obrazovky - notifikace](graphics/screenshot_notifications.png)
+|                            Hlavní obrazovka                            |                               Notifikace                                |
+|:----------------------------------------------------------------------:|:-----------------------------------------------------------------------:|
+| ![Snímek obrazovky - domovská obrazovka](graphics/screenshot_main.png) | ![Snímek obrazovky - notifikace](graphics/screenshot_notifications.png) |
 
 ## Instalace
 
 Aplikaci lze zkompilovat ze zdrojových kódů nebo stáhnout nejnovější stabilní verzi na libovolném z odkazů níže (zkrácený je interně přesměrován na úplný):
 
-- https://nocard.spojenka.cz/stahnout
-- https://lab.d3s.mff.cuni.cz:27083/update/download-latest/cz.nocard.android
+- https://karticky.spojenka.cz/stahnout
+- https://lab.d3s.mff.cuni.cz:27083/update/download-latest/cz.mamstylcendy.cards
 
-Automaticky sestavené artefakty z nejnovějšího commitu, podepsané tímtéž klíčem, jsou dostupné z [GitHub Actions](https://github.com/HelloOO7/NoCard-Android/actions/).
+Automaticky sestavené artefakty z nejnovějšího commitu, podepsané tímtéž klíčem, jsou dostupné z [GitHub Actions](https://github.com/HelloOO7/Karticky/actions/).
 
 ## Kompatibilita
 
