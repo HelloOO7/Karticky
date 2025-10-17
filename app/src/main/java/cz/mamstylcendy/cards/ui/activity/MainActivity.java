@@ -449,7 +449,8 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
         if (adapter != cardRecycler.getAdapter()) {
             cardRecycler.setAdapter(adapter);
 
-            if (adapter == personalCardAdapter) {
+            //adapter may be the null placeholder, so we have to call getSelectedCardListView
+            if (getSelectedCardListView() == personalCardAdapter) {
                 enableAddPersonalCardFAB();
             } else {
                 disableAddPersonalCardFAB();
@@ -1211,7 +1212,7 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
 
     @Override
     public void onCardAdded(PersonalCard card) {
-        updateSelectedCardList();
+        requestUpdateSelectedCardList();
         if (showingProvider != null && showingPersonalCardId == null && Objects.equals(showingProvider, card.provider())) {
             refreshCurrentUniversalCard();
         }
@@ -1223,8 +1224,12 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
         //otherwise, as reordering first removes the card and then re-adds it, it could
         //appear that the adapter is empty and the activity would show the empty placeholder,
         //which would cause crashes
-        updateSelectedCardList();
+        requestUpdateSelectedCardList();
         onCardChanged(card);
+    }
+
+    private void requestUpdateSelectedCardList() {
+        handler.post(this::updateSelectedCardList);
     }
 
     @Override
