@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:id="@+id/miSortByName" android:title="@string/cards_sort_by_name" />
+    <item android:id="@+id/miSortByProvider" android:title="@string/cards_sort_by_provider" />
+</menu>

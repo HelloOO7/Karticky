@@ -2,10 +2,14 @@ package cz.mamstylcendy.cards.ui.activity;
 
 import android.Manifest;
 import android.animation.LayoutTransition;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -145,6 +149,8 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
 
     private Handler handler;
     private Runnable wlanScanUpdater;
+    private WifiManager wifiManager;
+    private BroadcastReceiver wifiStateChangedReceiver;
 
     private boolean updateCheckDone;
 
@@ -160,6 +166,7 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
         personalCardStore.addListener(this, AsyncUtils.getLifecycleExecutor(this));
 
         handler = new Handler(getMainLooper());
+        wifiManager = getApplication().getSystemService(WifiManager.class);
 
         locationPermissionRequester = PermissionRequestHelper.setupRequestLocationPermission(this, this, PermissionRequestHelper.FINE_LOCATION);
         notificationPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
@@ -223,6 +230,19 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
 
         tryBindToWlanFencingManager();
 
+        wifiStateChangedReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                int wifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, WifiManager.WIFI_STATE_UNKNOWN);
+                if (wifiState == WifiManager.WIFI_STATE_DISABLED || wifiState == WifiManager.WIFI_STATE_DISABLING) {
+                    setAutoDetectNoWifiUI();
+                } else if (wifiState == WifiManager.WIFI_STATE_ENABLING) {
+                    setAutoDetectDiscoveringUI();
+                }
+            }
+        };
+        registerReceiver(wifiStateChangedReceiver, new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION));
+
         if (wlanFencingManager.isExplicitScanNeeded()) {
             prefs.putNotificationNagDisabled(true);
         }
@@ -261,7 +281,7 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
         autoDetectCard.setEnabled(false);
 
         if (canUseAutoDetect()) {
-            setAutoDetectDiscoveringUI();
+            setAutoDetectWifiStateUI();
         } else {
             setAutoDetectInitialUI();
         }
@@ -721,6 +741,7 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
         unbindFromWlanFencingManager();
         personalCardStore.removeListener(this);
         personalCardStore.removeListener(personalCardAdapter);
+        unregisterReceiver(wifiStateChangedReceiver);
     }
 
     private void unbindFromWlanFencingManager() {
@@ -777,9 +798,22 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
         autoDetectCard.setOnClickListener(v -> checkPermsAndShowAutoProvider());
     }
 
+    private void setAutoDetectWifiStateUI() {
+        if (wifiManager.isWifiEnabled()) {
+            setAutoDetectDiscoveringUI();
+        } else {
+            setAutoDetectNoWifiUI();
+        }
+    }
+
     private void setAutoDetectDiscoveringUI() {
         disableAutoDetectCard();
         setAutoDetectText(getString(R.string.autodetect_provider_format, getString(R.string.autodetect_discovering)));
+    }
+
+    private void setAutoDetectNoWifiUI() {
+        disableAutoDetectCard();
+        setAutoDetectText(getString(R.string.autodetect_provider_format, getString(R.string.autodetect_no_wifi)));
     }
 
     private void setAutoDetectInitialUI() {
@@ -1207,7 +1241,11 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
         }
         cardNotificationManager.ackAPForFutureNotification(null);
         currentAutoProvider = null;
-        setAutoDetectNoProviderUI();
+        if (!wifiManager.isWifiEnabled()) {
+            setAutoDetectNoWifiUI();
+        } else {
+            setAutoDetectNoProviderUI();
+        }
     }
 
     @Override

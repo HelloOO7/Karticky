@@ -223,7 +223,7 @@ public class WlanFencingManager extends AbstractListenerTarget<WlanFencingManage
         try {
             List<WlanAPInfo> lastScanResults = wifiManager.getScanResults()
                     .stream().map(WlanAPInfo::new)
-                    .collect(Collectors.toList());
+                    .toList();
 
             if (!lastScanResults.isEmpty()) {
                 //force initial scan done if OS was able to return some results from scans not initiated by this app

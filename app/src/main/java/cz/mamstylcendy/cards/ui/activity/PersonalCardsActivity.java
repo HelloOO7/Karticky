@@ -5,12 +5,14 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.PopupMenu;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -61,6 +63,23 @@ public class PersonalCardsActivity extends CardListBaseActivity {
         if (savedInstanceState != null) {
             inSelectionMode = savedInstanceState.getBoolean(STATE_IN_SELECTION_MODE);
         }
+
+        ui.btnReorder.setVisibility(View.VISIBLE);
+        ui.btnReorder.setOnClickListener(view -> {
+            PopupMenu popupMenu = new PopupMenu(this, ui.btnReorder);
+            popupMenu.inflate(R.menu.card_reorder_menu);
+            popupMenu.setOnMenuItemClickListener(item -> {
+                if (item.getItemId() == R.id.miSortByName) {
+                    reorderCardsByName();
+                } else if (item.getItemId() == R.id.miSortByProvider) {
+                    reorderCardsByProvider();
+                } else {
+                    return false;
+                }
+                return true;
+            });
+            popupMenu.show();
+        });
 
         ui.btnSelectionMode.setVisibility(View.VISIBLE);
         ui.btnSelectionMode.setImageResource(getSelectionModeButtonIcon());
@@ -141,6 +160,7 @@ public class PersonalCardsActivity extends CardListBaseActivity {
                     cardView.exitSelectionMode();
                 }
                 cardView.setUserSelected(cardState.selected);
+                cardView.setOnUserSelectionChangedListener(selected -> cardState.selected = selected);
             }
         };
 
@@ -179,6 +199,7 @@ public class PersonalCardsActivity extends CardListBaseActivity {
         inSelectionMode = true;
         ui.btnExitSelectionMode.setVisibility(View.VISIBLE);
         ui.btnSelectionMode.setImageResource(R.drawable.ic_check_48px);
+        ui.btnReorder.setVisibility(View.GONE);
         exitSelectionModeOnBack.setEnabled(true);
         ui.llTopControls.addView(multiSelectionControls.getRoot(), 0);
         ui.llTopControls.setVisibility(View.VISIBLE);
@@ -194,6 +215,7 @@ public class PersonalCardsActivity extends CardListBaseActivity {
         ui.llTopControls.setVisibility(View.GONE);
         ui.btnExitSelectionMode.setVisibility(View.GONE);
         ui.btnSelectionMode.setImageResource(getSelectionModeButtonIcon());
+        ui.btnReorder.setVisibility(View.VISIBLE);
         exitSelectionModeOnBack.setEnabled(false);
         ui.fabAddCard.setVisibility(View.VISIBLE);
         forAllCardStates((index, pc) -> pc.exitSelectionMode());
@@ -223,6 +245,18 @@ public class PersonalCardsActivity extends CardListBaseActivity {
 
     private void callCardSharing(int... cardIDs) {
         startActivity(ExportMethodJunctionActivity.newIntent(this, cardIDs));
+    }
+
+    private void reorderCardsByName() {
+        personalCardStore.reorderCards(Comparator.comparing(personalCard -> personalCardStore.getCardName(personalCard, config)));
+    }
+
+    private void reorderCardsByProvider() {
+        personalCardStore.reorderCards(
+                Comparator
+                        .comparing((PersonalCard personalCard) -> personalCardStore.getCardProviderName(personalCard, config))
+                        .thenComparing((PersonalCard personalCard) -> personalCardStore.getCardName(personalCard, config))
+        );
     }
 
     @Override

@@ -6,6 +6,7 @@ import android.os.Looper;
 import androidx.annotation.Keep;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -213,6 +214,29 @@ public class PersonalCardStore extends AbstractListenerTarget<PersonalCardStore.
             insertIndex++;
         }
         addCard(insertIndex, card);
+        endTransaction();
+    }
+
+    public synchronized void reorderCards(Comparator<PersonalCard> comparator) {
+        List<PersonalCard> cards = getPersonalCards();
+        List<PersonalCard> newOrder = cards.stream().sorted(comparator).toList();
+        beginTransaction();
+        boolean changed = true;
+        while (changed) {
+            changed = false;
+            for (int i = 0; i < cards.size(); ++i) {
+                PersonalCard current = cards.get(i);
+                int index = newOrder.indexOf(current);
+                if (index != -1 && index != i) {
+                    removeCard(current);
+                    if (index > i) {
+                        --index;
+                    }
+                    addCard(index, current);
+                    changed = true;
+                }
+            }
+        }
         endTransaction();
     }
 

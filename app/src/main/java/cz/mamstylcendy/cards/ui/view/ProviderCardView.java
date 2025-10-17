@@ -35,6 +35,7 @@ public class ProviderCardView extends FrameLayout {
 
     private ActionButtonState abStateBeforeSelection;
     private boolean inSelectionMode = false;
+    private Consumer<Boolean> userSelectionChangedListener;
 
     public ProviderCardView(Context context) {
         super(context);
@@ -53,6 +54,13 @@ public class ProviderCardView extends FrameLayout {
 
     protected void init() {
         binding = ProviderCardBinding.inflate(LayoutInflater.from(getContext()), this, true);
+        binding.btnActionButton.setOnClickListener(view -> {
+            if (inSelectionMode) {
+                userSelectionChangedListener.accept(isUserSelected());
+            } else {
+                invokeActionButton();
+            }
+        });
         installActionButton();
         setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
     }
@@ -146,6 +154,10 @@ public class ProviderCardView extends FrameLayout {
 
     }
 
+    protected void invokeActionButton() {
+
+    }
+
     public void enterSelectionMode() {
         if (inSelectionMode) {
             return;
@@ -155,7 +167,6 @@ public class ProviderCardView extends FrameLayout {
         binding.btnActionButton.setButtonDrawable(defaultCheckbox.getButtonDrawable());
         binding.btnActionButton.setButtonIconDrawable(defaultCheckbox.getButtonIconDrawable());
         binding.btnActionButton.setVisibility(VISIBLE);
-        binding.btnActionButton.setOnClickListener(null);
         binding.btnActionButton.setChecked(false);
         inSelectionMode = true;
     }
@@ -167,6 +178,10 @@ public class ProviderCardView extends FrameLayout {
         binding.btnActionButton.setButtonIconDrawableResource(R.drawable.empty);
         restoreActionButtonState(abStateBeforeSelection);
         inSelectionMode = false;
+    }
+
+    public void setOnUserSelectionChangedListener(Consumer<Boolean> func) {
+        userSelectionChangedListener = func;
     }
 
     public boolean isUserSelected() {
@@ -215,11 +230,15 @@ public class ProviderCardView extends FrameLayout {
         @Override
         protected void installActionButton() {
             binding.btnActionButton.setButtonDrawable(R.drawable.ic_favourite);
-            binding.btnActionButton.setOnClickListener(favouriteButtonListener);
+        }
+
+        @Override
+        protected void invokeActionButton() {
+            favouriteButtonListener.onClick(binding.btnActionButton);
         }
 
         public void setOnFavouriteChangeListener(Consumer<Boolean> func) {
-            binding.btnActionButton.setOnClickListener(favouriteButtonListener = v -> func.accept(binding.btnActionButton.isChecked()));
+            favouriteButtonListener = v -> func.accept(binding.btnActionButton.isChecked());
         }
 
         public void setFavourited(boolean favourited) {
@@ -246,11 +265,15 @@ public class ProviderCardView extends FrameLayout {
         @Override
         protected void installActionButton() {
             binding.btnActionButton.setButtonDrawable(R.drawable.ic_close_small_40px);
-            binding.btnActionButton.setOnClickListener(removeButtonListener);
+        }
+
+        @Override
+        protected void invokeActionButton() {
+            removeButtonListener.onClick(binding.btnActionButton);
         }
 
         public void setOnRemoveListener(Runnable listener) {
-            binding.btnActionButton.setOnClickListener(removeButtonListener = v -> listener.run());
+            removeButtonListener = v -> listener.run();
         }
     }
 
@@ -273,15 +296,17 @@ public class ProviderCardView extends FrameLayout {
         @Override
         protected void installActionButton() {
             binding.btnActionButton.setButtonDrawable(R.drawable.ic_more_vert_40px);
-            binding.btnActionButton.setOnClickListener(v -> {
-                if (popupMenuHandler == null) {
-                    return;
-                }
-                PopupMenu popupMenu = new PopupMenu(getContext(), binding.btnActionButton);
-                popupMenu.setGravity(Gravity.END);
-                popupMenuHandler.accept(popupMenu);
-                popupMenu.show();
-            });
+        }
+
+        @Override
+        protected void invokeActionButton() {
+            if (popupMenuHandler == null) {
+                return;
+            }
+            PopupMenu popupMenu = new PopupMenu(getContext(), binding.btnActionButton);
+            popupMenu.setGravity(Gravity.END);
+            popupMenuHandler.accept(popupMenu);
+            popupMenu.show();
         }
 
         public void setPopupMenuHandler(Consumer<PopupMenu> popupMenuHandler) {
