@@ -20,6 +20,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -233,7 +234,7 @@ public class WlanFencingManager extends AbstractListenerTarget<WlanFencingManage
             WlanAPInfo connectedResult = createCurrentNetworkPlaceholderResult();
             if (connectedResult != null) {
                 Log.d(LOG_TAG, "Active WLAN: " + connectedResult);
-                implantResult(lastScanResults, connectedResult);
+                lastScanResults = implantResult(lastScanResults, connectedResult);
             }
 
             Log.d(LOG_TAG, "Received " + lastScanResults.size() + " scan results");
@@ -313,9 +314,13 @@ public class WlanFencingManager extends AbstractListenerTarget<WlanFencingManage
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.S;
     }
 
-    private void implantResult(List<WlanAPInfo> results, WlanAPInfo result) {
+    private List<WlanAPInfo> implantResult(List<WlanAPInfo> results, WlanAPInfo result) {
         if (results.stream().noneMatch(result2 -> Objects.equals(result2.bssid(), result.bssid()))) {
-            results.add(result);
+            List<WlanAPInfo> modifiedResults = new ArrayList<>(results);
+            modifiedResults.add(result);
+            return modifiedResults;
+        } else {
+            return results;
         }
     }
 
