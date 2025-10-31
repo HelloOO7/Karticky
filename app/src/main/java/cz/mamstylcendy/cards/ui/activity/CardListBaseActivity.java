@@ -3,11 +3,9 @@ package cz.mamstylcendy.cards.ui.activity;
 import android.os.Bundle;
 import android.view.View;
 
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SimpleItemAnimator;
@@ -16,20 +14,19 @@ import cz.mamstylcendy.cards.R;
 import cz.mamstylcendy.cards.databinding.ActivityCardListBinding;
 import cz.spojenka.android.ui.helpers.EdgeToEdgeSupport;
 
-public abstract class CardListBaseActivity extends AppCompatActivity {
+public abstract class CardListBaseActivity extends BaseActivity {
 
     protected ActivityCardListBinding ui;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         ui = ActivityCardListBinding.inflate(getLayoutInflater());
         ui.tvTitle.setText(getTitle());
         setContentView(ui.getRoot());
 
         if (isAddButtonEnabled()) {
-            EdgeToEdgeSupport.useExplicitFitsSystemWindows(ui.fabAddCard);
+            EdgeToEdgeSupport.installInsets(ui.fabAddCard);
             ui.rvCards.setPadding(
                     ui.rvCards.getPaddingLeft(), ui.rvCards.getPaddingTop(), ui.rvCards.getPaddingRight(),
                     ui.rvCards.getPaddingBottom() + getResources().getDimensionPixelSize(R.dimen.fab_overlap_adjust_height)
@@ -38,12 +35,11 @@ public abstract class CardListBaseActivity extends AppCompatActivity {
             ui.fabAddCard.setVisibility(View.GONE);
         }
 
-        EdgeToEdgeSupport.useExplicitFitsSystemWindows(
+        EdgeToEdgeSupport.installInsets(
                 ui.clRoot,
-                EdgeToEdgeSupport.SIDE_HORIZONTAL | EdgeToEdgeSupport.SIDE_TOP,
-                0
+                EdgeToEdgeSupport.SIDE_HORIZONTAL | EdgeToEdgeSupport.SIDE_TOP
         );
-        EdgeToEdgeSupport.useExplicitFitsSystemWindows(
+        EdgeToEdgeSupport.installInsets(
                 ui.rvCards,
                 EdgeToEdgeSupport.SIDE_BOTTOM,
                 EdgeToEdgeSupport.FLAG_APPLY_AS_PADDING

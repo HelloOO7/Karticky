@@ -5,12 +5,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Base64;
 
-import androidx.activity.EdgeToEdge;
 import androidx.activity.result.contract.ActivityResultContract;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.IntentCompat;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -25,7 +23,7 @@ import cz.mamstylcendy.cards.util.ZxingCodeDrawable;
 import cz.mamstylcendy.cards.databinding.ActivityPickBarcodeTypeBinding;
 import cz.mamstylcendy.cards.databinding.BarcodeSampleCardBinding;
 
-public class PickBarcodeTypeActivity extends AppCompatActivity {
+public class PickBarcodeTypeActivity extends BaseActivity {
 
     public static final String RESULT_EXTRA_BARCODE_FORMAT = "barcode_format";
 
@@ -54,7 +52,6 @@ public class PickBarcodeTypeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         ui = ActivityPickBarcodeTypeBinding.inflate(getLayoutInflater());
         setContentView(ui.getRoot());
 

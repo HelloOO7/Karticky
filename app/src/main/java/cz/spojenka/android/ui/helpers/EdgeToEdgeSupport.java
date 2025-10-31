@@ -1,12 +1,12 @@
 package cz.spojenka.android.ui.helpers;
 
-import android.os.Build;
+import android.app.Activity;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.core.graphics.Insets;
-import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
+import androidx.core.view.ViewGroupCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 public class EdgeToEdgeSupport {
@@ -21,15 +21,19 @@ public class EdgeToEdgeSupport {
 
     public static int FLAG_APPLY_AS_PADDING = 1;
 
-    public static void useExplicitFitsSystemWindows(View view) {
-        useExplicitFitsSystemWindows(view, SIDE_ALL, 0, null);
+    public static void installInsets(View view) {
+        installInsets(view, SIDE_ALL, 0, null);
     }
 
-    public static void useExplicitFitsSystemWindows(View view, int sides, int flags) {
-        useExplicitFitsSystemWindows(view, sides, flags, null);
+    public static void installInsets(View view, int sides) {
+        installInsets(view, sides, 0, null);
     }
 
-    public static void useExplicitFitsSystemWindows(View view, int sides, int flags, Interceptor interceptor) {
+    public static void installInsets(View view, int sides, int flags) {
+        installInsets(view, sides, flags, null);
+    }
+
+    public static void installInsets(View view, int sides, int flags, Interceptor interceptor) {
         ViewGroup.MarginLayoutParams baseLayoutParams = new ViewGroup.MarginLayoutParams(
                 (ViewGroup.MarginLayoutParams) view.getLayoutParams()
         );
@@ -39,9 +43,6 @@ public class EdgeToEdgeSupport {
         int basePaddingRight = view.getPaddingRight();
 
         ViewCompat.setOnApplyWindowInsetsListener(view, (v, insets) -> {
-            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
-                insets = WindowInsetsCompat.toWindowInsetsCompat(v.getRootWindowInsets());
-            }
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
 
             boolean usePadding = ((flags & FLAG_APPLY_AS_PADDING) != 0);
@@ -110,17 +111,12 @@ public class EdgeToEdgeSupport {
     }
 
     /**
-     * Before Android 11, system bar inset values are "approximate" and not guaranteed. Oftentimes, they
-     * are simply zero, which makes snackbars etc. show up underneath the system bars. This method will,
-     * in the case of Android 10 and below, register a listener (with {@link ViewCompat#setOnApplyWindowInsetsListener(View, OnApplyWindowInsetsListener)}
-     * that will apply the system bar insets from {@link View#getRootWindowInsets()}, which works even on those older APIs.
+     * See <a href="https://issuetracker.google.com/issues/282790626">this Android issue</a>.
      *
-     * @param view The View to register the listener on
+     * @param activity The activity whose decor view will get the compat insets fixups
      */
-    public static void registerCompatInsetsFixups(View view) {
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
-            useExplicitFitsSystemWindows(view);
-        }
+    public static void registerCompatInsetsFixups(Activity activity) {
+        ViewGroupCompat.installCompatInsetsDispatch(activity.getWindow().getDecorView());
     }
 
     public interface Interceptor {

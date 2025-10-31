@@ -10,9 +10,8 @@ import android.provider.Settings;
 
 import androidx.annotation.CallSuper;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 
-public abstract class NfcActivityBase extends AppCompatActivity {
+public abstract class NfcActivityBase extends BaseActivity {
 
     protected NfcAdapter adapter;
     private BroadcastReceiver adapterStateChangedReceiver;

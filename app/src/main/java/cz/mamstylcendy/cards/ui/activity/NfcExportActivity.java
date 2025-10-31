@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
 
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.Nullable;
 
 import javax.inject.Inject;
@@ -55,7 +54,6 @@ public class NfcExportActivity extends NfcActivityBase {
     @Override
     protected void onCreateUI() {
         super.onCreateUI();
-        EdgeToEdge.enable(this);
         ui = ActivityNfcExportBinding.inflate(getLayoutInflater());
     }
 

@@ -11,7 +11,6 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContract;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.IntentCompat;
 import androidx.core.os.BundleCompat;
 
@@ -27,7 +26,7 @@ import cz.mamstylcendy.cards.databinding.ActivityNewCustomCardBinding;
 import cz.spojenka.android.ui.helpers.SimpleTextWatcher;
 import cz.spojenka.android.util.ViewUtils;
 
-public class NewCustomCardActivity extends AppCompatActivity {
+public class NewCustomCardActivity extends BaseActivity {
 
     public static final String RESULT_EXTRA_CARD = "card";
 

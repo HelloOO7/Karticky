@@ -10,14 +10,12 @@ import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import android.widget.EditText;
 
-import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.PickVisualMediaRequest;
 import androidx.activity.result.contract.ActivityResultContract;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.IntentCompat;
 
 import com.google.zxing.BarcodeFormat;
@@ -33,7 +31,7 @@ import cz.mamstylcendy.cards.databinding.ActivityImportMethodChoiceBinding;
 import cz.spojenka.android.system.ZxingCameraImageAnalyzer;
 import cz.spojenka.android.util.AsyncUtils;
 
-public class ImportMethodJunctionActivity extends AppCompatActivity {
+public class ImportMethodJunctionActivity extends BaseActivity {
 
     public static final String EXTRA_BARCODE_FORMAT = "barcode_format";
     public static final String RESULT_EXTRA_CODE = "code";
@@ -65,7 +63,6 @@ public class ImportMethodJunctionActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         ui = ActivityImportMethodChoiceBinding.inflate(getLayoutInflater());
         setContentView(ui.getRoot());
 

@@ -23,11 +23,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -58,29 +56,29 @@ import java.util.function.Predicate;
 import javax.inject.Inject;
 
 import cz.mamstylcendy.cards.AppUpdateChecker;
-import cz.mamstylcendy.cards.CardsApplication;
-import cz.mamstylcendy.cards.beacon.BackgroundWlanCheckWorker;
 import cz.mamstylcendy.cards.BuildConfig;
-import cz.mamstylcendy.cards.beacon.CardNotificationManager;
-import cz.mamstylcendy.cards.ui.dialogs.CommonDialogs;
-import cz.mamstylcendy.cards.data.ConfigManager;
-import cz.mamstylcendy.cards.ui.dialogs.ProgressDialog;
-import cz.mamstylcendy.cards.ui.view.PersonalCardListAdapter;
-import cz.mamstylcendy.cards.ui.view.ProviderCardView;
-import cz.mamstylcendy.cards.ui.view.ProviderCardViewHolder;
+import cz.mamstylcendy.cards.CardsApplication;
 import cz.mamstylcendy.cards.R;
-import cz.mamstylcendy.cards.ui.dialogs.SettingsSheetFragment;
+import cz.mamstylcendy.cards.beacon.BackgroundWlanCheckWorker;
+import cz.mamstylcendy.cards.beacon.CardNotificationManager;
 import cz.mamstylcendy.cards.beacon.WlanFencingManager;
-import cz.mamstylcendy.cards.ui.view.UniversalCardListAdapter;
-import cz.mamstylcendy.cards.util.ZxingCodeDrawable;
-import cz.mamstylcendy.cards.sharing.CardTransfer;
-import cz.mamstylcendy.cards.sharing.LinkCardTransfer;
 import cz.mamstylcendy.cards.data.CardsConfig;
 import cz.mamstylcendy.cards.data.CardsPreferences;
+import cz.mamstylcendy.cards.data.ConfigManager;
 import cz.mamstylcendy.cards.data.PersonalCard;
 import cz.mamstylcendy.cards.data.PersonalCardStore;
 import cz.mamstylcendy.cards.data.RemoteConfigFetcher;
 import cz.mamstylcendy.cards.databinding.ActivityMainBinding;
+import cz.mamstylcendy.cards.sharing.CardTransfer;
+import cz.mamstylcendy.cards.sharing.LinkCardTransfer;
+import cz.mamstylcendy.cards.ui.dialogs.CommonDialogs;
+import cz.mamstylcendy.cards.ui.dialogs.ProgressDialog;
+import cz.mamstylcendy.cards.ui.dialogs.SettingsSheetFragment;
+import cz.mamstylcendy.cards.ui.view.PersonalCardListAdapter;
+import cz.mamstylcendy.cards.ui.view.ProviderCardView;
+import cz.mamstylcendy.cards.ui.view.ProviderCardViewHolder;
+import cz.mamstylcendy.cards.ui.view.UniversalCardListAdapter;
+import cz.mamstylcendy.cards.util.ZxingCodeDrawable;
 import cz.spojenka.android.system.PermissionRequestHelper;
 import cz.spojenka.android.ui.drawable.EmptyDrawable;
 import cz.spojenka.android.ui.helpers.ArrayListAdapter;
@@ -89,7 +87,7 @@ import cz.spojenka.android.ui.helpers.SingleViewAdapter;
 import cz.spojenka.android.util.AsyncUtils;
 import cz.spojenka.android.util.ViewUtils;
 
-public class MainActivity extends AppCompatActivity implements WlanFencingManager.OnNearbyProviderCallback, PersonalCardStore.Listener {
+public class MainActivity extends BaseActivity implements WlanFencingManager.OnNearbyProviderCallback, PersonalCardStore.Listener {
 
     private static final String LOG_TAG = "Karticky";
 
@@ -157,7 +155,6 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         ui = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(ui.getRoot());
 
@@ -286,7 +283,7 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
             setAutoDetectInitialUI();
         }
 
-        EdgeToEdgeSupport.useExplicitFitsSystemWindows(ui.fabAddCard);
+        EdgeToEdgeSupport.installInsets(ui.fabAddCard);
         ui.fabAddCard.setOnClickListener(v -> {
             animateCardsOnNextStart = true;
             startActivity(new Intent(this, ImportSpringboardActivity.class));
@@ -303,12 +300,12 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
         };
 
         cardRecycler = ui.rvCards;
-        EdgeToEdgeSupport.useExplicitFitsSystemWindows(
+        EdgeToEdgeSupport.installInsets(
                 ui.clCoordinator,
                 EdgeToEdgeSupport.SIDE_HORIZONTAL | EdgeToEdgeSupport.SIDE_TOP,
                 EdgeToEdgeSupport.FLAG_APPLY_AS_PADDING
         );
-        EdgeToEdgeSupport.useExplicitFitsSystemWindows(
+        EdgeToEdgeSupport.installInsets(
                 cardRecycler,
                 EdgeToEdgeSupport.SIDE_HORIZONTAL | EdgeToEdgeSupport.SIDE_BOTTOM,
                 EdgeToEdgeSupport.FLAG_APPLY_AS_PADDING,
@@ -1201,7 +1198,7 @@ public class MainActivity extends AppCompatActivity implements WlanFencingManage
 
     private void showUpdateAvailableSnackbar() {
         Snackbar snackbar = Snackbar.make(ui.clCoordinator, R.string.update_available, Snackbar.LENGTH_INDEFINITE);
-        EdgeToEdgeSupport.registerCompatInsetsFixups(snackbar.getView());
+        //EdgeToEdgeSupport.registerCompatInsetsFixups(snackbar.getView());
         snackbar.setDuration(10000)
                 .setAction(R.string.update_action, v -> {
                     snackbar.dismiss();

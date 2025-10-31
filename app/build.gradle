@@ -4,14 +4,14 @@ plugins {
 
 android {
     namespace 'cz.mamstylcendy.cards'
-    compileSdk 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId "cz.mamstylcendy.cards"
         minSdk 24
-        targetSdk 35
-        versionCode 32
-        versionName "2.2.2"
+        targetSdk 36
+        versionCode 33
+        versionName "2.2.3"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -51,6 +51,7 @@ android {
 
 dependencies {
 
+    implementation libs.androidx.core
     implementation libs.appcompat
     implementation libs.material
     implementation libs.activity

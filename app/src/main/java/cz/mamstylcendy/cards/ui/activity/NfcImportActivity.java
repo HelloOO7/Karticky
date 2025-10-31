@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.Nullable;
 import androidx.core.content.IntentCompat;
 
@@ -73,7 +72,6 @@ public class NfcImportActivity extends NfcActivityBase {
     @Override
     protected void onCreateUI() {
         super.onCreateUI();
-        EdgeToEdge.enable(this);
         ui = ActivityNfcImportBinding.inflate(getLayoutInflater());
         defaultTextColor = ui.tvStatusText.getCurrentTextColor();
     }

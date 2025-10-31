@@ -5,9 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ShareCompat;
 
 import java.io.IOException;
@@ -19,7 +17,7 @@ import cz.mamstylcendy.cards.sharing.LinkCardTransfer;
 import cz.mamstylcendy.cards.sharing.NfcCommon;
 import cz.mamstylcendy.cards.databinding.ActivityExportMethodChoiceBinding;
 
-public class ExportMethodJunctionActivity extends AppCompatActivity {
+public class ExportMethodJunctionActivity extends BaseActivity {
 
     private ActivityExportMethodChoiceBinding ui;
     private ExportActivityCommon common;
@@ -27,7 +25,6 @@ public class ExportMethodJunctionActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         common = new ExportActivityCommon(this);
         ui = ActivityExportMethodChoiceBinding.inflate(getLayoutInflater());
         setContentView(ui.getRoot());
