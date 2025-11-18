@@ -142,4 +142,5 @@
     <string name="cards_sort_by_name">Seřadit podle názvu</string>
     <string name="cards_sort_by_provider">Seřadit podle řetězce</string>
     <string name="autodetect_no_wifi">Wi-Fi je vypnuta</string>
+    <string name="error_illegal_code">Zadaný řetězec není platný kód typu %1$s.</string>
 </resources>

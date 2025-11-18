@@ -192,7 +192,7 @@ public class NfcImportActivity extends NfcActivityBase {
                         personalCardStore.merge(cards);
                         return cards;
                     }
-                }).handleAsync((personalCards, throwable) -> {
+                }).whenCompleteAsync((personalCards, throwable) -> {
                     if (throwable != null) {
                         Log.e(TAG, "Error during import", throwable);
                         showError(throwable);
@@ -202,7 +202,6 @@ public class NfcImportActivity extends NfcActivityBase {
                     }
                     inTransaction = false;
                     newTransactionId();
-                    return null;
                 }, AsyncUtils.getLifecycleExecutor(this));
     }
 

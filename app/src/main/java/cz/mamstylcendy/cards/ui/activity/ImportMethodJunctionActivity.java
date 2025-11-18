@@ -21,6 +21,8 @@ import androidx.core.content.IntentCompat;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.Binarizer;
 import com.google.zxing.BinaryBitmap;
+import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.WriterException;
 import com.google.zxing.common.HybridBinarizer;
 
 import cz.mamstylcendy.cards.util.BarcodeTypeNames;
@@ -93,7 +95,7 @@ public class ImportMethodJunctionActivity extends BaseActivity {
                     BinaryBitmap binaryBitmap = new BinaryBitmap(binarizer);
                     return ZxingCameraImageAnalyzer.readerFor(format).decode(binaryBitmap);
                 }
-            }).handleAsync((scanned, ex) -> {
+            }).whenCompleteAsync((scanned, ex) -> {
                 if (ex != null) {
                     Log.e(getClass().getSimpleName(), "Error reading code from image", ex);
                     CommonDialogs.newInfoDialog(
@@ -104,7 +106,6 @@ public class ImportMethodJunctionActivity extends BaseActivity {
                 } else if (scanned != null) {
                     finishWithResult(scanned.getText());
                 }
-                return null;
             }, AsyncUtils.getLifecycleExecutor(this));
         });
 
@@ -126,12 +127,29 @@ public class ImportMethodJunctionActivity extends BaseActivity {
                     .setPositiveButton(R.string.confirm, (dialog, which) -> {
                         String code = editText.getText().toString();
                         if (!code.isEmpty()) {
-                            finishWithResult(code);
+                            if (validateCode(code)) {
+                                finishWithResult(code);
+                            } else {
+                                CommonDialogs.newInfoDialog(
+                                        this,
+                                        getString(R.string.error),
+                                        getString(R.string.error_illegal_code, BarcodeTypeNames.getOrDefault(this, barcodeFormat))
+                                ).show();
+                            }
                         }
                     })
                     .setNegativeButton(android.R.string.cancel, null)
                     .show();
         });
+    }
+
+    private boolean validateCode(String code) {
+        try {
+            new MultiFormatWriter().encode(code, barcodeFormat, 0, 0);
+            return true;
+        } catch (WriterException | IllegalArgumentException e) {
+            return false;
+        }
     }
 
     private void finishWithResult(String code) {

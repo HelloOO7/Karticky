@@ -580,7 +580,7 @@ public class MainActivity extends BaseActivity implements WlanFencingManager.OnN
                             return cards;
                         }
                         return null;
-                    }).handleAsync((mergedCards, throwable) -> {
+                    }).whenCompleteAsync((mergedCards, throwable) -> {
                         if (throwable instanceof IllegalArgumentException) {
                             Log.e(LOG_TAG, "Invalid link data", throwable);
                             CommonDialogs.newInfoDialog(this, R.string.error, R.string.invalid_deep_link).show();
@@ -597,7 +597,6 @@ public class MainActivity extends BaseActivity implements WlanFencingManager.OnN
                                     .setNeutralButton(R.string.open_my_cards, (dialog, which) -> startActivity(new Intent(this, PersonalCardsActivity.class)))
                                     .show();
                         }
-                        return null;
                     }, AsyncUtils.getLifecycleExecutor(this));
                 }
             }
@@ -1073,10 +1072,10 @@ public class MainActivity extends BaseActivity implements WlanFencingManager.OnN
                             .setData(code)
                             .setFormat(pi.format())
             ));
-        })).handleAsync((result, throwable) -> {
+        })).whenCompleteAsync((result, throwable) -> {
             if (throwable instanceof CancellationException) {
                 Log.d(LOG_TAG, "QR code generation cancelled for request: " + card);
-                return null; //cancelled
+                return; //cancelled
             }
             if (throwable != null) {
                 Log.e(LOG_TAG, "Failed to generate QR code", throwable);
@@ -1112,7 +1111,6 @@ public class MainActivity extends BaseActivity implements WlanFencingManager.OnN
                 resetCardDisplayLayoutTransition();
                 ui.ablAppBar.setExpanded(true, true);
             }
-            return null;
         }, AsyncUtils.getLifecycleExecutor(this));
     }
 
@@ -1125,7 +1123,7 @@ public class MainActivity extends BaseActivity implements WlanFencingManager.OnN
         final String _etag = etag;
         AsyncUtils.supplyAsync(
                 () -> RemoteConfigFetcher.fetchRemoteConfig(configManager.getCurrentConfig(), _etag)
-        ).handleAsync((result, throwable) -> {
+        ).whenCompleteAsync((result, throwable) -> {
             if (throwable != null) {
                 displayRemoteConfigError(throwable);
             } else {
@@ -1149,7 +1147,6 @@ public class MainActivity extends BaseActivity implements WlanFencingManager.OnN
                     tvRemoteConfigState.setText(R.string.remote_config_incompatible);
                 }
             }
-            return null;
         }, AsyncUtils.getLifecycleExecutor(this));
     }
 
@@ -1178,7 +1175,7 @@ public class MainActivity extends BaseActivity implements WlanFencingManager.OnN
     private void checkForAppUpdates() {
         AsyncUtils
                 .supplyAsync(AppUpdateChecker::checkForUpdate)
-                .handleAsync((newVersionCode, throwable) -> {
+                .whenCompleteAsync((newVersionCode, throwable) -> {
                     if (throwable != null) {
                         Log.e(LOG_TAG, "Failed to check for app updates", throwable);
                     }
@@ -1192,7 +1189,6 @@ public class MainActivity extends BaseActivity implements WlanFencingManager.OnN
                             );
                         }
                     }
-                    return null;
                 });
     }
 

@@ -126,10 +126,7 @@ public class ProgressDialog extends AppCompatDialog {
         ProgressDialog dialog = new ProgressDialog(context, progressText);
         dialog.show();
 
-        task.handleAsync((r, throwable) -> {
-            dialog.dismissIfExists();
-            return null;
-        }, AsyncUtils.getLifecycleExecutor(dialog));
+        task.whenCompleteAsync((r, throwable) -> dialog.dismissIfExists(), AsyncUtils.getLifecycleExecutor(dialog));
 
         return task;
     }
