@@ -24,7 +24,7 @@ nejsou s nikým sdíleny, nicméně je v případně zájmu můžete přidat do 
 Aplikaci lze zkompilovat ze zdrojových kódů nebo stáhnout nejnovější stabilní verzi na libovolném z odkazů níže (zkrácený je interně přesměrován na úplný):
 
 - https://karticky.spojenka.cz/stahnout
-- https://lab.d3s.mff.cuni.cz:27083/update/download-latest/cz.mamstylcendy.cards
+- https://spojenka.d3s.mff.cuni.cz/ma-services/update/download-latest/cz.mamstylcendy.cards
 
 Automaticky sestavené artefakty z nejnovějšího commitu, podepsané tímtéž klíčem, jsou dostupné z [GitHub Actions](https://github.com/HelloOO7/Karticky/actions/).
 

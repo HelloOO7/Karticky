@@ -1,0 +1,15 @@
+[
+    {
+        "relation": [
+            "delegate_permission/common.handle_all_urls"
+        ],
+        "target": {
+            "namespace": "android_app",
+            "package_name": "cz.mamstylcendy.cards",
+            "sha256_cert_fingerprints": [
+                "74:0A:B8:C3:0E:CF:B8:F5:B1:0D:96:41:48:C5:12:72:59:FC:A4:FA:D9:DF:DD:08:B6:30:FB:63:CE:8A:D5:CE",
+                "86:57:A3:A6:74:21:4C:A2:21:D9:C3:AB:68:04:AD:C4:B9:3C:7F:18:89:FB:A4:88:BA:EE:17:94:B2:49:E6:0A"
+            ]
+        }
+    }
+]
