@@ -15,6 +15,16 @@ public class GoogleUtils {
     private static Boolean isGooglePlayInstalled;
 
     /**
+     * Get the package name of the Google Play Store app.
+     * This is currently set to "com.android.vending".
+     *
+     * @return The package name
+     */
+    public static String getGooglePlayPackageName() {
+        return GOOGLE_PLAY_PACKAGE_NAME;
+    }
+
+    /**
      * Check if Google Play is installed on the device.
      * The result is cached for the lifetime of the application.
      *

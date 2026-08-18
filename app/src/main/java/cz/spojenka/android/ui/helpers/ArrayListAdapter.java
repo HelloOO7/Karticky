@@ -16,7 +16,7 @@ import java.util.ListIterator;
  * Adapter for RecyclerView that uses ArrayList as data container.
  * The adapter may be seamlessly used as a {@link List}, as all operations
  * notify the RecyclerView about the changes appropriately. Additionally,
- * the {@link cz.spojenka.android.ui.helpers.ListReorderHelper.RowReorderListener} interface is implemented
+ * the {@link ListReorderHelper.RowReorderListener} interface is implemented
  * so that support for item reordering by dragging is provided as plug-and-play.
  *
  * @param <T> Type of the data in the list

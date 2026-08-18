@@ -86,7 +86,7 @@ public abstract class BasicListAdapter<T, V extends BasicListAdapter.BasicViewHo
      *
      * @param <T> The data item type
      */
-    public static abstract class BasicViewHolder<T> extends RecyclerView.ViewHolder {
+    public static abstract class BasicViewHolder<T> extends RecyclerView.ViewHolder implements IElementViewHolder<T> {
 
         /**
          * Create a new view holder.

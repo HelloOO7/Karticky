@@ -651,6 +651,10 @@ public class MainActivity extends BaseActivity implements WlanFencingManager.OnN
     protected void onResume() {
         super.onResume();
         if (canUseAutoDetect() && !wlanFencingManager.isExplicitScanNeeded()) {
+            if (!autodetectCallbackBound) {
+                // after permission request was granted, try to rebind
+                tryBindToWlanFencingManager();
+            }
             wlanFencingManager.update();
         }
         tryScheduleWorker();

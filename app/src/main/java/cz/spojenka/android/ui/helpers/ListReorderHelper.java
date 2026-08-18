@@ -17,9 +17,12 @@ import androidx.recyclerview.widget.RecyclerView;
  * <p>
  * By default, item view swipe is disabled and only vertical dragging is supported.
  * Implicit UI elevation changes are also suppressed, so that the view holders can manage
- * it on their own.
+ * it on their own. The movement flags for individual items may be adjusted by overriding
+ * the {@link DraggableViewHolder#getMovementFlags()} method.
  */
 public class ListReorderHelper extends ItemTouchHelper.Callback {
+
+    public static final int MOVEMENT_FLAGS_NONE = makeMovementFlags(0, 0);
 
     private RowReorderListener listener;
 
@@ -43,13 +46,26 @@ public class ListReorderHelper extends ItemTouchHelper.Callback {
 
     }
 
-    @Override
-    public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
+    private static int defaultMovementFlags() {
         return makeMovementFlags(ItemTouchHelper.UP | ItemTouchHelper.DOWN, 0);
     }
 
     @Override
+    public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
+        if (viewHolder instanceof DraggableViewHolder draggable) {
+            return draggable.getMovementFlags();
+        } else {
+            return defaultMovementFlags();
+        }
+    }
+
+    @Override
     public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+        if (target instanceof DraggableViewHolder draggable) {
+            if (draggable.getMovementFlags() == MOVEMENT_FLAGS_NONE) {
+                return false;
+            }
+        }
         if (listener != null) {
             listener.onRowMoved(viewHolder.getBindingAdapterPosition(), target.getBindingAdapterPosition());
         }
@@ -99,6 +115,18 @@ public class ListReorderHelper extends ItemTouchHelper.Callback {
          * Called when dragging of this view holder is finished.
          */
         void onDragClear();
+
+        /**
+         * Get the movement flags for this view holder.
+         * By default, vertical dragging (up and down) is enabled.
+         *
+         * @see ItemTouchHelper.Callback#getMovementFlags(RecyclerView, RecyclerView.ViewHolder)
+         *
+         * @return The movement flags
+         */
+        default int getMovementFlags() {
+            return defaultMovementFlags();
+        }
     }
 
     /**

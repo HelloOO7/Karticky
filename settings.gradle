@@ -17,10 +17,10 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven {
-            url "https://lab.d3s.mff.cuni.cz:27091/snapshots/"
+            url = "https://lab.d3s.mff.cuni.cz:27091/snapshots/"
         }
         maven {
-            url "https://jitpack.io"
+            url = "https://jitpack.io"
         }
     }
 }

@@ -1,7 +1,6 @@
 package cz.mamstylcendy.cards.ui.activity;
 
 import android.os.Bundle;
-import android.os.PersistableBundle;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.Nullable;

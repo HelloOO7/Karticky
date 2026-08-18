@@ -3,17 +3,17 @@ plugins {
 }
 
 android {
-    namespace 'cz.mamstylcendy.cards'
-    compileSdk = 36
+    namespace = 'cz.mamstylcendy.cards'
+    compileSdk = 37
 
     defaultConfig {
         applicationId "cz.mamstylcendy.cards"
-        minSdk 24
-        targetSdk 36
-        versionCode 34
-        versionName "2.2.4"
+        minSdk = 24
+        targetSdk = 37
+        versionCode = 34
+        versionName = "2.2.5"
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         def DEEP_LINK_DOMAIN = "karticky.spojenka.cz"
         def DEEP_LINK_PATH_PREFIX = "/share";
@@ -30,28 +30,30 @@ android {
     }
 
     buildFeatures {
-        buildConfig true
-        viewBinding true
+        buildConfig = true
+        viewBinding = true
+        resValues = true
     }
 
     buildTypes {
         release {
-            minifyEnabled true
-            shrinkResources true
+            minifyEnabled = true
+            shrinkResources = true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
 
-        coreLibraryDesugaringEnabled true
+        coreLibraryDesugaringEnabled = true
     }
 }
 
 dependencies {
 
     implementation libs.androidx.core
+    implementation libs.androidx.concurrent.futures
     implementation libs.appcompat
     implementation libs.material
     implementation libs.activity

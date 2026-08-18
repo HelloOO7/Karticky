@@ -1,8 +1,5 @@
 package cz.mamstylcendy.cards.ui.activity;
 
-import android.app.PendingIntent;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.TagLostException;
@@ -12,7 +9,6 @@ import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.Nullable;
-import androidx.core.content.IntentCompat;
 
 import java.util.List;
 
@@ -65,8 +61,6 @@ public class NfcImportActivity extends NfcActivityBase {
         ui.btnFinish.setOnClickListener(v -> finish());
         ui.btnEnableNfc.setOnClickListener(v -> callNfcSettings());
         ui.btnImportMore.setOnClickListener(v -> startListening());
-
-        addOnNewIntentListener(this::handleForegroundDispatch);
     }
 
     @Override
@@ -156,15 +150,9 @@ public class NfcImportActivity extends NfcActivityBase {
         ++transactionId;
     }
 
-    private void handleForegroundDispatch(Intent intent) {
-        Log.d(TAG, "Handling foreground dispatch with intent: " + intent);
-        if (!isListening || inTransaction) {
-            Log.d(TAG, "Ignoring foreground dispatch, isListening " + isListening + " inTransaction " + inTransaction);
-            return;
-        }
-        inTransaction = true;
-        Tag tag = IntentCompat.getParcelableExtra(intent, NfcAdapter.EXTRA_TAG, Tag.class);
-        if (tag == null) {
+    private void handleTag(Tag tag) {
+        if (!isListening) {
+            // do not read tags after a tag was read (without manually restarting)
             return;
         }
 
@@ -246,23 +234,17 @@ public class NfcImportActivity extends NfcActivityBase {
     protected void onResumeNfc() {
         super.onResumeNfc();
         serviceState.setEnabled(false); //disable HCE when receiving
-        adapter.enableForegroundDispatch(
+        adapter.enableReaderMode(
                 this,
-                PendingIntent.getActivity(
-                        this,
-                        0,
-                        new Intent(this, getClass())
-                                .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
-                        PendingIntent.FLAG_MUTABLE
-                ),
-                new IntentFilter[]{new IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED)},
-                new String[][]{new String[]{IsoDep.class.getName()}}
+                this::handleTag,
+                NfcAdapter.FLAG_READER_NFC_A | NfcAdapter.FLAG_READER_SKIP_NDEF_CHECK | NfcAdapter.FLAG_READER_NO_PLATFORM_SOUNDS,
+                null
         );
     }
 
     @Override
     protected void onPauseNfc() {
         super.onPauseNfc();
-        adapter.disableForegroundDispatch(this);
+        adapter.disableReaderMode(this);
     }
 }
