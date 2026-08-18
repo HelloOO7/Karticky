@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 
 public class AppUpdateChecker {
 
-    private static final Pattern VERSION_CODE_REGEX = Pattern.compile("versionCode\\s*(\\d+)");
+    private static final Pattern VERSION_CODE_REGEX = Pattern.compile("versionCode\\s*=?\\s*(\\d+)");
 
     public static int checkForUpdate() throws IOException {
         Connection.Response response = Jsoup.connect(BuildConfig.REMOTE_BUILD_GRADLE).execute();

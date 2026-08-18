@@ -10,6 +10,9 @@ android {
         applicationId "cz.mamstylcendy.cards"
         minSdk = 24
         targetSdk = 37
+        // the line below exists so that old app versions which do not handle the "="
+        // can check for app updates
+        // versionCode 34
         versionCode = 34
         versionName = "2.2.5"
 
